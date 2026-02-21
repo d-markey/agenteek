@@ -57,22 +57,6 @@ class ChatbotUI {
   Stream<AgentConfiguration> get agentConfiguration => _agentConfCtrlr.stream;
   AgentConfiguration? _current;
 
-  Future<String> getImagingApiKey() {
-    final completer = Completer<String>();
-
-    var apiKey = '';
-    while (apiKey.isEmpty) {
-      apiKey =
-          web.window
-              .prompt('Please provide your CAST Imaging API key:')
-              ?.trim() ??
-          '';
-    }
-    completer.complete(apiKey);
-
-    return completer.future;
-  }
-
   void clearMessages() {
     _messages.innerHTML = ''.toJS;
     _messages.scrollTop = 0;

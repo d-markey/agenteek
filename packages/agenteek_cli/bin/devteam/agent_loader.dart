@@ -98,18 +98,6 @@ Future<List<AgentConf>> loadAgentsConf(String yaml, Secrets secrets) async {
                 toolsAcl: mcp.value,
               ),
             );
-          case 'imaging':
-            final apiKey = await secrets.get('imaging-api-key');
-            if (apiKey.isEmpty) throw Exception('Missing Imaging API key.');
-            mcpInitializations.add(
-              Implementation(name: 'CAST Imaging', version: '1.0.0').setup(
-                prefix: 'imaging',
-                scope: 'CAST Imaging',
-                url: Uri.parse('https://demo-imaging-v3.castsoftware.com/mcp'),
-                headers: {'x-api-key': apiKey},
-                toolsAcl: mcp.value,
-              ),
-            );
           default:
             modelLogger.append(
               'Unsupported MCP tool: "${mcp.key}", it will be ignored.',

@@ -8,14 +8,12 @@ void main() async {
 
   final chatbot = ChatbotUI(conversationManager);
 
-  final imagingApiKey = await chatbot.getImagingApiKey();
-
   // initialize
   chatbot.systemOutput.add(
     'Toolsets are initializing... '
     'please provide model info and API key.',
   );
-  final toolSet = await initializeToolSets(imagingApiKey);
+  final toolSet = await initializeToolSets();
   chatbot.systemOutput.add('Toolsets are ready.');
 
   InteractiveAgent? agent;

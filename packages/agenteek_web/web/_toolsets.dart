@@ -2,11 +2,6 @@ import 'package:agenteek/agenteek.dart';
 import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart' as mcp;
 
-final imagingMcpServer = mcp.Implementation(
-  name: 'CAST Imaging',
-  version: '1.0.0',
-);
-
 final deepWikiMcpServer = mcp.Implementation(
   name: 'DeepWiki',
   version: '1.0.0',
@@ -17,22 +12,8 @@ final context7McpServer = mcp.Implementation(
   version: '1.0.0',
 );
 
-Future<ToolSet> initializeToolSets(String imagingApiKey) async {
+Future<ToolSet> initializeToolSets() async {
   final outcomes = await BetterFuture.settle<ToolSet?>({
-    // 'imaging': () => imagingMcpServer.setup(
-    //   prefix: 'imaging',
-    //   scope: 'CAST Imaging',
-    //   url: Uri.parse('http://localhost:8124/mcp'),
-    //   headers: {'x-api-key': imagingApiKey},
-    //   toolsAcl: AccessControlList.allowAll,
-    // ),
-    // 'imaging_legacy': () => imagingMcpServer.setup(
-    //   prefix: 'imaging_DO_NOT_USE',
-    //   scope: 'CAST Imaging (DO NOT USE)',
-    //   url: Uri.parse('https://demo-imaging-v3.castsoftware.com/mcp'),
-    //   authHeader: MapEntry('x-api-key', imagingApiKey),
-    //   toolsAcl: AccessControlList.allowAll,
-    // ),
     'deepwiki': () => deepWikiMcpServer.setup(
       prefix: 'deepwiki',
       scope: 'DeepWiki information for GitHub repositories',
