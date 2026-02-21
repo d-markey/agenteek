@@ -1,0 +1,21 @@
+name: agenteek_dart
+description: Agenteek Dart toolset.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  dartantic_interface:
+  agenteek:
+  agenteek_files:
+  dart_mcp:
+  path:
+
+dev_dependencies:
+  lints:
+  test:

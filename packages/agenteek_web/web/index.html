@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="scaffolded-by" content="https://github.com/dart-lang/sdk">
+  <title>agenteek_web</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="main.dart.js"></script>
+</head>
+
+<body>
+
+  <div class="app" role="application">
+    <header>
+      <div class="brand">My Custom Web Agent</div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <button id="exportPdf" class="button" title="Export to PDF" aria-label="Export to PDF">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path
+              d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M12 18V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 15L12 12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Export PDF
+        </button>
+        <label class="log-toggle">
+          <input type="checkbox" id="logToggle" aria-label="Enable logs" />
+          <label class="lbl" for="logToggle">Enable Logs</label>
+        </label>
+      </div>
+    </header>
+
+    <main id="content" class="content" aria-label="Conversation area">
+      <div id="messages" class="messages" role="log" aria-live="polite" />
+    </main>
+
+    <footer class="setup" aria-label="Model Configuration">
+      <div>
+        <label class="lbl" for="model_id">Model ID:</label>
+        <input type="text" id="model_id" class="textbox" style="width: 16em;" />
+        <label class="lbl" for="api_key">API Key:</label>
+        <input type="text" id="api_key" class="textbox" style="width: 32em;" />
+        <button id="setModelInfo" class="button" title="Use Model" aria-label="Use Model">Use Model</button>
+      </div>
+    </footer>
+
+    <footer class="composer" aria-label="Message composer">
+      <div class="composer-inner">
+        <textarea id="composer" disabled
+          placeholder="Write a message and type Enter or click on the Send button; type Shift+Enter to insert a new line..."
+          aria-label="Message input"></textarea>
+        <button id="send" disabled class="send-btn" title="Send message" aria-label="Send message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const sendBtn = document.getElementById('send');
+    document.getElementById('composer').addEventListener('keydown', (e) => {
+      if (e.keyCode == 0x0D && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) sendBtn.click();
+      }
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+name: agenteek_cli
+description: Agenteek command line.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+dependencies:
+  better_future: ^2.0.0
+  dartantic_ai:
+  dart_mcp:
+  path:
+  yaml:
+  glob:
+  agenteek:
+  agenteek_memory:
+  agenteek_files:
+  agenteek_dart:
+  agenteek_tickets:
+
+dev_dependencies:
+  lints:
+  test:

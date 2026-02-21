@@ -1,0 +1,29 @@
+name: agenteek
+description: A powerful and flexible toolkit for building agentic AI applications with Dart.
+version: 1.0.0
+repository: https://github.com/d-markey/agenteek
+funding:
+  - https://github.com/sponsors/d-markey
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+dependencies:
+  async: ^2.13.0
+  better_future: ^2.0.0
+  collection: ^1.19.1
+  dartantic_ai: ^3.0.0
+  path: ^1.9.1
+  http: ^1.4.0
+  dart_mcp: ^0.4.0
+  stream_channel: ^2.1.4
+  glob: ^2.1.3
+  yaml: ^3.1.3
+  web: ^1.1.1
+  meta: ^1.17.0
+
+dev_dependencies:
+  lints:
+  test:

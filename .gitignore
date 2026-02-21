@@ -1,0 +1,22 @@
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# Secret files (CRITICAL)
+.secret.keys
+.env
+*.local
+credentials.json
+
+# Build-related
+build/
+*.dart.js
+*.js.deps
+*.js.map
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db

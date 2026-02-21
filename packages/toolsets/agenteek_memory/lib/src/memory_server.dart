@@ -1,0 +1,31 @@
+import 'package:agenteek/agenteek.dart';
+import 'package:dart_mcp/server.dart' as mcp;
+
+import 'memory_toolset.dart';
+
+base class MemoryMcpServer extends mcp.MCPServer with mcp.ToolsSupport {
+  MemoryMcpServer(
+    this.owner,
+    this.fileSystem,
+    super.channel, {
+    super.protocolLogSink,
+  }) : super.fromStreamChannel(
+         implementation: mcp.Implementation(
+           name: 'Memory Management',
+           version: '1.0.0',
+         ),
+         instructions: 'Handle memory',
+       ) {
+    _toolSet = MemoryToolSet(
+      owner: owner,
+      prefix: 'memory',
+      scope: implementation.name,
+      fileSystem: fileSystem,
+    );
+    registerToolSet(_toolSet);
+  }
+
+  final String owner;
+  final FileSystem fileSystem;
+  late final MemoryToolSet _toolSet;
+}

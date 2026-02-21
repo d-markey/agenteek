@@ -1,0 +1,14 @@
+name: _
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+workspace:
+  - packages/agenteek
+  - packages/agenteek_cli
+  - packages/agenteek_web
+  - packages/toolsets/agenteek_dart
+  - packages/toolsets/agenteek_files
+  - packages/toolsets/agenteek_memory
+  - packages/toolsets/agenteek_tickets

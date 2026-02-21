@@ -1,0 +1,27 @@
+name: agenteek_web
+description: An absolute bare-bones web app.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  web:
+  dart_mcp:
+  dartantic_ai:
+  agenteek:
+  markdown:
+  better_future: ^2.0.0
+  pdf: ^3.11.0
+  http: ^1.2.0
+
+dev_dependencies:
+  cors_enabler: ^0.9.0
+  build_runner:
+  build_web_compilers:
+  preload:
+  lints:

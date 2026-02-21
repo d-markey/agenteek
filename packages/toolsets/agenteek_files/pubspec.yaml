@@ -1,0 +1,21 @@
+name: agenteek_files
+description: Agenteek file toolset
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.9.0
+
+resolution: workspace
+
+dependencies:
+  collection:
+  dartantic_interface:
+  agenteek:
+  dart_mcp:
+  glob:
+  path:
+
+dev_dependencies:
+  lints:
+  test:

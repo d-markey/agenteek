@@ -1,0 +1,27 @@
+targets:
+  $default:
+    builders:
+      preload:
+        options:
+          include:
+            - "web/main.dart.js"
+      build_web_compilers|dart2js_archive_extractor:
+        options:
+          filter_outputs: false
+      build_web_compilers|entrypoint:
+        generate_for:
+          - web/main.dart
+        options:
+          compilers:
+            # Currently broken
+            # dart2wasm:
+            #   args:
+            #     - -O2
+            #     - --no-strip-wasm
+            dart2js:
+              args:
+                - --stage=dump-info-all
+                - --no-frequency-based-minification
+                - --no-source-maps
+                - --show-package-warnings
+                - -O4
