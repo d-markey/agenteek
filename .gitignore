@@ -10,9 +10,6 @@ credentials.json
 
 # Build-related
 build/
-*.dart.js
-*.js.deps
-*.js.map
 
 # Logs
 *.log
