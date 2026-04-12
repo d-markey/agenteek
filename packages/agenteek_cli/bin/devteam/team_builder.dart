@@ -23,7 +23,7 @@ Map<String, Agent> buildTeam(
     final toolSet = ToolSet.combined(conf.toolSets);
 
     final agentName = '${conf.displayName} (${conf.role})';
-    final chatManager = InMemoryConversationManager();
+    final chatManager = PersistentConversationManager(MemoryFileSystem());
     final modelOutput = outputCallbackBuilder(agentName);
 
     final agent = (interactive && conf.displayName == rootAgentName)

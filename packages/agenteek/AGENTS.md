@@ -40,8 +40,7 @@ Channels:
 | `lib/src/agents/agent_interactive.dart` | `InteractiveAgent extends Agent` — runs a prompt loop (`interactWithUser()`), dispatches slash commands via `CommandRegistry`, stops with `stopInteracting()` |
 | `lib/src/agents/agent_configuration.dart` | `AgentConfiguration` — YAML-driven config: model string, API key name, role, system instructions, roots, MCP ACLs, team membership |
 | `lib/src/conversations/conversation_manager.dart` | Abstract `ConversationManager` interface — history, checkpoints, start/switch/delete conversations |
-| `lib/src/conversations/in_memory_conversation_manager.dart` | In-memory implementation (no persistence) |
-| `lib/src/conversations/file_system_conversation_manager.dart` | File-backed implementation (persists conversations to disk) |
+| `lib/src/conversations/persistent_conversation_manager.dart` | `PersistentConversationManager` — Uses `FileSystem` to persist or keep conversations in memory. |
 | `lib/src/toolsets/toolset.dart` | `ToolSet` — holds `dartantic.Tool` list, registers tools, invokes by name, thread-safe disposal |
 | `lib/src/toolsets/toolset_combined.dart` | `CombinedToolSet` — merges multiple `ToolSet`s (tool names must be unique across sources) |
 | `lib/src/toolsets/mcp/mcp_toolset.dart` | `McpToolSet` — connects to an MCP server via a channel, discovers tools, proxies calls; applies `AccessControlList` white/black lists |
@@ -100,6 +99,6 @@ dart test packages/agenteek
 ```
 
 When writing new tests:
-- Prefer `InMemoryConversationManager` to avoid file I/O.
+- Prefer `PersistentConversationManager(MemoryFileSystem())` to avoid file I/O.
 - Use `ToolSet.empty` for agents that do not need tools.
 - Stub `dartantic.Agent` where possible to avoid real LLM calls.

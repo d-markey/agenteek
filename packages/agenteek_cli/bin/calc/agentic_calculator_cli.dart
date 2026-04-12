@@ -34,7 +34,7 @@ void main() async {
     secrets: secrets,
   );
 
-  final conversationManager = InMemoryConversationManager();
+  final conversationManager = PersistentConversationManager(MemoryFileSystem());
 
   final agent = InteractiveAgent(
     agentConf.modelInfo,

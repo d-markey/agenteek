@@ -67,7 +67,7 @@ The `build.yaml` controls compiler output settings.
 - **`InteractiveAgent` lifecycle**: The agent may be replaced when the user changes model config. Always call `agent.stopInteracting()` then `await agent.dispose()` before creating a new agent instance, to avoid dangling event listeners.
 - **Output rendering**: Use `HtmlSink` (which renders markdown to HTML) for model responses. Use a plain text sink for system messages. Never write raw HTML from model output — sanitize/escape.
 - **Toolset initialization is async**: `initializeToolSets()` may need to await MCP server connections. Show a loading indicator in `ChatbotUI.systemOutput` while it completes.
-- **Conversation persistence**: Uses `InMemoryConversationManager` — history is lost on page reload. If persistence is needed, implement a `FileSystem`-backed manager using `localStorage` or an API.
+- **Conversation persistence**: Uses `PersistentConversationManager(MemoryFileSystem())` — history is lost on page reload. If persistence is needed, implement a `PersistentFileSystem`-backed manager using `localStorage` or an API.
 
 ---
 

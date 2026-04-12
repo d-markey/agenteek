@@ -50,7 +50,7 @@ The `Ticket` class (in `lib/src/ticket.dart`) tracks:
 
 ## Coding Conventions
 
-- **Persistence**: Use a persistent `FileSystem` (like `FileSystemConversationManager`'s directory) to ensure tickets survive agent restarts.
+- **Persistence**: Use a persistent `FileSystem` (like `PersistentConversationManager`'s directory) to ensure tickets survive agent restarts.
 - **IDs**: IDs are auto-incremented based on the existing files in the storage directory.
 - **Owner**: The `owner` field is automatically populated from the toolset's `owner` parameter during creation/update.
 

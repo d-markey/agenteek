@@ -20,7 +20,7 @@ void main() async {
     secrets: secrets,
   );
 
-  final conversationManager = InMemoryConversationManager();
+  final conversationManager = PersistentConversationManager(MemoryFileSystem());
 
   // 3. Create the interactive agent
   final agent = InteractiveAgent(

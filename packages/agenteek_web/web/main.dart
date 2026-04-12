@@ -5,7 +5,8 @@ import 'config/config_store.dart';
 import '_toolsets.dart';
 
 void main() async {
-  final conversationManager = InMemoryConversationManager();
+  final memory = MemoryFileSystem();
+  final conversationManager = PersistentConversationManager(memory);
   final agentUi = AgentUI(conversationManager);
 
   InteractiveAgent? agent;

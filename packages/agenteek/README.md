@@ -35,7 +35,7 @@ void main() async {
     secrets: secrets,
   );
 
-  final conversationManager = InMemoryConversationManager();
+  final conversationManager = PersistentConversationManager(MemoryFileSystem());
 
   // 3. Create and start the interactive agent
   final agent = InteractiveAgent(
@@ -66,8 +66,8 @@ void main() async {
 
 ### Conversation Management
 Don't lose context. Use `CheckPoint` to save and restore the state of your conversation.
-- `FileSystemConversationManager`: Persists history to JSON files.
-- `InMemoryConversationManager`: Light-weight manager for transient sessions.
+- `PersistentConversationManager(PersistentFileSystem(...))`: Persists history to JSON files.
+- `PersistentConversationManager(MemoryFileSystem())`: Light-weight manager for transient sessions.
 
 ### Error Recovery 🛡️
 Agenteek features a unique error recovery system. Your `onError` callback can return a `String` which the agent will use as its output if an error occurs, allowing the conversation to continue smoothly even when APIs fail.

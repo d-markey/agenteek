@@ -9,8 +9,8 @@ import '../utils/unique_id.dart';
 import 'check_point.dart';
 import 'conversation_manager.dart';
 
-class FileSystemConversationManager extends ConversationManager {
-  FileSystemConversationManager(this._fileSystem);
+class PersistentConversationManager extends ConversationManager {
+  PersistentConversationManager(this._fileSystem);
 
   final FileSystem _fileSystem;
 
@@ -31,14 +31,14 @@ class FileSystemConversationManager extends ConversationManager {
       _history.where((m) => m.role == dartantic.ChatMessageRole.system);
 
   @override
-  Iterable<dartantic.ChatMessage> get history =>
-      _history.where((m) => m.role != dartantic.ChatMessageRole.system);
+  Iterable<dartantic.ChatMessage> get history => _history;
 
-  String get _fileName =>
-      'chat_${_conversationId.toRadixString(16).padLeft(8, '0')}.ai.chat';
+  String _getFileName({int? conversationId}) =>
+      'chat_${(conversationId ?? _conversationId).toRadixString(16).padLeft(8, '0')}.ai.chat';
 
   Future<List<dartantic.ChatMessage>> _load(int conversationId) async {
-    final json = await _fileSystem.read(_fileName);
+    final fileName = _getFileName(conversationId: conversationId);
+    final json = await _fileSystem.read(fileName);
     return (jsonDecode(json) as List)
         .cast<Json>()
         .map(dartantic.ChatMessage.fromJson)
@@ -48,7 +48,7 @@ class FileSystemConversationManager extends ConversationManager {
   Future<void> _save() async {
     if (_conversationId < 0) return;
     final json = jsonEncode(_history.map((m) => m.toJson()).toList());
-    await _fileSystem.write(_fileName, json);
+    await _fileSystem.write(_getFileName(), json);
   }
 
   @override
@@ -104,7 +104,8 @@ class FileSystemConversationManager extends ConversationManager {
   @override
   Future<bool> deleteConversation(int conversationId) async {
     if (conversationId == _conversationId) return false;
-    await _fileSystem.delete(_fileName);
+    final fileName = _getFileName(conversationId: conversationId);
+    await _fileSystem.delete(fileName);
     return true;
   }
 
