@@ -14,6 +14,7 @@ dependencies:
   async: ^2.13.0
   better_future: ^2.0.0
   collection: ^1.19.1
+  cancelation_token: ^1.1.0
   dartantic_ai: ^3.4.0
   path: ^1.9.1
   http: ^1.6.0

@@ -119,23 +119,81 @@ textarea:focus {
   border-color: var(--accent)
 }
 
-.send-btn {
+/* ── Morphing Send ↔ Cancel action button ─────────────────────────── */
+.action-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
   height: 48px;
   border-radius: 12px;
   border: 0;
   background: var(--accent);
   color: white;
   cursor: pointer;
-  padding: 0 16px
+  padding: 0;
+  flex-shrink: 0;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    border-radius 0.25s ease;
+  overflow: visible;
 }
 
-.send-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed
+.action-btn:hover:enabled {
+  background: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
 }
+
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* In cancel mode the button turns red */
+.action-btn.cancel {
+  background: #ef4444;
+  border-radius: 10px;
+}
+
+.action-btn.cancel:hover:enabled {
+  background: #dc2626;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+}
+
+/* Pulsing ring behind the cancel button */
+.action-btn.cancel::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  border: 2px solid rgba(239, 68, 68, 0.55);
+  animation: cancel-pulse 1.4s ease-out infinite;
+}
+
+@keyframes cancel-pulse {
+  0%   { transform: scale(1);    opacity: 1; }
+  80%  { transform: scale(1.22); opacity: 0; }
+  100% { transform: scale(1.22); opacity: 0; }
+}
+
+/* ── Icon layers inside the action button ─────────────────────────── */
+.action-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Default: send icon visible, cancel icon hidden */
+.action-btn .send-icon   { opacity: 1; transform: scale(1);    }
+.action-btn .cancel-icon { opacity: 0; transform: scale(0.55); }
+
+/* Flipped when button gains .cancel class */
+.action-btn.cancel .send-icon   { opacity: 0; transform: scale(0.55); }
+.action-btn.cancel .cancel-icon { opacity: 1; transform: scale(1);    }
 
 .textbox {
   display: inline-flex;

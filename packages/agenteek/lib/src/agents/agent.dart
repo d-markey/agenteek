@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cancelation_token/cancelation_token.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../conversations/check_point.dart';
@@ -73,6 +74,8 @@ class Agent {
   Future<bool> restoreCheckPoint(CheckPoint checkPoint) =>
       _conversationManager.restoreCheckPoint(checkPoint);
 
+  void compactHistory() => _conversationManager.compact();
+
   Future<void> summarizeConversation() async {
     final response = await agent.send(
       '**Summarize this conversation**\n'
@@ -88,7 +91,7 @@ class Agent {
     ]);
   }
 
-  Future<String> invokeStream(String prompt) async {
+  Future<String> invokeStream(String prompt, {CancelationToken? token}) async {
     chatLogger.append(() => '[$name] RECEIVED PROMPT: $prompt');
     modelLogger.append(() => '[$name] PROCESSING PROMPT $prompt');
 
@@ -101,16 +104,38 @@ class Agent {
         streamingThinkingOutput: streamingThinkingOutput,
       );
 
-      await agent
+      late StreamSubscription<dartantic.ChatResult<String>> sub;
+      sub = agent
           .sendStream(prompt, history: _conversationManager.history)
-          .forEach(accumulator.add);
+          .listen(
+            accumulator.add,
+            onError: (ex, st) {
+              print('$ex @ $st');
+            },
+            onDone: () {
+              print('Done.');
+            },
+          );
 
-      await Future.delayed(const Duration(seconds: 1));
+      token?.onCanceled.then((_) {
+        sub.cancel();
+        accumulator.add(
+          dartantic.ChatResult(
+            output: 'User cancelled.',
+            finishReason: dartantic.FinishReason.stop,
+          ),
+        );
+      });
+
+      await Future.any(
+        [sub.asFuture(), token?.onCanceled].whereType<Future>(),
+      ).catchError((ex, st) {
+        print('$ex @ $st');
+      });
 
       final finalResult = accumulator.buildFinal();
 
-      await _conversationManager.addAll(finalResult.messages);
-      _conversationManager.register(finalResult);
+      await _conversationManager.register(finalResult);
 
       unawaited(streamingThinkingOutput?.finish());
       unawaited(streamingOutput?.finish());
@@ -138,8 +163,7 @@ class Agent {
         prompt,
         history: _conversationManager.history,
       );
-      await _conversationManager.addAll(response.messages);
-      _conversationManager.register(response);
+      await _conversationManager.register(response);
       modelLogger.append(response.output);
       return response.output;
     } catch (ex, st) {

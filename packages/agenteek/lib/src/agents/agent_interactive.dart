@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cancelation_token/cancelation_token.dart';
+
 import '../commands/command.dart';
 import '../commands/command_registry.dart';
 import '../commands/help_command.dart';
@@ -47,7 +49,10 @@ class InteractiveAgent extends Agent {
 
   bool get isInteracting => _completer != null;
 
-  Future<void> interactWithUser([UserCommandHandler? handleUserCommand]) {
+  Future<void> interactWithUser({
+    UserCommandHandler? handleUserCommand,
+    CancelationToken Function()? tokenFactory,
+  }) {
     final completer = _completer ?? Completer<void>();
     if (_completer == completer) return completer.future;
     _completer = completer;
@@ -93,7 +98,8 @@ class InteractiveAgent extends Agent {
           // invoke() will call onError and return a recovery string if available.
           // If it rethrows, it means the error was not "handled" (returned null).
 
-          final response = await invokeStream(prompt);
+          final token = tokenFactory?.call();
+          final response = await invokeStream(prompt, token: token);
 
           if (response.trim().isNotEmpty) {
             modelOutput.add(response);

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:agenteek/agenteek.dart';
+import 'package:cancelation_token/cancelation_token.dart';
 import 'package:web/web.dart' as web;
 
 import '_agent_config.dart';
@@ -23,7 +25,7 @@ class AgentUI {
     _messages = _getElementById<web.HTMLDivElement>('messages');
     _outputController = HtmlOutputController(_messages);
     _prompt = _getElementById<web.HTMLTextAreaElement>('composer');
-    _sendBtn = _getElementById<web.HTMLButtonElement>('send');
+    _actionBtn = _getElementById<web.HTMLButtonElement>('action-btn');
     _configModelBtn = _getElementById<web.HTMLButtonElement>('configModel');
 
     _toggleLogBtn.checked = Log.enabled;
@@ -95,7 +97,7 @@ class AgentUI {
 
   late final web.HTMLInputElement _toggleLogBtn;
   late final web.HTMLButtonElement _exportPdfBtn;
-  late final web.HTMLButtonElement _sendBtn;
+  late final web.HTMLButtonElement _actionBtn;
   late final web.HTMLButtonElement _configModelBtn;
 
   late final web.HTMLDivElement _messages;
@@ -104,6 +106,41 @@ class AgentUI {
 
   late final FutureOr<String> Function() userInput;
   late final UserCommandHandler userCommandHandler;
+
+  static const _kPromptHistoryKey = 'agenteek_prompt_history';
+
+  /// In-memory history of submitted prompts (oldest first).
+  /// Loaded from [sessionStorage] on startup and persisted after every submit.
+  final List<String> _promptHistory = _loadPromptHistory();
+
+  static List<String> _loadPromptHistory() {
+    try {
+      final raw = web.window.sessionStorage.getItem(_kPromptHistoryKey);
+      if (raw != null) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) return decoded.cast<String>();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  void _savePromptHistory() {
+    try {
+      web.window.sessionStorage.setItem(
+        _kPromptHistoryKey,
+        jsonEncode(_promptHistory),
+      );
+    } catch (_) {}
+  }
+
+  /// Current navigation position within [_promptHistory].
+  /// Points past the end when no history item is selected.
+  int _historyCursor = 0;
+
+  /// Temporary buffer that holds the draft text while the user navigates
+  /// through history, so it can be restored when they press ArrowDown back
+  /// to the "new" position.
+  String _historyDraft = '';
 
   final _agentConfCtrlr = StreamController<WebAgentConfig?>();
   Stream<WebAgentConfig?> get agentConfiguration => _agentConfCtrlr.stream;
@@ -122,8 +159,8 @@ class AgentUI {
 
     _prompt.disabled = true;
 
-    _sendBtn.onclick = null;
-    _sendBtn.disabled = true;
+    _actionBtn.onclick = null;
+    _actionBtn.disabled = true;
   }
 
   void _onToggleLogClick(web.Event e) {
@@ -278,24 +315,99 @@ class AgentUI {
   PromptCallback bindUserInput() => () {
     final completer = Completer<String>();
 
+    // Reset navigation cursor to "past the end" for this new input session.
+    _historyCursor = _promptHistory.length;
+    _historyDraft = '';
+
     _prompt.disabled = false;
     _prompt.focus();
 
-    _sendBtn.onclick = (web.Event e) {
+    void submit() {
       final userInput = _prompt.value.trim();
       if (userInput.isNotEmpty) {
+        // Push to history (avoid consecutive duplicates) and persist.
+        if (_promptHistory.isEmpty || _promptHistory.last != userInput) {
+          _promptHistory.add(userInput);
+          _savePromptHistory();
+        }
         userOutput.add(userInput);
         _prompt.value = '';
         _prompt.disabled = true;
-        _sendBtn.disabled = true;
-        _sendBtn.onclick = null;
+        _prompt.onkeydown = null;
+        // Switch back to send mode
+        _setSendMode();
         completer.complete(userInput);
       }
+    }
+
+    // Enter send mode: blue, paper-plane icon
+    _setSendMode();
+    _actionBtn.disabled = false;
+    _actionBtn.onclick = (web.Event e) {
+      submit();
     }.toJS;
-    _sendBtn.disabled = false;
+
+    // Handle ArrowUp / ArrowDown for history navigation.
+    _prompt.onkeydown = (web.KeyboardEvent e) {
+      final key = e.key;
+      if (key == 'ArrowUp') {
+        if (_promptHistory.isEmpty) return;
+        // Save the current draft the first time we navigate away.
+        if (_historyCursor == _promptHistory.length) {
+          _historyDraft = _prompt.value;
+        }
+        if (_historyCursor > 0) {
+          _historyCursor--;
+          _prompt.value = _promptHistory[_historyCursor];
+          // Move caret to end.
+          final len = _prompt.value.length;
+          _prompt.setSelectionRange(len, len);
+        }
+        e.preventDefault();
+      } else if (key == 'ArrowDown') {
+        if (_historyCursor < _promptHistory.length) {
+          _historyCursor++;
+          _prompt.value = _historyCursor == _promptHistory.length
+              ? _historyDraft
+              : _promptHistory[_historyCursor];
+          final len = _prompt.value.length;
+          _prompt.setSelectionRange(len, len);
+        }
+        e.preventDefault();
+      }
+    }.toJS;
 
     return completer.future;
   };
+
+  CancelableToken? _token;
+
+  /// Switches the action button to send mode (blue, paper-plane icon).
+  void _setSendMode() {
+    _actionBtn.classList.remove('cancel');
+    _actionBtn.title = 'Send message';
+    _actionBtn.ariaLabel = 'Send message';
+    _actionBtn.disabled = true;
+    _actionBtn.onclick = null;
+  }
+
+  /// Switches the action button to cancel mode (red, stop-square icon).
+  void _setCancelMode() {
+    _actionBtn.classList.add('cancel');
+    _actionBtn.title = 'Cancel';
+    _actionBtn.ariaLabel = 'Cancel';
+    _actionBtn.disabled = false;
+    _actionBtn.onclick = (web.Event e) {
+      _token?.cancel();
+    }.toJS;
+  }
+
+  CancelationToken createToken() {
+    _token = CancelableToken();
+    // Switch to cancel mode now that the agent is running
+    _setCancelMode();
+    return _token!;
+  }
 
   UserCommandHandler bindUserCommandHandler() => (label, args) {
     switch (label.toLowerCase()) {
@@ -330,7 +442,11 @@ class AgentUI {
         return SystemPromptCommand.to(systemOutput);
 
       case 'new':
+      case 'clear':
         return NewConversationCommand(systemOutput);
+
+      case 'compact':
+        return CompactCommand(systemOutput);
 
       default:
         return null;

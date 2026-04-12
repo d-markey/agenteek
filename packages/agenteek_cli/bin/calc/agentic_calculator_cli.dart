@@ -59,7 +59,7 @@ void main() async {
   print(
     '${agent.name} Agent is running with model ${agent.agent.chatModelName}.',
   );
-  await agent.interactWithUser(commandHandler);
+  await agent.interactWithUser(handleUserCommand: commandHandler);
 
   // clean up
   mcpTools.dispose();

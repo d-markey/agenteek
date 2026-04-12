@@ -51,6 +51,26 @@ class NewConversationCommand extends Command {
   }
 }
 
+class CompactCommand extends Command {
+  const CompactCommand(this.output);
+
+  final Sink<String> output;
+
+  @override
+  String get name => 'compact';
+
+  @override
+  String get description => 'Compact the conversation history.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
+    output.add('Compact the conversation history');
+    if (output case HtmlNestedSink nested) nested.close();
+    agent.compactHistory();
+    return null;
+  }
+}
+
 class HtmlHistoryCommand extends HistoryCommand {
   const HtmlHistoryCommand();
 

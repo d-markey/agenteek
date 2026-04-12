@@ -12,13 +12,13 @@ This package is a **demo/application** rather than a library — it has no `lib/
 
 ```
 web/main.dart
-    → ChatbotUI          initializes DOM event listeners, streams user input / model output
+    → AgentUI          initializes DOM event listeners, streams user input / model output
     → initializeToolSets()  builds and returns a CombinedToolSet (from _toolsets.dart)
-    → InteractiveAgent   bound to ChatbotUI I/O streams
-    → agent.interactWithUser(chatbot.userCommandHandler)
+    → InteractiveAgent   bound to AgentUI I/O streams
+    → agent.interactWithUser(agentUI.userCommandHandler)
 ```
 
-The agent's configuration (model info and API key) is entered by the user through the chatbot UI itself (a special input before the normal chat begins). Once confirmed the agent reconstructs itself with the new `AgentConfiguration`.
+The agent's configuration (model info and API key) is entered by the user through the chatbot UI itself (via a custom dialog before the normal chat begins). Once confirmed the agent reconstructs itself with the new `AgentConfiguration`.
 
 ---
 
@@ -27,12 +27,13 @@ The agent's configuration (model info and API key) is entered by the user throug
 | File | What it Does |
 |------|-------------|
 | `main.dart` | Application entry point. Prompts for GitHub PAT, initializes toolsets, builds `InteractiveAgent`, runs the interaction loop, handles agent reconfiguration when the user submits new model info |
-| `_chatbot_ui.dart` | `ChatbotUI` — wraps DOM elements; exposes `userInput` (prompt stream), `modelOutput` (sink), `systemOutput` (sink), `agentConfiguration` (stream of new model configs), `userCommandHandler`, `clearMessages()`, `shutdown()` |
+| `_agent_ui.dart` | `AgentUI` — wraps DOM elements; exposes `userInput` (prompt stream), `modelOutput` (sink), `systemOutput` (sink), `agentConfiguration` (stream of new model configs), `userCommandHandler`, `clearMessages()`, `shutdown()`. Also manages the **prompt history** (see below) |
 | `_toolsets.dart` | `initializeToolSets(secrets)` — constructs and returns the `CombinedToolSet` (e.g., `FileToolSet`, `MemoryToolSet`, MCP-connected toolsets) using secrets for authentication |
 | `_user_command_handler.dart` | Slash-command handler for the web UI (subset of the CLI commands, adapted for browser context) |
 | `_html_sink.dart` | `HtmlSink implements Sink<String>` — renders agent markdown output as HTML into a DOM container element |
 | `_export_pdf.dart` | PDF export helper using the `pdf` package — allows users to save the current conversation as a PDF |
 | `index.html` | Shell HTML page — loads `main.dart.js`, provides the chat container and input elements |
+| `messages.js` | JavaScript code for the chat UI |
 | `styles.css` | Chat UI stylesheet |
 
 ---
@@ -40,21 +41,6 @@ The agent's configuration (model info and API key) is entered by the user throug
 ## Compilation & Development
 
 The web package uses `build_runner` + `build_web_compilers`. A pre-compiled `main.dart.js` is checked in for convenience (do not hand-edit it).
-
-> [!IMPORTANT]
-> **Use the Batch script for serving**. `tools\serve.bat` is a Windows Batch program that orchestrates the local dev server and necessary CORS proxies.
-
-```batch
-CD packages\agenteek_web
-
-REM Rebuild the JS code
-tools\build.bat
-
-REM Serve locally (Windows Console)
-REM This script will fire CORS proxies for MCP servers
-REM and serve the web page on port 8213.
-tools\serve.bat
-```
 
 The `build.yaml` controls compiler output settings.
 
@@ -66,8 +52,9 @@ The `build.yaml` controls compiler output settings.
 - **Platform target is `web` only**: This package imports `package:web/web.dart` for DOM access. Do not import `dart:io`. Keep all I/O through DOM APIs or the `http` package.
 - **`InteractiveAgent` lifecycle**: The agent may be replaced when the user changes model config. Always call `agent.stopInteracting()` then `await agent.dispose()` before creating a new agent instance, to avoid dangling event listeners.
 - **Output rendering**: Use `HtmlSink` (which renders markdown to HTML) for model responses. Use a plain text sink for system messages. Never write raw HTML from model output — sanitize/escape.
-- **Toolset initialization is async**: `initializeToolSets()` may need to await MCP server connections. Show a loading indicator in `ChatbotUI.systemOutput` while it completes.
+- **Toolset initialization is async**: `initializeToolSets()` may need to await MCP server connections. Show a loading indicator in `AgentUI.systemOutput` while it completes.
 - **Conversation persistence**: Uses `PersistentConversationManager(MemoryFileSystem())` — history is lost on page reload. If persistence is needed, implement a `PersistentFileSystem`-backed manager using `localStorage` or an API.
+- **Prompt history**: The `AgentUI` keeps a list of submitted prompts in memory and persists it to `sessionStorage` (key: `agenteek_prompt_history`) as a JSON array. This survives page reloads within the same browser tab session but is automatically cleared when the tab or browser is closed. Users navigate through previous prompts with the **↑ / ↓ arrow keys** while the composer textarea is focused. Consecutive duplicate entries are suppressed. The cursor resets to the "new prompt" position at the start of each input session, preserving any in-progress draft.
 
 ---
 

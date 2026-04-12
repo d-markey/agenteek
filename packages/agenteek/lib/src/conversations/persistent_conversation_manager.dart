@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:agenteek/src/conversations/chat_message_ext.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../file_system/file_system.dart';
@@ -95,10 +96,13 @@ class PersistentConversationManager extends ConversationManager {
   }
 
   @override
-  Future<void> addAll(Iterable<dartantic.ChatMessage> messages) async {
+  Future<void> register(dartantic.ChatResult result) async {
     if (_conversationId < 0) await startConversation();
-    messages.forEach(_register);
+    result.messages.forEach(_register);
     await _save();
+    final usage =
+        result.usage?.toString().trim().replaceAll(RegExp(r'\s+'), ' ') ?? '-';
+    print('Usage: $usage');
   }
 
   @override
@@ -125,14 +129,20 @@ class PersistentConversationManager extends ConversationManager {
   }
 
   @override
-  void register(dartantic.ChatResult message) {
-    print(message.usage);
-  }
-
-  @override
   void reset() {
     _conversationId = -1;
     _history.clear();
     _checkpoints.clear();
+  }
+
+  @override
+  void compact() {
+    for (var i = _history.length - 1; i >= 0; i--) {
+      _history[i] = _history[i].compact();
+      if (_history[i].isEmpty) {
+        _history.removeAt(i);
+        _checkpoints.removeAt(i);
+      }
+    }
   }
 }

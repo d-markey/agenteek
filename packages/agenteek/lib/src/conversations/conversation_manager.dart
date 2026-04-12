@@ -23,9 +23,9 @@ abstract class ConversationManager {
 
   Future<void> add(dartantic.ChatMessage message);
 
-  Future<void> addAll(Iterable<dartantic.ChatMessage> messages);
-
-  void register(dartantic.ChatResult message);
+  Future<void> register(dartantic.ChatResult result);
 
   Future<bool> deleteConversation(int conversationId);
+
+  void compact();
 }

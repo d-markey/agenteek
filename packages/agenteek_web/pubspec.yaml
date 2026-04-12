@@ -15,6 +15,7 @@ dependencies:
   dartantic_ai:
   agenteek:
   markdown:
+  cancelation_token: 
   better_future: ^2.0.0
   pdf: ^3.11.0
   http: ^1.6.0

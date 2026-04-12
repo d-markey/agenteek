@@ -65,7 +65,10 @@ void main() async {
         start = false;
         await curAgent.startNewConversation();
       }
-      curAgent.interactWithUser(agentUi.userCommandHandler);
+      curAgent.interactWithUser(
+        handleUserCommand: agentUi.userCommandHandler,
+        tokenFactory: agentUi.createToken,
+      );
     },
     onError: (ex, st) {
       agentUi.systemOutput.add('Error: $ex');

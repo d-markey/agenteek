@@ -89,7 +89,7 @@ void main(List<String> arguments) async {
   );
 
   // process user instructions
-  await rootAgent.interactWithUser(userCommandHandler);
+  await rootAgent.interactWithUser(handleUserCommand: userCommandHandler);
 
   dbg.trace('Shutting down...');
   await Future.wait(agents.values.map((a) => a.dispose()));
