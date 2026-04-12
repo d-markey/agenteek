@@ -9,7 +9,13 @@ class ToolsCommand extends Command {
   final Sink<String>? output;
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'tools';
+
+  @override
+  String get description => 'List available tools for the current agent.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     (output?.add ?? print)(
       agent.toolNames.isEmpty
           ? 'No available tools.'

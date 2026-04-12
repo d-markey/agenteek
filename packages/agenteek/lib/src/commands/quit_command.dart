@@ -8,7 +8,16 @@ class QuitCommand extends Command {
   final void Function()? _callback;
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'quit';
+
+  @override
+  String get description => 'Stop interacting and quit the session.';
+
+  @override
+  List<String> get aliases => const ['exit', 'q'];
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     if (agent is InteractiveAgent) {
       agent.stopInteracting();
       _callback?.call();

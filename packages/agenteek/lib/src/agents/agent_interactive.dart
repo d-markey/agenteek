@@ -1,7 +1,13 @@
 import 'dart:async';
 
 import '../commands/command.dart';
+import '../commands/command_registry.dart';
+import '../commands/help_command.dart';
+import '../commands/history_command.dart';
 import '../commands/quit_command.dart';
+import '../commands/summarize_command.dart';
+import '../commands/system_prompt_command.dart';
+import '../commands/tools_command.dart';
 import '../utils/debug.dart' as dbg;
 import '../utils/types.dart';
 import 'agent.dart';
@@ -14,13 +20,28 @@ class InteractiveAgent extends Agent {
     super.displayName,
     super.systemPrompt,
     super.modelOutput,
+    super.streamingOutput,
+    super.streamingThinkingOutput,
     super.toolSet,
     super.onError,
     required PromptCallback prompt,
     super.onNewConversation,
-  }) : _prompt = prompt;
+    CommandRegistry? commandRegistry,
+  }) : _prompt = prompt,
+       commandRegistry = commandRegistry ?? CommandRegistry() {
+    // Register default commands if the registry is empty or new.
+    if (this.commandRegistry.all.isEmpty) {
+      this.commandRegistry.register(HelpCommand.to(modelOutput));
+      this.commandRegistry.register(QuitCommand(callback: stopInteracting));
+      this.commandRegistry.register(HistoryCommand.to(modelOutput));
+      this.commandRegistry.register(SummarizeCommand.to(modelOutput));
+      this.commandRegistry.register(SystemPromptCommand.to(modelOutput));
+      this.commandRegistry.register(ToolsCommand.to(modelOutput));
+    }
+  }
 
   final PromptCallback _prompt;
+  final CommandRegistry commandRegistry;
 
   Completer<void>? _completer;
 
@@ -31,11 +52,19 @@ class InteractiveAgent extends Agent {
     if (_completer == completer) return completer.future;
     _completer = completer;
 
-    Command? $getCommand(String prompt) {
-      final cmd = handleUserCommand?.call(prompt);
-      return (cmd == null && prompt.toLowerCase().trim() == '/quit')
-          ? QuitCommand()
-          : cmd;
+    (Command?, List<String>) $parseCommand(String input) {
+      final parts = input.trim().split(RegExp(r'\s+'));
+      if (parts.isEmpty || !parts[0].startsWith('/')) return (null, []);
+
+      final label = parts[0].substring(1);
+      final args = parts.sublist(1);
+
+      // Check external handler first
+      var cmd = handleUserCommand?.call(label, args);
+      // Then check internal registry
+      cmd ??= commandRegistry.lookup(label);
+
+      return (cmd, args);
     }
 
     Future<void> $handleUserInput() async {
@@ -49,9 +78,9 @@ class InteractiveAgent extends Agent {
             prompt = await _prompt();
 
             // handle command
-            final command = $getCommand(prompt);
+            final (command, args) = $parseCommand(prompt);
             if (command != null) {
-              prompt = await command.handle(this) ?? '';
+              prompt = await command.handle(this, args) ?? '';
             }
           } catch (ex, st) {
             await onError?.call(ex, st);
@@ -63,7 +92,8 @@ class InteractiveAgent extends Agent {
 
           // invoke() will call onError and return a recovery string if available.
           // If it rethrows, it means the error was not "handled" (returned null).
-          final response = await invoke(prompt);
+
+          final response = await invokeStream(prompt);
 
           if (response.trim().isNotEmpty) {
             modelOutput.add(response);

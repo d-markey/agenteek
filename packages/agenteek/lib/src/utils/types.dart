@@ -14,7 +14,7 @@ typedef PromptCallback = FutureOr<String> Function();
 
 typedef NewConversationCallback = FutureOr<void> Function();
 
-typedef UserCommandHandler = Command? Function(String);
+typedef UserCommandHandler = Command? Function(String label, List<String> args);
 
 typedef CustomErrorHandler = Future<Duration?> Function(Response, int);
 

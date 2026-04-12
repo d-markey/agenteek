@@ -3,38 +3,38 @@ import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
 
-Command? userCommandHandler(String input) {
-  var command = input.toLowerCase();
-  switch (command) {
+Command? userCommandHandler(String label, List<String> args) {
+  switch (label.toLowerCase()) {
     case '':
-      return ConfirmAndQuitCommand();
+      return const ConfirmAndQuitCommand();
 
-    case '/exit':
-    case '/quit':
-    case '/q':
-    case '/x':
+    case 'exit':
+    case 'quit':
+    case 'q':
+    case 'x':
       return const QuitCommand();
 
-    case '/help':
-    case '/h':
-    case '/?':
+    case 'help':
+    case 'h':
+    case '?':
       return const HelpCommand();
 
-    case '/tools':
+    case 'tools':
       return const ToolsCommand();
 
-    case '/history':
+    case 'history':
       return const HistoryCommand();
 
-    // TODO
-    // case '/summarize':
-    //   return const SummarizeCommand();
+    case 'summarize':
+    case 'sum':
+      return const SummarizeCommand();
 
-    case '/systemprompt':
-    case '/system-prompt':
+    case 'systemprompt':
+    case 'system-prompt':
+    case 'system':
       return const SystemPromptCommand();
 
-    case '/new':
+    case 'new':
       return const NewConversationCommand();
 
     default:
@@ -46,7 +46,13 @@ class HelpCommand extends Command {
   const HelpCommand();
 
   @override
-  Null handle(Agent _) {
+  String get name => 'help';
+
+  @override
+  String get description => 'Show this help page.';
+
+  @override
+  Null handle(Agent _, List<String> args) {
     print(
       'USAGE:\n'
       '   /exit    /x, /q    quits\n'
@@ -63,39 +69,34 @@ class NewConversationCommand extends Command {
   const NewConversationCommand();
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'new';
+
+  @override
+  String get description => 'Start a new conversation.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     print('Start a new conversation');
     agent.startNewConversation();
     return null;
   }
 }
 
-// TODO
-// class SummarizeCommand extends Command {
-//   const SummarizeCommand();
-
-//   @override
-//   Future<Null> handle(Agent agent) async {
-//     print('Summarize conversation:\n*****');
-//     await agent.summarizeConversation();
-//     print('Here\'s the summary:\n*****');
-//     for (var message in agent.history) {
-//       print(message);
-//     }
-//     print('*****');
-//     return null;
-//   }
-// }
-
 class ConfirmAndQuitCommand extends Command {
   const ConfirmAndQuitCommand();
 
   @override
-  Future<String?> handle(Agent agent) async {
+  String get name => 'confirm-quit';
+
+  @override
+  String get description => 'Confirm before quitting (internal).';
+
+  @override
+  Future<String?> handle(Agent agent, List<String> args) async {
     stdout.writeln('Do you really want to quit (y/N)? ');
     final answer = stdin.readLineSync()?.trim().toLowerCase() ?? '';
     return (answer == 'y' || answer == 'yes')
-        ? const QuitCommand().handle(agent)
+        ? const QuitCommand().handle(agent, args)
         : null;
   }
 }

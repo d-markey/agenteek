@@ -5,7 +5,7 @@ final _rnd = Random.secure().nextInt;
 class UniqueIdGenerator {
   UniqueIdGenerator();
 
-  final _ids = <int>{};
+  final Set<int> _ids = {};
 
   int next() {
     while (true) {

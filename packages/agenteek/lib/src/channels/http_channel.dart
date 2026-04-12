@@ -52,7 +52,7 @@ class HttpChannel
       'Content-Type': 'application/json',
       'User-Agent': 'agenteek',
       'Mcp-Session-Id': ?_sessionId,
-      if (_headers != null) ..._headers,
+      ...?_headers,
     };
 
     try {

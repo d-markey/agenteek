@@ -1,6 +1,7 @@
 export 'src/agents/agent.dart';
 export 'src/agents/agent_configuration.dart';
 export 'src/agents/agent_interactive.dart';
+export 'src/agents/streaming_sink.dart';
 export 'src/channels/http_channel.dart';
 export 'src/channels/http_client.dart';
 export 'src/channels/stdio_channel.dart';
@@ -25,4 +26,5 @@ export 'src/toolsets/toolset_base.dart';
 export 'src/utils/access_control_list.dart';
 export 'src/utils/log.dart';
 export 'src/utils/types.dart';
+export 'src/utils/unique_id.dart';
 export 'src/utils/zod.dart';

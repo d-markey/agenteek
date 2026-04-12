@@ -11,7 +11,7 @@ import 'toolset_combined.dart';
 class ToolSet extends ToolSetBase {
   ToolSet();
 
-  static const ToolSetBase empty = EmptyToolSet._();
+  static const ToolSet empty = EmptyToolSet._();
 
   factory ToolSet.combined(Iterable<ToolSet> toolSets) {
     final toolsets = toolSets.toSet();
@@ -71,7 +71,7 @@ class ToolSet extends ToolSetBase {
   }
 }
 
-class EmptyToolSet extends ToolSetBase {
+class EmptyToolSet extends ToolSetBase implements ToolSet {
   const EmptyToolSet._();
 
   @override
@@ -84,7 +84,7 @@ class EmptyToolSet extends ToolSetBase {
   dartantic.Tool<Object>? getTool(String name) => null;
 
   @override
-  FutureOr<dynamic> invoke(String name, Json args) =>
+  Future<dynamic> invoke(String name, Json args) =>
       throw Exception('Tool "$name" not found.');
 
   @override
@@ -94,7 +94,16 @@ class EmptyToolSet extends ToolSetBase {
   void register(dartantic.Tool<Object> tool) {}
 
   @override
-  List<dartantic.Tool<Object>> get tools => const [];
+  final _tools = const <dartantic.Tool<Object>>[];
+
+  @override
+  List<dartantic.Tool<Object>> get tools => _tools;
+
+  @override
+  bool get _disposed => false;
+
+  @override
+  set _disposed(bool value) {}
 }
 
 extension on dartantic.Tool? {

@@ -9,12 +9,15 @@ class SystemPromptCommand extends Command {
   final Sink<String>? output;
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'system';
+
+  @override
+  String get description => 'Show the current system prompt.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     (output?.add ?? print)(
-      'System instruction:\n'
-      '*****\n'
-      '${agent.systemPrompt?.text ?? ''}\n'
-      '******',
+      'System Prompt:\n---\n${agent.systemPrompt}\n---',
     );
     return null;
   }

@@ -2,10 +2,10 @@ PUSHD "%~dp0.."
 
 CALL .\tools\build.bat
 
-RMDIR /s /q ..\..\publish\agenteek_web
+RMDIR /s /q ..\..\docs\agenteek_web
 
-MKDIR ..\..\publish\agenteek_web
+MKDIR ..\..\docs\agenteek_web
 
-COPY .\web\*.html ..\..\publish\agenteek_web
-COPY .\web\*.js ..\..\publish\agenteek_web
-COPY .\web\*.css ..\..\publish\agenteek_web
+COPY .\web\*.html ..\..\docs\agenteek_web
+COPY .\web\*.js ..\..\docs\agenteek_web
+COPY .\web\*.css ..\..\docs\agenteek_web

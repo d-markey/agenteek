@@ -2,32 +2,31 @@ import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
 
-Command? commandHandler(String input) {
-  var command = input.toLowerCase();
-  switch (command) {
-    case '/exit':
-    case '/quit':
-    case '/q':
-    case '/x':
+Command? commandHandler(String label, List<String> args) {
+  switch (label.toLowerCase()) {
+    case 'exit':
+    case 'quit':
+    case 'q':
+    case 'x':
       return const QuitCommand();
 
     case '':
       stdout.writeln('Do you really want to quit (y/N)? ');
-      command = stdin.readLineSync()?.trim().toLowerCase() ?? '';
-      return (command == 'y' || command == 'yes') ? const QuitCommand() : null;
+      final answer = stdin.readLineSync()?.trim().toLowerCase() ?? '';
+      return (answer == 'y' || answer == 'yes') ? const QuitCommand() : null;
 
-    case '/help':
-    case '/h':
-    case '/?':
+    case 'help':
+    case 'h':
+    case '?':
       return const HelpCommand();
 
-    case '/tools':
+    case 'tools':
       return const ToolsCommand();
 
-    case '/history':
+    case 'history':
       return const HistoryCommand();
 
-    case '/new':
+    case 'new':
       return const NewConversationCommand();
 
     default:
@@ -39,7 +38,13 @@ class HelpCommand extends Command {
   const HelpCommand();
 
   @override
-  Null handle(Agent _) {
+  String get name => 'help';
+
+  @override
+  String get description => 'Show this help page.';
+
+  @override
+  Null handle(Agent _, List<String> args) {
     print(
       'USAGE:\n'
       '   /exit    /x, /q    quits\n'
@@ -56,7 +61,13 @@ class NewConversationCommand extends Command {
   const NewConversationCommand();
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'new';
+
+  @override
+  String get description => 'Start a new conversation.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     print('Start a new conversation');
     agent.startNewConversation();
     return null;

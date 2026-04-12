@@ -9,6 +9,7 @@
   <meta name="scaffolded-by" content="https://github.com/dart-lang/sdk">
   <title>agenteek_web</title>
   <link rel="stylesheet" href="styles.css">
+  <script defer src="messages.js"></script>
   <script defer src="main.dart.js"></script>
 </head>
 
@@ -17,8 +18,12 @@
   <div class="app" role="application">
     <header>
       <div class="brand">My Custom Web Agent</div>
-      <div style="display: flex; gap: 16px; align-items: center;">
-        <button id="exportPdf" class="button" title="Export to PDF" aria-label="Export to PDF">
+      <div style="display: flex; gap: 16px; align-items: center;" id="toolbar">
+        <div class="log-toggle">
+          <input type="checkbox" id="logToggle" aria-label="Enable logs" />
+          <label class="lbl" for="logToggle">Enable Logs</label>
+        </div>
+        <button id="exportPdf" class="button accent" title="Export to PDF" aria-label="Export to PDF">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true">
             <path
@@ -32,10 +37,15 @@
           </svg>
           Export PDF
         </button>
-        <label class="log-toggle">
-          <input type="checkbox" id="logToggle" aria-label="Enable logs" />
-          <label class="lbl" for="logToggle">Enable Logs</label>
-        </label>
+        <button id="configModel" class="button accent" title="Configure Agent" aria-label="Configure Agent">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          Configure Agent
+        </button>
       </div>
     </header>
 
@@ -43,15 +53,6 @@
       <div id="messages" class="messages" role="log" aria-live="polite" />
     </main>
 
-    <footer class="setup" aria-label="Model Configuration">
-      <div>
-        <label class="lbl" for="model_id">Model ID:</label>
-        <input type="text" id="model_id" class="textbox" style="width: 16em;" />
-        <label class="lbl" for="api_key">API Key:</label>
-        <input type="text" id="api_key" class="textbox" style="width: 32em;" />
-        <button id="setModelInfo" class="button" title="Use Model" aria-label="Use Model">Use Model</button>
-      </div>
-    </footer>
 
     <footer class="composer" aria-label="Message composer">
       <div class="composer-inner">
@@ -80,6 +81,18 @@
       }
     });
   </script>
+
+  <!-- Modal Dialog Overlay -->
+  <div id="dlg-overlay" class="overlay hidden">
+    <div class="dialog">
+      <h2 id="dlg-title"></h2>
+      <form id="dlg-content" class="dlg-content"></form>
+      <div class="dlg-actions">
+        <button id="dlg-cancel" class="button">Cancel</button>
+        <button id="dlg-submit" class="button accent">OK</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 

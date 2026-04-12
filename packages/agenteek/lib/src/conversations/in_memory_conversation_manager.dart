@@ -107,6 +107,11 @@ class InMemoryConversationManager extends ConversationManager {
   }
 
   @override
+  void register(dartantic.ChatResult message) {
+    print(message.usage);
+  }
+
+  @override
   void reset() {
     _conversationId = -1;
     _history = [];

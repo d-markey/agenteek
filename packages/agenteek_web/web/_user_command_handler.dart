@@ -10,7 +10,13 @@ class HelpCommand extends Command {
   final Sink<String> output;
 
   @override
-  Null handle(Agent _) {
+  String get name => 'help';
+
+  @override
+  String get description => 'Show this help page.';
+
+  @override
+  Null handle(Agent _, List<String> args) {
     output.add(
       '```\n'
       'USAGE:\n'
@@ -31,7 +37,13 @@ class NewConversationCommand extends Command {
   final Sink<String> output;
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'new';
+
+  @override
+  String get description => 'Start a new conversation.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     output.add('Start a new conversation');
     if (output case HtmlNestedSink nested) nested.close();
     agent.startNewConversation();
@@ -45,8 +57,8 @@ class HtmlHistoryCommand extends HistoryCommand {
   HtmlHistoryCommand.to(super.output) : super.to();
 
   @override
-  Null handle(Agent agent) {
-    super.handle(agent);
+  Null handle(Agent agent, List<String> args) {
+    super.handle(agent, args);
     if (output case HtmlNestedSink nested) nested.close();
     return null;
   }
@@ -58,8 +70,8 @@ class HtmlSummarizeCommand extends SummarizeCommand {
   HtmlSummarizeCommand.to(super.output) : super.to();
 
   @override
-  FutureOr<Null> handle(Agent agent) async {
-    await super.handle(agent);
+  Future<String?> handle(Agent agent, List<String> args) async {
+    await super.handle(agent, args);
     if (output case HtmlNestedSink nested) nested.close();
     return null;
   }

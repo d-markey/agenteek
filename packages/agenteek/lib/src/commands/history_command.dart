@@ -12,7 +12,13 @@ class HistoryCommand extends Command {
   final Sink<String>? output;
 
   @override
-  Null handle(Agent agent) {
+  String get name => 'history';
+
+  @override
+  String get description => 'Show the full conversation history.';
+
+  @override
+  Null handle(Agent agent, List<String> args) {
     final sb = StringBuffer();
     sb.writeln('Full conversation history:');
     sb.writeln('---');

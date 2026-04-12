@@ -14,7 +14,16 @@ class SummarizeCommand extends Command {
   final Sink<String>? output;
 
   @override
-  FutureOr<Null> handle(Agent agent) async {
+  String get name => 'summarize';
+
+  @override
+  String get description => 'Summarize the current conversation history.';
+
+  @override
+  List<String> get aliases => const ['sum'];
+
+  @override
+  Future<String?> handle(Agent agent, List<String> args) async {
     final sb = StringBuffer();
     sb.writeln('Summary for conversation:');
     sb.writeln('---');

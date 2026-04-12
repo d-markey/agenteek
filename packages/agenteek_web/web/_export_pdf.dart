@@ -157,63 +157,149 @@ List<pdf.Widget> _renderMarkdown(
   pdf.Font fontBold,
   pdf.Font fontMono,
 ) {
-  final List<pdf.Widget> widgets = [];
   try {
     final nodes = md.Document().parseLines(text.split('\n'));
-    for (final node in nodes) {
-      widgets.add(_convertNode(node, font, fontBold, fontMono));
-    }
+    return _renderNodes(nodes, font, fontBold, fontMono);
   } catch (e) {
     // Fallback for parsing errors
-    widgets.add(
+    return [
       pdf.Text(
         text,
         style: pdf.TextStyle(font: font, fontSize: 11, height: 1.4),
       ),
-    );
+    ];
+  }
+}
+
+/// Helper to render a list of nodes, grouping inlines as needed.
+List<pdf.Widget> _renderNodes(
+  List<md.Node>? nodes,
+  pdf.Font font,
+  pdf.Font fontBold,
+  pdf.Font fontMono,
+) {
+  if (nodes == null || nodes.isEmpty) return [];
+
+  final List<pdf.Widget> widgets = [];
+  final List<md.Node> currentInlines = [];
+
+  void flushInlines() {
+    if (currentInlines.isNotEmpty) {
+      widgets.add(
+        pdf.Padding(
+          padding: const pdf.EdgeInsets.symmetric(vertical: 4),
+          child: pdf.RichText(
+            text: pdf.TextSpan(
+              style: pdf.TextStyle(font: font, fontSize: 11, height: 1.4),
+              children: currentInlines
+                  .map((c) => _convertInline(c, font, fontBold, fontMono))
+                  .toList(),
+            ),
+          ),
+        ),
+      );
+      currentInlines.clear();
+    }
   }
 
+  for (final node in nodes) {
+    if (_isBlock(node)) {
+      flushInlines();
+      widgets.add(_convertNode(node, font, fontBold, fontMono));
+    } else {
+      currentInlines.add(node);
+    }
+  }
+  flushInlines();
+
   return widgets;
+}
+
+bool _isBlock(md.Node node) {
+  if (node is md.Element) {
+    return const {
+      'p',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'pre',
+      'hr',
+      'table',
+    }.contains(node.tag);
+  }
+  return false;
 }
 
 pdf.Widget _convertNode(
   md.Node node,
   pdf.Font font,
   pdf.Font fontBold,
-  pdf.Font fontMono,
-) {
+  pdf.Font fontMono, {
+  String? listMarker,
+}) {
   if (node is md.Element) {
     switch (node.tag) {
       case 'p':
         return pdf.Padding(
           padding: const pdf.EdgeInsets.symmetric(vertical: 4),
-          child: pdf.Text(
-            node.textContent,
-            style: pdf.TextStyle(font: font, fontSize: 11, height: 1.4),
+          child: pdf.RichText(
+            text: pdf.TextSpan(
+              style: pdf.TextStyle(font: font, fontSize: 11, height: 1.4),
+              children:
+                  node.children
+                      ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+                      .toList() ??
+                  [],
+            ),
           ),
         );
       case 'h1':
         return pdf.Padding(
           padding: const pdf.EdgeInsets.only(top: 12, bottom: 4),
-          child: pdf.Text(
-            node.textContent,
-            style: pdf.TextStyle(font: fontBold, fontSize: 16),
+          child: pdf.RichText(
+            text: pdf.TextSpan(
+              style: pdf.TextStyle(font: fontBold, fontSize: 16),
+              children:
+                  node.children
+                      ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+                      .toList() ??
+                  [],
+            ),
           ),
         );
       case 'h2':
         return pdf.Padding(
           padding: const pdf.EdgeInsets.only(top: 10, bottom: 4),
-          child: pdf.Text(
-            node.textContent,
-            style: pdf.TextStyle(font: fontBold, fontSize: 14),
+          child: pdf.RichText(
+            text: pdf.TextSpan(
+              style: pdf.TextStyle(font: fontBold, fontSize: 14),
+              children:
+                  node.children
+                      ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+                      .toList() ??
+                  [],
+            ),
           ),
         );
       case 'h3':
         return pdf.Padding(
           padding: const pdf.EdgeInsets.only(top: 8, bottom: 4),
-          child: pdf.Text(
-            node.textContent,
-            style: pdf.TextStyle(font: fontBold, fontSize: 12),
+          child: pdf.RichText(
+            text: pdf.TextSpan(
+              style: pdf.TextStyle(font: fontBold, fontSize: 12),
+              children:
+                  node.children
+                      ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+                      .toList() ??
+                  [],
+            ),
           ),
         );
       case 'li':
@@ -222,24 +308,43 @@ pdf.Widget _convertNode(
           child: pdf.Row(
             crossAxisAlignment: pdf.CrossAxisAlignment.start,
             children: [
-              pdf.Text('• ', style: pdf.TextStyle(font: font, fontSize: 11)),
-              pdf.Expanded(
+              pdf.SizedBox(
+                width: 18,
                 child: pdf.Text(
-                  node.textContent,
-                  style: pdf.TextStyle(font: font, fontSize: 11, height: 1.4),
+                  listMarker ?? '* ',
+                  style: pdf.TextStyle(font: font, fontSize: 11),
+                ),
+              ),
+              pdf.Expanded(
+                child: pdf.Column(
+                  crossAxisAlignment: pdf.CrossAxisAlignment.start,
+                  children: _renderNodes(
+                    node.children,
+                    font,
+                    fontBold,
+                    fontMono,
+                  ),
                 ),
               ),
             ],
           ),
         );
       case 'ul':
+      case 'ol':
+        final isOrdered = node.tag == 'ol';
+        final children = node.children ?? [];
         return pdf.Column(
           crossAxisAlignment: pdf.CrossAxisAlignment.start,
-          children:
-              node.children
-                  ?.map((c) => _convertNode(c, font, fontBold, fontMono))
-                  .toList() ??
-              [],
+          children: List.generate(children.length, (i) {
+            final marker = isOrdered ? '${i + 1}. ' : '* ';
+            return _convertNode(
+              children[i],
+              font,
+              fontBold,
+              fontMono,
+              listMarker: marker,
+            );
+          }),
         );
       case 'code':
         return pdf.Container(
@@ -249,7 +354,7 @@ pdf.Widget _convertNode(
             borderRadius: const pdf.BorderRadius.all(pdf.Radius.circular(4)),
           ),
           child: pdf.Text(
-            node.textContent,
+            _decodeHtml(node.textContent),
             style: pdf.TextStyle(font: fontMono, fontSize: 10),
           ),
         );
@@ -264,7 +369,7 @@ pdf.Widget _convertNode(
           ),
           width: double.infinity,
           child: pdf.Text(
-            node.textContent,
+            _decodeHtml(node.textContent),
             style: pdf.TextStyle(font: fontMono, fontSize: 9, height: 1.2),
           ),
         );
@@ -277,29 +382,101 @@ pdf.Widget _convertNode(
               left: pdf.BorderSide(color: pdf.PdfColors.grey400, width: 4),
             ),
           ),
-          child: pdf.Text(
-            node.textContent,
-            style: pdf.TextStyle(
-              font: font,
-              fontSize: 11,
-              color: pdf.PdfColors.grey700,
-              fontStyle: pdf.FontStyle.italic,
-            ),
+          child: pdf.Column(
+            crossAxisAlignment: pdf.CrossAxisAlignment.start,
+            children: _renderNodes(node.children, font, fontBold, fontMono),
           ),
         );
       default:
         if (node.children != null) {
           return pdf.Column(
             crossAxisAlignment: pdf.CrossAxisAlignment.start,
-            children: node.children!
-                .map((c) => _convertNode(c, font, fontBold, fontMono))
-                .toList(),
+            children: _renderNodes(node.children, font, fontBold, fontMono),
           );
         }
     }
   }
   return pdf.Text(
-    node.textContent,
+    _decodeHtml(node.textContent),
     style: pdf.TextStyle(font: font, fontSize: 11),
   );
+}
+
+/// Convert a markdown node into a pdf.InlineSpan to preserve nested styles.
+pdf.InlineSpan _convertInline(
+  md.Node node,
+  pdf.Font font,
+  pdf.Font fontBold,
+  pdf.Font fontMono,
+) {
+  if (node is md.Text) {
+    return pdf.TextSpan(text: _decodeHtml(node.text));
+  }
+
+  if (node is md.Element) {
+    switch (node.tag) {
+      case 'strong':
+        return pdf.TextSpan(
+          style: pdf.TextStyle(font: fontBold),
+          children: node.children
+              ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+              .toList(),
+        );
+      case 'em':
+        // Standard PDF fonts usually don't support italic unless using a variation.
+        // We'll approximate with italic style if the font allows it.
+        return pdf.TextSpan(
+          style: pdf.TextStyle(fontStyle: pdf.FontStyle.italic),
+          children: node.children
+              ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+              .toList(),
+        );
+      case 'code':
+        return pdf.TextSpan(
+          text: _decodeHtml(node.textContent),
+          style: pdf.TextStyle(
+            font: fontMono,
+            fontSize: 10,
+            background: pdf.BoxDecoration(color: pdf.PdfColors.grey200),
+          ),
+        );
+      case 'a':
+        // Add basic link support
+        final href = node.attributes['href']?.trim() ?? '';
+        pdf.AnnotationLink? link;
+        if (href.isNotEmpty) {
+          link = pdf.AnnotationLink(href);
+        }
+        return pdf.TextSpan(
+          text: _decodeHtml(node.textContent),
+          style: pdf.TextStyle(
+            color: (link == null)
+                ? pdf.PdfColors.red700
+                : pdf.PdfColors.blue700,
+            decoration: pdf.TextDecoration.underline,
+          ),
+          annotation: link,
+        );
+      default:
+        return pdf.TextSpan(
+          children: node.children
+              ?.map((c) => _convertInline(c, font, fontBold, fontMono))
+              .toList(),
+        );
+    }
+  }
+
+  return pdf.TextSpan(text: _decodeHtml(node.textContent));
+}
+
+/// Decode HTML entities using a temporary browser DOM element.
+String _decodeHtml(String input) {
+  try {
+    final div = web.document.createElement('div') as web.HTMLDivElement;
+    div.innerHTML = input.toJS;
+    return div.textContent ?? input;
+  } catch (e) {
+    // If browser interop fails for any reason, return the original input
+    return input;
+  }
 }

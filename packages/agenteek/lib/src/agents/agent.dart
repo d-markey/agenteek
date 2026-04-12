@@ -1,9 +1,16 @@
 import 'dart:async';
 
-import 'package:agenteek/agenteek.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
+import '../conversations/check_point.dart';
+import '../conversations/conversation_manager.dart';
+import '../toolsets/toolset.dart';
+import '../toolsets/toolset_base.dart';
+import '../utils/log.dart';
 import '../utils/null_sink.dart';
+import '../utils/types.dart';
+import '_accumulator.dart';
+import 'streaming_sink.dart';
 
 class Agent {
   Agent(
@@ -12,6 +19,8 @@ class Agent {
     String? displayName,
     String? systemPrompt,
     this.modelOutput = const NullSink(),
+    this.streamingOutput,
+    this.streamingThinkingOutput,
     required ConversationManager conversationManager,
     this.onNewConversation,
     this.onError,
@@ -30,6 +39,8 @@ class Agent {
   final NewConversationCallback? onNewConversation;
   final ErrorCallback? onError;
   final Sink<String> modelOutput;
+  final StreamingStringSink? streamingOutput;
+  final StreamingStringSink? streamingThinkingOutput;
 
   final ToolSetBase toolSet;
   Iterable<String> get toolNames => toolSet.tools.map((t) => t.name);
@@ -64,15 +75,58 @@ class Agent {
 
   Future<void> summarizeConversation() async {
     final response = await agent.send(
-      'Summarize this conversation: '
-      'retain key information only and any actions applied; '
-      'do not summarize questions asked, focus on results.',
+      '**Summarize this conversation**\n'
+      'Retain key information only, and any actions applied. '
+      'Do not summarize questions asked, but focus on:\n'
+      '* **key information** discovered\n'
+      '* **major outcomes** such as new features, modifications applied, etc.\n',
       history: messages,
     );
 
     await _conversationManager.setConversation([
       dartantic.ChatMessage.model(response.output),
     ]);
+  }
+
+  Future<String> invokeStream(String prompt) async {
+    chatLogger.append(() => '[$name] RECEIVED PROMPT: $prompt');
+    modelLogger.append(() => '[$name] PROCESSING PROMPT $prompt');
+
+    try {
+      await streamingThinkingOutput?.start();
+      await streamingOutput?.start();
+
+      final accumulator = AgentResponseAccumulator(
+        streamingOutput: streamingOutput,
+        streamingThinkingOutput: streamingThinkingOutput,
+      );
+
+      await agent
+          .sendStream(prompt, history: _conversationManager.history)
+          .forEach(accumulator.add);
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      final finalResult = accumulator.buildFinal();
+
+      await _conversationManager.addAll(finalResult.messages);
+      _conversationManager.register(finalResult);
+
+      unawaited(streamingThinkingOutput?.finish());
+      unawaited(streamingOutput?.finish());
+
+      modelLogger.append(finalResult.output);
+      return finalResult.output;
+    } catch (ex, st) {
+      final recovery = await onError?.call(ex, st);
+      if (recovery != null) return recovery;
+      rethrow;
+    } finally {
+      await Future.wait([
+        ?streamingThinkingOutput?.finish(),
+        ?streamingOutput?.finish(),
+      ]);
+    }
   }
 
   Future<String> invoke(String prompt) async {
@@ -85,6 +139,7 @@ class Agent {
         history: _conversationManager.history,
       );
       await _conversationManager.addAll(response.messages);
+      _conversationManager.register(response);
       modelLogger.append(response.output);
       return response.output;
     } catch (ex, st) {
