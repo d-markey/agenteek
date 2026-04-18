@@ -11,7 +11,7 @@ This workspace is organized into several modular packages:
 
 ### Interfaces
 - **[agenteek_cli](packages/agenteek_cli)**: Command-line interface for interacting with Agenteek agents.
-- **[agenteek_web](packages/agenteek_web)**: A bare-bones web application for chatting with agents in the browser.
+- **[agenteek_web](packages/agenteek_web)**: A bare-bones web application for [chatting with agents in the browser](https://d-markey.github.io/agenteek/agenteek_web/).
 
 ### Toolsets
 Specialized capabilities that can be plugged into any agent:
