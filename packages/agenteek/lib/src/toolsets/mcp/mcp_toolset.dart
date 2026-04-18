@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dart_mcp/client.dart' as mcp;
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
@@ -8,6 +9,9 @@ import '../../utils/debug.dart' as dbg;
 import '../../utils/types.dart';
 import '../../utils/zod.dart';
 import '../toolset.dart';
+import '_json_to_markdown.dart';
+
+const _experimental = true;
 
 class McpToolSet extends ToolSet {
   McpToolSet(this.prefix, this.scope, this._client, this._connection);
@@ -68,16 +72,66 @@ class McpToolSet extends ToolSet {
 
     return (args) async {
       try {
-        final res = await _connection.callTool(
-          mcp.CallToolRequest(name: name, arguments: args),
-        );
-        return res as Json;
+        dbg.trace('Calling tool $name...');
+        final res =
+            await _connection.callTool(
+                  mcp.CallToolRequest(name: name, arguments: args),
+                )
+                as Json;
+        dbg.trace('Tool $name results: $res');
+
+        if (_experimental && res.containsKey('structuredContent')) {
+          final structured = _decodeIfNeeded(res['structuredContent']);
+          if (structured != null) {
+            String? table;
+            if (structured case List data) {
+              table = JsonToMarkdownConverter.convert(data);
+            } else if (structured case {'content': Object? data}) {
+              data = _decodeIfNeeded(data);
+              if (data is List) {
+                table = JsonToMarkdownConverter.convert(data);
+                if (table != null) {
+                  structured.remove('content');
+                  if (structured.isNotEmpty) {
+                    table = '${jsonEncode(structured)}\n\n$table';
+                  }
+                }
+              }
+            }
+            if (table != null) {
+              res.remove('structuredContent');
+              res['content'] = {'type': 'text', 'text': table};
+            }
+          }
+          dbg.trace('[EXPERIMENTAL] Tool $name results: $res');
+        }
+
+        return res;
       } catch (ex, st) {
-        final message = 'Error executing $name: $ex\nStacktrace: $st';
-        dbg.trace(message);
-        return {'error': message, 'stacktrace': st.toString()};
+        dbg.trace('Error executing $name: $ex\nStacktrace: $st');
+        return {
+          'error': 'Error executing $name: $ex',
+          'stacktrace': st.toString(),
+        };
       }
     };
+  }
+
+  static Object? _decodeIfNeeded(Object? data) {
+    if (data is String) {
+      try {
+        data = data.trim().isEmpty ? null : jsonDecode(data);
+      } catch (_) {
+        try {
+          data = (data as String)
+              .replaceAll(r'\r', '\r')
+              .replaceAll(r'\n', '\n')
+              .replaceAll(r'\t', '\t');
+          data = jsonDecode(data);
+        } catch (_) {}
+      }
+    }
+    return data;
   }
 
   @override

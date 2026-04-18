@@ -2,6 +2,7 @@ export 'src/agents/agent.dart';
 export 'src/agents/agent_configuration.dart';
 export 'src/agents/agent_interactive.dart';
 export 'src/agents/streaming_sink.dart';
+export 'src/agents/user_cancellation_exception.dart';
 export 'src/channels/http_channel.dart';
 export 'src/channels/http_client.dart';
 export 'src/channels/stdio_channel.dart';

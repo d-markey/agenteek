@@ -70,3 +70,17 @@ If you are an agent working in this repository:
   * Every package **must** have an `AGENTS.md` file summarizing its purpose and internals for future AI collaborators.
   * Public APIs must be documented with /// comments.
 
+---
+
+## Development Workflow Tools
+
+While specialized toolsets are provided, agents also have access to standard CLI tools for development:
+- `flutter pub get` / `dart pub get`: Dependency management.
+- `flutter analyze` / `dart analyze`: Static analysis.
+- `flutter test` / `dart test`: Automated testing.
+- `dart format`: Code formatting.
+
+**CRITICAL: Mandatory Approval Policy**
+- **Non-Systematic**: These tools must NOT be used systematically or automatically after code changes.
+- **User Approval Required**: You **MUST** always ask for and receive explicit user approval before executing any of these commands. Never run them in the background without the user's consent.
+

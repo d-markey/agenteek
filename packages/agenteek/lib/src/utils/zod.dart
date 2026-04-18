@@ -23,6 +23,22 @@ abstract class z {
   static dartantic.Schema string([String? description]) =>
       dartantic.Schema.fromMap({'type': 'string', 'description': ?description});
 
-  static dartantic.Schema of(Tool tool) =>
-      dartantic.Schema.fromMap(tool.inputSchema as Map<String, Object?>);
+  static dartantic.Schema of(Tool tool) => dartantic.Schema.fromMap(
+    _removeEmptyEnums(tool.inputSchema as Map<String, Object?>),
+  );
+
+  static Map<String, Object?> _removeEmptyEnums(Map<String, Object?> schema) {
+    var enums = schema['enum'];
+    if (enums is List) {
+      if (enums.where((e) => e.toString().trim().isEmpty).isNotEmpty) {
+        schema['enum'] = enums
+            .where((e) => e.toString().trim().isNotEmpty)
+            .toList();
+      }
+    }
+    for (var value in schema.values.whereType<Map>()) {
+      _removeEmptyEnums(value as Map<String, Object?>);
+    }
+    return schema;
+  }
 }

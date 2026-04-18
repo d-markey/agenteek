@@ -16,13 +16,17 @@ void main() async {
 
   // get api key and initialize MCP toolset
   await BetterFuture.wait({
-    'secretsFile': () => FileLocator.find(dir, '.secret.keys'),
-    'secrets': ($) async {
-      secrets = await InMemorySecrets.load($.secretsFile!.path);
+    'secrets': () async {
+      final file = await FileLocator.find(dir, '.secret.keys');
+      if (file != null) {
+        secrets = await InMemorySecrets.load(file.path);
+      } else {
+        secrets = InMemorySecrets(const {});
+      }
     },
-    'mcp': () => initializeArithmeticMcpServerAndClient(),
-    'tools': ($) async {
-      mcpTools = McpToolSet('math', 'math', $.mcp.client, $.mcp.connection);
+    'tools': () async {
+      final mcp = await initializeArithmeticMcpServerAndClient();
+      mcpTools = McpToolSet('math', 'math', mcp.client, mcp.connection);
       await mcpTools.initialize();
     },
   });

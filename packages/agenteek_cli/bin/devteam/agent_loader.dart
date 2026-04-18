@@ -5,6 +5,7 @@ import 'package:agenteek_dart/agenteek_dart.dart';
 import 'package:agenteek_files/agenteek_files.dart';
 import 'package:agenteek_memory/agenteek_memory.dart';
 import 'package:agenteek_tickets/agenteek_tickets.dart';
+import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart';
 import 'package:yaml/yaml.dart';
 
@@ -82,22 +83,29 @@ Future<List<AgentConf>> loadAgentsConf(String yaml, Secrets secrets) async {
     }
 
     if (agentConf.mcp.isNotEmpty) {
-      final mcpInitializations = <Future<McpToolSet?>>[];
+      final mcpInitializations = <String, Future<void> Function()>{};
 
       for (var mcp in agentConf.mcp.entries) {
         switch (mcp.key) {
           case 'github':
+            mcpInitializations[mcp.key] = () async {
             final token = await secrets.get('github-pat');
-            if (token.isEmpty) throw Exception('Missing Github access token.');
-            mcpInitializations.add(
-              Implementation(name: 'Github', version: '1.0.0').setup(
+              if (token.isEmpty) {
+                throw Exception('Missing Github access token.');
+              }
+              final toolset =
+                  await Implementation(name: 'Github', version: '1.0.0').setup(
                 prefix: 'github',
                 scope: 'Github repositories',
                 url: Uri.parse('https://api.githubcopilot.com/mcp/'),
                 headers: {'Authorization': 'Bearer $token'},
                 toolsAcl: mcp.value,
-              ),
             );
+              if (toolset != null) {
+                agentConf.registerToolSet(toolset);
+              }
+            };
+
           default:
             modelLogger.append(
               'Unsupported MCP tool: "${mcp.key}", it will be ignored.',
@@ -105,8 +113,10 @@ Future<List<AgentConf>> loadAgentsConf(String yaml, Secrets secrets) async {
         }
       }
 
-      final mcpToolsets = await Future.wait(mcpInitializations);
-      mcpToolsets.nonNulls.forEach(agentConf.registerToolSet);
+      final outcomes = await BetterFuture.settle(mcpInitializations);
+      for (var entry in outcomes.errors) {
+        print('Failed to load MCP tool "${entry.key}": ${entry.value}');
+      }
     }
 
     agentsConf.insert(0, agentConf);

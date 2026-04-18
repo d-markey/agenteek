@@ -12,6 +12,7 @@ import '../utils/null_sink.dart';
 import '../utils/types.dart';
 import '_accumulator.dart';
 import 'streaming_sink.dart';
+import 'user_cancellation_exception.dart';
 
 class Agent {
   Agent(
@@ -117,31 +118,25 @@ class Agent {
             },
           );
 
-      token?.onCanceled.then((_) {
-        sub.cancel();
-        accumulator.add(
-          dartantic.ChatResult(
-            output: 'User cancelled.',
-            finishReason: dartantic.FinishReason.stop,
-          ),
-        );
-      });
-
       await Future.any(
-        [sub.asFuture(), token?.onCanceled].whereType<Future>(),
-      ).catchError((ex, st) {
-        print('$ex @ $st');
-      });
+        [
+          sub.asFuture(),
+          token?.onCanceled.then((_) => sub.cancel()),
+        ].whereType<Future>(),
+      );
 
       final finalResult = accumulator.buildFinal();
-
       await _conversationManager.register(finalResult);
-
-      unawaited(streamingThinkingOutput?.finish());
-      unawaited(streamingOutput?.finish());
-
       modelLogger.append(finalResult.output);
-      return finalResult.output;
+
+      if (token != null && token.isCanceled) {
+        throw UserCancellationException(
+          message: token.exception?.message ?? 'Cancelled at your request.',
+          pendingOutput: finalResult.output,
+        );
+      } else {
+        return finalResult.output;
+      }
     } catch (ex, st) {
       final recovery = await onError?.call(ex, st);
       if (recovery != null) return recovery;
