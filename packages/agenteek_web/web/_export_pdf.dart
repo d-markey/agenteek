@@ -94,6 +94,7 @@ Future<void> exportConversationToPdf(
                     : pdf.PdfColor.fromInt(0xFF1565C0);
 
                 return pdf.Container(
+                  width: double.infinity,
                   margin: const pdf.EdgeInsets.only(bottom: 20),
                   padding: const pdf.EdgeInsets.all(14),
                   decoration: pdf.BoxDecoration(
@@ -158,7 +159,9 @@ List<pdf.Widget> _renderMarkdown(
   pdf.Font fontMono,
 ) {
   try {
-    final nodes = md.Document().parseLines(text.split('\n'));
+    final nodes = md.Document(
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+    ).parseLines(text.split('\n'));
     return _renderNodes(nodes, font, fontBold, fontMono);
   } catch (e) {
     // Fallback for parsing errors
@@ -232,6 +235,11 @@ bool _isBlock(md.Node node) {
       'pre',
       'hr',
       'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td',
     }.contains(node.tag);
   }
   return false;
@@ -387,6 +395,8 @@ pdf.Widget _convertNode(
             children: _renderNodes(node.children, font, fontBold, fontMono),
           ),
         );
+      case 'table':
+        return _buildTable(node, font, fontBold, fontMono);
       default:
         if (node.children != null) {
           return pdf.Column(
@@ -399,6 +409,110 @@ pdf.Widget _convertNode(
   return pdf.Text(
     _decodeHtml(node.textContent),
     style: pdf.TextStyle(font: font, fontSize: 11),
+  );
+}
+
+/// Build a PDF table from a markdown `<table>` element.
+pdf.Widget _buildTable(
+  md.Element tableNode,
+  pdf.Font font,
+  pdf.Font fontBold,
+  pdf.Font fontMono,
+) {
+  // Collect (row element, isHeader) pairs by scanning thead/tbody children.
+  final List<(md.Element, bool)> rows = [];
+  for (final section in (tableNode.children ?? [])) {
+    if (section is! md.Element) continue;
+    final isHeader = section.tag == 'thead';
+    for (final child in (section.children ?? [])) {
+      if (child is md.Element && child.tag == 'tr') {
+        rows.add((child, isHeader));
+      }
+    }
+  }
+
+  if (rows.isEmpty) {
+    // Fallback: render as plain text.
+    return pdf.Text(
+      _decodeHtml(tableNode.textContent),
+      style: pdf.TextStyle(font: font, fontSize: 11),
+    );
+  }
+
+  // Determine the max column count for uniform column widths.
+  int maxCols = 0;
+  for (final (row, _) in rows) {
+    final cellCount = row.children?.whereType<md.Element>().length ?? 0;
+    if (cellCount > maxCols) maxCols = cellCount;
+  }
+
+  // Define column widths based on the number of columns.
+  // For 2-column tables, use Intrinsic for the first and Flex for the second.
+  // This is typical for key-value or labeled data.
+  final Map<int, pdf.TableColumnWidth> columnWidths;
+  if (maxCols == 2) {
+    columnWidths = const {
+      0: pdf.IntrinsicColumnWidth(),
+      1: pdf.FlexColumnWidth(),
+    };
+  } else {
+    columnWidths = {
+      for (var i = 0; i < maxCols; i++) i: const pdf.FlexColumnWidth(),
+    };
+  }
+
+  final tableRows = <pdf.TableRow>[];
+  for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    final (rowEl, isHeader) = rows[rowIndex];
+    final cells = rowEl.children?.whereType<md.Element>().toList() ?? [];
+
+    // Alternating background: headers = grey200, even rows = white, odd rows = grey50.
+    final pdf.PdfColor rowBg = isHeader
+        ? pdf.PdfColors.grey300
+        : (rowIndex.isEven ? pdf.PdfColors.white : pdf.PdfColors.grey100);
+
+    final pdfCells = <pdf.Widget>[];
+    for (var i = 0; i < cells.length; i++) {
+      final cell = cells[i];
+      // In a 2-column table, treat the first column as a header (bold)
+      final isFirstCol = i == 0 && maxCols == 2;
+      final cellFont = (isHeader || isFirstCol) ? fontBold : font;
+
+      final cellContent = _renderNodes(
+        cell.children,
+        cellFont,
+        fontBold,
+        fontMono,
+      );
+
+      pdfCells.add(
+        pdf.Container(
+          color: rowBg,
+          padding: const pdf.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: pdf.BoxDecoration(
+            border: pdf.Border.all(color: pdf.PdfColors.grey400, width: 0.5),
+          ),
+          child: pdf.Column(
+            crossAxisAlignment: pdf.CrossAxisAlignment.start,
+            children: cellContent.isEmpty
+                ? [
+                    pdf.Text(
+                      '',
+                      style: pdf.TextStyle(font: cellFont, fontSize: 10),
+                    ),
+                  ]
+                : cellContent,
+          ),
+        ),
+      );
+    }
+
+    tableRows.add(pdf.TableRow(children: pdfCells));
+  }
+
+  return pdf.Padding(
+    padding: const pdf.EdgeInsets.symmetric(vertical: 8),
+    child: pdf.Table(columnWidths: columnWidths, children: tableRows),
   );
 }
 

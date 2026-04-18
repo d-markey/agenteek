@@ -30,12 +30,27 @@ class ConfigStore {
     return _fs.write(_configFileName, jsonEncode(config));
   }
 
-  static Future<AgentConfigData?> autoConf(Uri resource) async {
+  static Future<Map<String, dynamic>?> _loadAutoConf(Uri resource) async {
     final res = await web.window.fetch(resource.toString().toJS).toDart;
     final blob = await res.blob().toDart;
     final text = (await blob.text().toDart).toDart;
     if (text.isEmpty) return null;
     final json = jsonDecode(text) as Map<String, dynamic>;
+    return json;
+  }
+
+  static Future<bool> hasAutoConf(Uri resource) async {
+    try {
+      final json = await _loadAutoConf(resource);
+      return json != null && json.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<AgentConfigData?> autoConf(Uri resource) async {
+    final json = await _loadAutoConf(resource);
+    if (json == null || json.isEmpty) return null;
     await save(config: json);
     return AgentConfigData.from(json);
   }

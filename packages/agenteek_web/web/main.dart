@@ -50,8 +50,16 @@ void main() async {
         streamingThinkingOutput: agentUi.modelThinkingStreamOutput,
         onError: (error, [st]) async {
           agentUi.systemOutput.add('Error: $error');
-          return 'I encountered an issue. '
-              'Please try again or rephrase your request.';
+          if (error is UserCancellationException) {
+            return error.pendingOutput.isNotEmpty
+                ? 'You cancelled this prompt while I was providing an answer. '
+                      'My current thoughts:\n\n'
+                      '${error.pendingOutput}'
+                : 'You cancelled this prompt; feel free to provide more context and try again.';
+          } else {
+            return 'I encountered an issue. '
+                'Please try again or rephrase your request.';
+          }
         },
         onNewConversation: () {
           agentUi.clearMessages();

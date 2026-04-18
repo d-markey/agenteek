@@ -15,8 +15,7 @@ class MemoryToolSet extends ToolSet {
     FileSystem? fileSystem,
   }) : _fileSystem = fileSystem ?? MemoryFileSystem(),
        scope = scope?.trim() ?? '',
-       _fileName = 'memory_$owner.json',
-       _logger = Log('memory_$owner') {
+       _fileName = 'memory_$owner.json' {
     // register tools
     register(_listTopicsSpec);
     register(_recallTopicSpec);
@@ -32,7 +31,6 @@ class MemoryToolSet extends ToolSet {
 
   final FileSystem _fileSystem;
   final String _fileName;
-  final Log _logger;
 
   final _topics = <String, String>{};
 

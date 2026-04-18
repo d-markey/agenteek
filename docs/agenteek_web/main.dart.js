@@ -583,11 +583,17 @@
     insertAll$2$ax(receiver, a0, a1) {
       return J.getInterceptor$ax(receiver).insertAll$2(receiver, a0, a1);
     },
+    join$1$ax(receiver, a0) {
+      return J.getInterceptor$ax(receiver).join$1(receiver, a0);
+    },
     map$1$1$ax(receiver, a0, $T1) {
       return J.getInterceptor$ax(receiver).map$1$1(receiver, a0, $T1);
     },
     matchAsPrefix$2$s(receiver, a0, a1) {
       return J.getInterceptor$s(receiver).matchAsPrefix$2(receiver, a0, a1);
+    },
+    remove$1$ax(receiver, a0) {
+      return J.getInterceptor$ax(receiver).remove$1(receiver, a0);
     },
     removeAt$1$ax(receiver, a0) {
       return J.getInterceptor$ax(receiver).removeAt$1(receiver, a0);
@@ -8851,11 +8857,8 @@
     },
     Agent_invokeStream_closure1: function Agent_invokeStream_closure1() {
     },
-    Agent_invokeStream_closure3: function Agent_invokeStream_closure3(t0, t1) {
+    Agent_invokeStream_closure3: function Agent_invokeStream_closure3(t0) {
       this.sub = t0;
-      this.accumulator = t1;
-    },
-    Agent_invokeStream_closure4: function Agent_invokeStream_closure4() {
     },
     AgentConfiguration$(apiKeyName, displayName, modelInfo, secrets) {
       var t1 = B._setArrayType([], type$.JSArray_String),
@@ -8916,6 +8919,10 @@
       _.completer = t1;
       _.$$parseCommand = t2;
       _.tokenFactory = t3;
+    },
+    UserCancellationException: function UserCancellationException(t0, t1) {
+      this.pendingOutput = t0;
+      this.message = t1;
     },
     _httpError(res, details) {
       var t1 = res.reasonPhrase,
@@ -9071,7 +9078,7 @@
       var _ = this;
       _._fileSystem = t0;
       _._conversationId = -1;
-      _._history = t1;
+      _._persistent_conversation_manager$_history = t1;
       _._checkpoints = t2;
       _._uniqueId = t3;
     },
@@ -9112,6 +9119,81 @@
     },
     InMemorySecrets: function InMemorySecrets(t0) {
       this._secrets = t0;
+    },
+    JsonToMarkdownConverter__flatten(map, prefix) {
+      var t1, t2, t3, t4, t5, t6, newKey, _0_0, $$,
+        flattened = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic);
+      for (t1 = map.get$entries(), t1 = t1.get$iterator(t1), t2 = type$.List_dynamic, t3 = type$.Map_String_dynamic, t4 = prefix + ".", t5 = prefix.length === 0; t1.moveNext$0();) {
+        t6 = t1.get$current();
+        newKey = t6.key;
+        newKey = t5 ? newKey : t4 + newKey;
+        _0_0 = t6.value;
+        t6 = t3._is(_0_0);
+        $$ = t6 ? _0_0 : null;
+        if (t6) {
+          flattened.addAll$1(0, B.JsonToMarkdownConverter__flatten($$, newKey));
+          continue;
+        }
+        t6 = t2._is(_0_0);
+        $$ = t6 ? _0_0 : null;
+        if (t6) {
+          flattened.$indexSet(0, newKey, J.join$1$ax($$, ", "));
+          continue;
+        }
+        flattened.$indexSet(0, newKey, J.toString$0$(_0_0));
+        continue;
+      }
+      return flattened;
+    },
+    JsonToMarkdownConverter_convert(jsonInput) {
+      var allKeys, flattenedDataList, t2, item, flattenedItem, sortedKeys, t3, t4, _i,
+        t1 = J.getInterceptor$asx(jsonInput);
+      if (t1.get$isEmpty(jsonInput))
+        return "List is empty.";
+      allKeys = B.LinkedHashSet_LinkedHashSet$_empty(type$.String);
+      flattenedDataList = B._setArrayType([], type$.JSArray_Map_String_dynamic);
+      for (t1 = t1.get$iterator(jsonInput), t2 = type$.Map_String_dynamic; t1.moveNext$0();) {
+        item = t1.get$current();
+        if (item == null)
+          continue;
+        if (!t2._is(item))
+          return null;
+        flattenedItem = B.JsonToMarkdownConverter__flatten(item, "");
+        allKeys.addAll$1(0, new B.LinkedHashMapKeysIterable(flattenedItem, B._instanceType(flattenedItem)._eval$1("LinkedHashMapKeysIterable<1>")));
+        A.JSArray_methods.add$1(flattenedDataList, flattenedItem);
+      }
+      sortedKeys = B.List_List$_of(allKeys, allKeys.$ti._precomputed1);
+      A.JSArray_methods.sort$0(sortedKeys);
+      t1 = B._arrayInstanceType(sortedKeys);
+      t2 = t1._eval$1("String(1)");
+      t1 = t1._eval$1("MappedListIterable<1,String>");
+      t3 = "| " + A.JSArray_methods.join$1(sortedKeys, " | ") + " |\n" + ("| " + new B.MappedListIterable(sortedKeys, t2._as(new B.JsonToMarkdownConverter_convert_closure()), t1).join$1(0, " | ") + " |\n");
+      for (t4 = flattenedDataList.length, _i = 0; _i < flattenedDataList.length; flattenedDataList.length === t4 || (0, B.throwConcurrentModificationError)(flattenedDataList), ++_i)
+        t3 += "| " + new B.MappedListIterable(sortedKeys, t2._as(new B.JsonToMarkdownConverter_convert_closure0(flattenedDataList[_i])), t1).join$1(0, " | ") + " |\n";
+      return t3.charCodeAt(0) == 0 ? t3 : t3;
+    },
+    JsonToMarkdownConverter_convert_closure: function JsonToMarkdownConverter_convert_closure() {
+    },
+    JsonToMarkdownConverter_convert_closure0: function JsonToMarkdownConverter_convert_closure0(t0) {
+      this.row = t0;
+    },
+    McpToolSet__decodeIfNeeded(data) {
+      var exception, t1;
+      data = data;
+      if (typeof data == "string")
+        try {
+          data = A.JSString_methods.trim$0(data).length === 0 ? null : A.C_JsonCodec.decode$2$reviver(data, null);
+        } catch (exception) {
+          try {
+            t1 = B._asString(data);
+            t1 = B.stringReplaceAllUnchecked(t1, "\\r", "\r");
+            t1 = B.stringReplaceAllUnchecked(t1, "\\n", "\n");
+            data = B.stringReplaceAllUnchecked(t1, "\\t", "\t");
+            data = A.C_JsonCodec.decode$2$reviver(data, null);
+          } catch (exception) {
+          }
+        }
+      return data;
     },
     McpToolSet: function McpToolSet(t0, t1, t2, t3, t4) {
       var _ = this;
@@ -9175,14 +9257,9 @@
     },
     trace_closure: function trace_closure() {
     },
-    AccessControlList: function AccessControlList(t0, t1) {
-      this._whiteList = t0;
-      this._blackList = t1;
+    AccessControlList: function AccessControlList() {
     },
     AccessControlList_check_closure: function AccessControlList_check_closure(t0) {
-      this.name = t0;
-    },
-    AccessControlList_check_closure0: function AccessControlList_check_closure0(t0) {
       this.name = t0;
     },
     ChatMessageDbgExt_dump(_this) {
@@ -9232,6 +9309,25 @@
       this._ids = t0;
       this._strings = t1;
     },
+    z__removeEmptyEnums(schema) {
+      var t1, t2, t3, t4,
+        enums = schema.$index(0, "enum");
+      if (type$.List_dynamic._is(enums)) {
+        t1 = J.getInterceptor$ax(enums);
+        if (!t1.where$1(enums, new B.z__removeEmptyEnums_closure()).get$isEmpty(0)) {
+          t1 = t1.where$1(enums, new B.z__removeEmptyEnums_closure0());
+          t1 = B.List_List$_of(t1, t1.$ti._eval$1("Iterable.E"));
+          schema.$indexSet(0, "enum", t1);
+        }
+      }
+      for (t1 = schema.get$values(), t1 = t1.whereType$1$0(t1, type$.Map_dynamic_dynamic), t2 = J.get$iterator$ax(t1._source), t1 = t1.$ti, t3 = new B.WhereTypeIterator(t2, t1._eval$1("WhereTypeIterator<1>")), t1 = t1._precomputed1, t4 = type$.Map_of_String_and_nullable_Object; t3.moveNext$0();)
+        B.z__removeEmptyEnums(t4._as(t1._as(t2.get$current())));
+      return schema;
+    },
+    z__removeEmptyEnums_closure: function z__removeEmptyEnums_closure() {
+    },
+    z__removeEmptyEnums_closure0: function z__removeEmptyEnums_closure0() {
+    },
     AuthCredentials: function AuthCredentials() {
     },
     ApiKeyCredentials: function ApiKeyCredentials(t0) {
@@ -9246,7 +9342,7 @@
       _._httpClient = t1;
       _._ownsHttpClient = t2;
       _._closed = false;
-      _.__AnthropicClient_skills_F = _.__AnthropicClient_files_F = _.__AnthropicClient_models_F = _.__AnthropicClient_messages_F = _.__AnthropicClient__requestBuilder_F = _.__AnthropicClient__interceptorChain_F = $;
+      _.__AnthropicClient_vaults_F = _.__AnthropicClient_sessions_F = _.__AnthropicClient_agents_F = _.__AnthropicClient_skills_F = _.__AnthropicClient_files_F = _.__AnthropicClient_models_F = _.__AnthropicClient_messages_F = _.__AnthropicClient__requestBuilder_F = _.__AnthropicClient__interceptorChain_F = $;
     },
     RetryPolicy0: function RetryPolicy0() {
     },
@@ -9698,8 +9794,9 @@
       this.content = t1;
     },
     Message_Message$fromJson(json) {
-      var t3, t4, t5, t6, t7, t8, t9,
+      var t3, t4, t5, t6, t7, t8, t9, t10,
         _s11_ = "stop_reason",
+        _s12_ = "stop_details",
         _s9_ = "container",
         t1 = B._asString(json.$index(0, "id")),
         t2 = B._asStringQ(json.$index(0, "type"));
@@ -9710,12 +9807,13 @@
       t4 = B.List_List$_of(t4, t4.$ti._eval$1("ListIterable.E"));
       t5 = B._asString(json.$index(0, "model"));
       t6 = json.$index(0, _s11_) != null ? B.StopReason_fromJson(B._asString(json.$index(0, _s11_))) : null;
-      t7 = B._asStringQ(json.$index(0, "stop_sequence"));
-      t8 = type$.Map_String_dynamic;
-      t9 = B.Usage_Usage$fromJson(t8._as(json.$index(0, "usage")));
-      return new B.Message(t1, t2, t3, t4, t5, t6, t7, t9, json.$index(0, _s9_) != null ? B.Container_Container$fromJson(t8._as(json.$index(0, _s9_))) : null);
+      t7 = json.$index(0, _s12_) != null ? B.RefusalStopDetails_RefusalStopDetails$fromJson(type$.Map_String_dynamic._as(json.$index(0, _s12_))) : null;
+      t8 = B._asStringQ(json.$index(0, "stop_sequence"));
+      t9 = type$.Map_String_dynamic;
+      t10 = B.Usage_Usage$fromJson(t9._as(json.$index(0, "usage")));
+      return new B.Message(t1, t2, t3, t4, t5, t6, t7, t8, t10, json.$index(0, _s9_) != null ? B.Container_Container$fromJson(t9._as(json.$index(0, _s9_))) : null);
     },
-    Message: function Message(t0, t1, t2, t3, t4, t5, t6, t7, t8) {
+    Message: function Message(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) {
       var _ = this;
       _.id = t0;
       _.type = t1;
@@ -9723,9 +9821,10 @@
       _.content = t3;
       _.model = t4;
       _.stopReason = t5;
-      _.stopSequence = t6;
-      _.usage = t7;
-      _.container = t8;
+      _.stopDetails = t6;
+      _.stopSequence = t7;
+      _.usage = t8;
+      _.container = t9;
     },
     Message_Message$fromJson_closure: function Message_Message$fromJson_closure() {
     },
@@ -9837,10 +9936,37 @@
       }
       return t1;
     },
+    RefusalCategory_RefusalCategory$fromJson(json) {
+      return A.JSArray_methods.firstWhere$2$orElse(A.List_8nB, new B.RefusalCategory_RefusalCategory$fromJson_closure(json), new B.RefusalCategory_RefusalCategory$fromJson_closure0());
+    },
+    RefusalStopDetails_RefusalStopDetails$fromJson(json) {
+      var t2,
+        _s8_ = "category",
+        t1 = B._asStringQ(json.$index(0, "type"));
+      if (t1 == null)
+        t1 = "refusal";
+      t2 = json.$index(0, _s8_) != null ? B.RefusalCategory_RefusalCategory$fromJson(B._asString(json.$index(0, _s8_))) : null;
+      return new B.RefusalStopDetails(t1, t2, B._asStringQ(json.$index(0, "explanation")));
+    },
     StopReason: function StopReason(t0, t1, t2) {
       this.value = t0;
       this.index = t1;
       this._core$_name = t2;
+    },
+    RefusalCategory: function RefusalCategory(t0, t1, t2) {
+      this.value = t0;
+      this.index = t1;
+      this._core$_name = t2;
+    },
+    RefusalCategory_RefusalCategory$fromJson_closure: function RefusalCategory_RefusalCategory$fromJson_closure(t0) {
+      this.json = t0;
+    },
+    RefusalCategory_RefusalCategory$fromJson_closure0: function RefusalCategory_RefusalCategory$fromJson_closure0() {
+    },
+    RefusalStopDetails: function RefusalStopDetails(t0, t1, t2) {
+      this.type = t0;
+      this.category = t1;
+      this.explanation = t2;
     },
     CacheCreation_CacheCreation$fromJson(json) {
       var t2,
@@ -10052,10 +10178,12 @@
         t6 = null;
       return new B.MessageDeltaUsage(t1, t2, t3, t4, t5, t6, json.$index(0, "speed") != null ? B.Speed_fromJson(B._asString(json.$index(0, "speed"))) : null);
     },
-    MessageDelta: function MessageDelta(t0, t1, t2) {
-      this.container = t0;
-      this.stopReason = t1;
-      this.stopSequence = t2;
+    MessageDelta: function MessageDelta(t0, t1, t2, t3) {
+      var _ = this;
+      _.container = t0;
+      _.stopReason = t1;
+      _.stopDetails = t2;
+      _.stopSequence = t3;
     },
     MessageDeltaUsage: function MessageDeltaUsage(t0, t1, t2, t3, t4, t5, t6) {
       var _ = this;
@@ -10072,9 +10200,10 @@
     MessageDeltaUsage_toJson_closure: function MessageDeltaUsage_toJson_closure() {
     },
     MessageStreamEvent_MessageStreamEvent$fromJson(json) {
-      var t1, t2, t3, t4, _null = null,
+      var t1, t2, t3, t4, t5, _null = null,
         _s9_ = "container",
         _s11_ = "stop_reason",
+        _s12_ = "stop_details",
         _s5_ = "index",
         type = B._asString(json.$index(0, "type"));
       $label0$0: {
@@ -10087,7 +10216,8 @@
           t2 = t1._as(json.$index(0, "delta"));
           t3 = t2.$index(0, _s9_) != null ? B.Container_Container$fromJson(t1._as(t2.$index(0, _s9_))) : _null;
           t4 = t2.$index(0, _s11_) != null ? B.StopReason_fromJson(B._asString(t2.$index(0, _s11_))) : _null;
-          t1 = new B.MessageDeltaEvent(new B.MessageDelta(t3, t4, B._asStringQ(t2.$index(0, "stop_sequence"))), B.MessageDeltaUsage_MessageDeltaUsage$fromJson(t1._as(json.$index(0, "usage"))));
+          t5 = t2.$index(0, _s12_) != null ? B.RefusalStopDetails_RefusalStopDetails$fromJson(t1._as(t2.$index(0, _s12_))) : _null;
+          t1 = new B.MessageDeltaEvent(new B.MessageDelta(t3, t4, t5, B._asStringQ(t2.$index(0, "stop_sequence"))), B.MessageDeltaUsage_MessageDeltaUsage$fromJson(t1._as(json.$index(0, "usage"))));
           break $label0$0;
         }
         if ("message_stop" === type) {
@@ -10209,6 +10339,14 @@
     BuiltInToolDefinition: function BuiltInToolDefinition(t0) {
       this.tool = t0;
     },
+    AgentsResource: function AgentsResource(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.config = t0;
+      _.httpClient = t1;
+      _.interceptorChain = t2;
+      _.requestBuilder = t3;
+      _.ensureNotClosed = t4;
+    },
     ResourceBase: function ResourceBase() {
     },
     FilesResource: function FilesResource() {
@@ -10243,6 +10381,14 @@
       _.requestBuilder = t3;
       _.ensureNotClosed = t4;
     },
+    SessionsResource: function SessionsResource(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.config = t0;
+      _.httpClient = t1;
+      _.interceptorChain = t2;
+      _.requestBuilder = t3;
+      _.ensureNotClosed = t4;
+    },
     SkillsResource: function SkillsResource(t0, t1, t2, t3, t4) {
       var _ = this;
       _.config = t0;
@@ -10252,6 +10398,14 @@
       _.ensureNotClosed = t4;
     },
     StreamingResource: function StreamingResource() {
+    },
+    VaultsResource: function VaultsResource(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.config = t0;
+      _.httpClient = t1;
+      _.interceptorChain = t2;
+      _.requestBuilder = t3;
+      _.ensureNotClosed = t4;
     },
     SseParser: function SseParser() {
     },
@@ -10569,13 +10723,13 @@
       return B._asyncStartSync($async$BetterFuture_settle, $async$completer);
     },
     BetterFuture__waiter(computation, $T) {
-      if ($T._eval$1("0/()")._is(computation) || $T._eval$1("Future<0>()")._is(computation) || $T._eval$1("0()")._is(computation))
-        return new B.BetterFuture__waiter_closure(computation);
-      else if ($T._eval$1("0/(BetterResults)")._is(computation) || $T._eval$1("Future<0>(BetterResults)")._is(computation) || $T._eval$1("0(BetterResults)")._is(computation))
+      if ($T._eval$1("0/(BetterResults)")._is(computation) || $T._eval$1("Future<0>(BetterResults)")._is(computation) || $T._eval$1("0(BetterResults)")._is(computation))
         if ($T._eval$1("0/(@)")._is(computation) || $T._eval$1("Future<0>(@)")._is(computation) || $T._eval$1("0(@)")._is(computation))
-          return new B.BetterFuture__waiter_closure0(computation);
+          return new B.BetterFuture__waiter_closure(computation);
         else
-          return new B.BetterFuture__waiter_closure1(computation);
+          return new B.BetterFuture__waiter_closure0(computation);
+      else if ($T._eval$1("0/()")._is(computation) || $T._eval$1("Future<0>()")._is(computation) || $T._eval$1("0()")._is(computation))
+        return new B.BetterFuture__waiter_closure1(computation);
       return null;
     },
     BetterFuture__settler(computation, $T) {
@@ -12025,7 +12179,8 @@
     },
     CancelationToken: function CancelationToken() {
     },
-    CanceledException: function CanceledException() {
+    CanceledException: function CanceledException(t0) {
+      this.message = t0;
     },
     CancelableToken: function CancelableToken(t0) {
       this._cancelable_token$_exception = null;
@@ -17296,23 +17451,16 @@
         t4 = B.LinkedHashSet_LinkedHashSet$_empty(type$.InlineSyntax),
         t5 = inlineSyntaxes == null,
         t6 = t5 && null;
-      if (t6 !== true) {
-        t6 = extensionSet == null ? null : extensionSet.inlineSyntaxes.length !== 0;
-        t6 = t6 === true;
-      } else
+      if (t6 !== true)
+        t6 = extensionSet.inlineSyntaxes.length !== 0;
+      else
         t6 = true;
       if (blockSyntaxes != null)
         t3.addAll$1(0, blockSyntaxes);
       if (!t5)
         t4.addAll$1(0, inlineSyntaxes);
-      if (extensionSet == null) {
-        t5 = $.$get$ExtensionSet_commonMark();
-        t3.addAll$1(0, t5.blockSyntaxes);
-        t4.addAll$1(0, t5.inlineSyntaxes);
-      } else {
-        t3.addAll$1(0, extensionSet.blockSyntaxes);
-        t4.addAll$1(0, extensionSet.inlineSyntaxes);
-      }
+      t3.addAll$1(0, extensionSet.blockSyntaxes);
+      t4.addAll$1(0, extensionSet.inlineSyntaxes);
       return new B.Document(B.LinkedHashMap_LinkedHashMap$_empty(t1, type$.LinkReference), B.LinkedHashMap_LinkedHashMap$_empty(t1, type$.int), t2, linkResolver, imageLinkResolver, true, true, true, t3, t4, t6);
     },
     Document: function Document(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) {
@@ -18085,7 +18233,7 @@
       this.type = t1;
       this.$function = t2;
     },
-    AgentsResource: function AgentsResource(t0, t1, t2, t3) {
+    AgentsResource0: function AgentsResource0(t0, t1, t2, t3) {
       var _ = this;
       _.config = t0;
       _.httpClient = t1;
@@ -22109,8 +22257,8 @@
     },
     PdfImage: function PdfImage(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) {
       var _ = this;
-      _._width = t0;
-      _._height = t1;
+      _._image$_width = t0;
+      _._image$_height = t1;
       _.orientation = t2;
       _.buf = t3;
       _.isBinary = t4;
@@ -22377,16 +22525,16 @@
       _.left = t2;
       _.right = t3;
     },
-    Container$(alignment, child, decoration, margin, padding, width) {
-      var t1, t2;
+    Container$(alignment, child, color, decoration, margin, padding, width) {
+      var t1, t2, _null = null;
       if (decoration == null)
-        t1 = null;
+        t1 = color != null ? B.BoxDecoration$(_null, _null, color) : _null;
       else
         t1 = decoration;
       if (width != null)
-        t2 = B.BoxConstraints$tightFor(null, width);
+        t2 = B.BoxConstraints$tightFor(_null, width);
       else
-        t2 = null;
+        t2 = _null;
       return new B.Container0(child, alignment, padding, t1, t2, margin);
     },
     DecoratedBox: function DecoratedBox(t0, t1, t2) {
@@ -22585,8 +22733,8 @@
       var _ = this;
       _.bytes = t0;
       _.dpi = t1;
-      _._image_provider$_width = t2;
-      _._image_provider$_height = t3;
+      _._width = t2;
+      _._height = t3;
       _.orientation = t4;
       _._cache = t5;
     },
@@ -22642,6 +22790,47 @@
       this.color = t0;
       this.strokeWidth = t1;
       this.box = null;
+    },
+    TableRow: function TableRow(t0) {
+      this.children = t0;
+    },
+    TableCellVerticalAlignment: function TableCellVerticalAlignment(t0, t1) {
+      this.index = t0;
+      this._core$_name = t1;
+    },
+    TableWidth: function TableWidth(t0, t1) {
+      this.index = t0;
+      this._core$_name = t1;
+    },
+    TableContext: function TableContext() {
+      this.lastLine = this.firstLine = 0;
+    },
+    ColumnLayout: function ColumnLayout(t0, t1) {
+      this.width = t0;
+      this.flex = t1;
+    },
+    TableColumnWidth: function TableColumnWidth() {
+    },
+    IntrinsicColumnWidth: function IntrinsicColumnWidth() {
+    },
+    FlexColumnWidth: function FlexColumnWidth() {
+    },
+    Table: function Table(t0, t1, t2, t3, t4) {
+      var _ = this;
+      _.children = t0;
+      _._widths = t1;
+      _._heights = t2;
+      _._table$_context = t3;
+      _.columnWidths = t4;
+      _.box = null;
+    },
+    Table_layout_closure: function Table_layout_closure() {
+    },
+    Table_layout_closure0: function Table_layout_closure0() {
+    },
+    Table_layout_closure1: function Table_layout_closure1() {
+    },
+    _Table_Widget_SpanningWidget: function _Table_Widget_SpanningWidget() {
     },
     RichText$(maxLines, overflow, softWrap, text, textAlign, textDirection, textScaleFactor, tightBounds) {
       return new B.RichText(text, textAlign, textDirection, textScaleFactor, softWrap, false, maxLines, B._setArrayType([], type$.JSArray__Span), B._setArrayType([], type$.JSArray__TextDecoration), new B.RichTextContext(), overflow);
@@ -23491,32 +23680,15 @@
       this.secrets = t1;
     },
     AgentUI$(conversationManager) {
-      var t1 = new B.AgentUI(conversationManager, B.AgentUI__loadPromptHistory(), B.StreamController_StreamController(null, null, null, false, type$.nullable_WebAgentConfig));
+      var t1 = new B.AgentUI(conversationManager, B.PromptHistory$(), B.StreamController_StreamController(null, null, null, false, type$.nullable_WebAgentConfig));
       t1.AgentUI$1(conversationManager);
       return t1;
-    },
-    AgentUI__loadPromptHistory() {
-      var raw, decoded, t1, exception;
-      try {
-        raw = B._asStringQ(B._asJSObject(B._asJSObject(init.G.window).sessionStorage).getItem("agenteek_prompt_history"));
-        if (raw != null) {
-          decoded = A.C_JsonCodec.decode$2$reviver(raw, null);
-          if (type$.List_dynamic._is(decoded)) {
-            t1 = J.cast$1$0$ax(decoded, type$.String);
-            return t1;
-          }
-        }
-      } catch (exception) {
-      }
-      return B._setArrayType([], type$.JSArray_String);
     },
     AgentUI: function AgentUI(t0, t1, t2) {
       var _ = this;
       _.conversationManager = t0;
       _.__AgentUI_userCommandHandler_F = _.__AgentUI_userInput_F = _.__AgentUI__prompt_F = _.__AgentUI__outputController_F = _.__AgentUI__messages_F = _.__AgentUI__configModelBtn_F = _.__AgentUI__actionBtn_F = _.__AgentUI__exportPdfBtn_F = _.__AgentUI__toggleLogBtn_F = _.__AgentUI_systemOutput_F = _.__AgentUI_modelThinkingStreamOutput_F = _.__AgentUI_modelStreamOutput_F = _.__AgentUI_modelOutput_F = _.__AgentUI_userOutput_F = $;
-      _._promptHistory = t1;
-      _._historyCursor = 0;
-      _._historyDraft = "";
+      _._history = t1;
       _._agentConfCtrlr = t2;
       _._token = _.__agent_ui$_current = null;
     },
@@ -23613,7 +23785,7 @@
     _renderMarkdown(text, font, fontBold, fontMono) {
       var nodes, t1, t2, exception, _null = null;
       try {
-        t1 = B.Document$(_null, true, _null, _null, _null, _null, true, true);
+        t1 = B.Document$(_null, true, $.$get$ExtensionSet_gitHubFlavored(), _null, _null, _null, true, true);
         t2 = type$.MappedListIterable_String_Line;
         t2 = B.List_List$_of(new B.MappedListIterable(type$.List_String._as(B._setArrayType(text.split("\n"), type$.JSArray_String)), type$.Line_Function_String._as(B.line_Line___new_tearOff$closure()), t2), t2._eval$1("ListIterable.E"));
         nodes = t1.parseLineList$1(t2);
@@ -23644,7 +23816,7 @@
     },
     _isBlock(node) {
       if (node instanceof B.Element)
-        return A.Set_fmwJh.contains$1(0, node.tag);
+        return A.Set_z3PW.contains$1(0, node.tag);
       return false;
     },
     _convertNode(node, font, fontBold, fontMono, listMarker) {
@@ -23703,13 +23875,15 @@
             return B.Column$(B.List_List$generate(J.get$length$asx(children), new B._convertNode_closure3(t1 === "ol", children, font, fontBold, fontMono), type$.Widget), A.CrossAxisAlignment_0);
           case "code":
             t1 = B.BoxDecoration$(_null, A.BorderRadius_nnp, A.PdfColor_d9F);
-            return B.Container$(_null, B.Text$(B._decodeHtml(node.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, fontMono, _null, _null, A.List_empty14, _null, _null, 10, _null, _null, _null, true, _null, _null, _null, _null)), t1, _null, A.EdgeInsets_4_2_4_2, _null);
+            return B.Container$(_null, B.Text$(B._decodeHtml(node.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, fontMono, _null, _null, A.List_empty14, _null, _null, 10, _null, _null, _null, true, _null, _null, _null, _null)), _null, t1, _null, A.EdgeInsets_4_2_4_2, _null);
           case "pre":
             t1 = new B.BorderSide(A.PdfColor_HvE, 1, A.BorderStyle_true);
             t1 = B.BoxDecoration$(new B.Border(t1, t1, t1, t1), A.BorderRadius_QxF, A.PdfColor_RO8);
-            return B.Container$(_null, B.Text$(B._decodeHtml(node.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, fontMono, _null, _null, A.List_empty14, _null, _null, 9, _null, _null, 1.2, true, _null, _null, _null, _null)), t1, A.EdgeInsets_0_8_0_8, A.EdgeInsets_10_10_10_10, 1 / 0);
+            return B.Container$(_null, B.Text$(B._decodeHtml(node.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, fontMono, _null, _null, A.List_empty14, _null, _null, 9, _null, _null, 1.2, true, _null, _null, _null, _null)), _null, t1, A.EdgeInsets_0_8_0_8, A.EdgeInsets_10_10_10_10, 1 / 0);
           case "blockquote":
-            return B.Container$(_null, B.Column$(B._renderNodes(node.children, font, fontBold, fontMono), A.CrossAxisAlignment_0), A.BoxDecoration_OJh, A.EdgeInsets_0_8_0_8, A.EdgeInsets_12_4_0_4, _null);
+            return B.Container$(_null, B.Column$(B._renderNodes(node.children, font, fontBold, fontMono), A.CrossAxisAlignment_0), _null, A.BoxDecoration_OJh, A.EdgeInsets_0_8_0_8, A.EdgeInsets_12_4_0_4, _null);
+          case "table":
+            return B._buildTable(node, font, fontBold, fontMono);
           default:
             t1 = node.children;
             if (t1 != null)
@@ -23717,6 +23891,77 @@
         }
       }
       return B.Text$(B._decodeHtml(node.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, font, _null, _null, A.List_empty14, _null, _null, 11, _null, _null, _null, true, _null, _null, _null, _null));
+    },
+    _buildTable(tableNode, font, fontBold, fontMono) {
+      var section, isHeader, t2, child, maxCols, _i, t3, cellCount, isFirstCol, columnWidths, i, tableRows, rowIndex, _1_0, t4, cells, rowBg, pdfCells, cell, isFirstCol0, cellFont, cellContent, t5, t6, _null = null,
+        rows = B._setArrayType([], type$.JSArray_Record_2_Element_and_bool),
+        t1 = tableNode.children;
+      t1 = J.get$iterator$ax(t1 == null ? [] : t1);
+      while (t1.moveNext$0()) {
+        section = t1.get$current();
+        if (!(section instanceof B.Element))
+          continue;
+        isHeader = section.tag === "thead";
+        t2 = section.children;
+        t2 = J.get$iterator$ax(t2 == null ? [] : t2);
+        while (t2.moveNext$0()) {
+          child = t2.get$current();
+          if (child instanceof B.Element && child.tag === "tr")
+            A.JSArray_methods.add$1(rows, new B._Record_2(child, isHeader));
+        }
+      }
+      t1 = rows.length;
+      if (t1 === 0)
+        return B.Text$(B._decodeHtml(tableNode.get$textContent()), B.TextStyle$(_null, _null, _null, _null, _null, _null, font, _null, _null, A.List_empty14, _null, _null, 11, _null, _null, _null, true, _null, _null, _null, _null));
+      for (t2 = type$.Element, maxCols = 0, _i = 0; _i < rows.length; rows.length === t1 || (0, B.throwConcurrentModificationError)(rows), ++_i) {
+        t3 = rows[_i]._0.children;
+        cellCount = t3 == null ? _null : J.whereType$1$0$ax(t3, t2).get$length(0);
+        if (cellCount == null)
+          cellCount = 0;
+        if (cellCount > maxCols)
+          maxCols = cellCount;
+      }
+      isFirstCol = maxCols === 2;
+      if (isFirstCol)
+        columnWidths = A.Map_bpo4S;
+      else {
+        t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.int, type$.TableColumnWidth);
+        for (i = 0; i < maxCols; ++i)
+          t1.$indexSet(0, i, A.C_FlexColumnWidth);
+        columnWidths = t1;
+      }
+      tableRows = B._setArrayType([], type$.JSArray_TableRow);
+      for (t1 = type$.JSArray_Widget, t3 = type$.JSArray_Element, rowIndex = 0; rowIndex < rows.length; ++rowIndex) {
+        _1_0 = rows[rowIndex];
+        isHeader = _1_0._1;
+        t4 = _1_0._0.children;
+        if (t4 == null)
+          cells = _null;
+        else {
+          t4 = J.whereType$1$0$ax(t4, t2);
+          t4 = B.List_List$_of(t4, t4.$ti._eval$1("Iterable.E"));
+          cells = t4;
+        }
+        if (cells == null)
+          cells = B._setArrayType([], t3);
+        if (isHeader)
+          rowBg = A.PdfColor_HvE;
+        else
+          rowBg = (rowIndex & 1) === 0 ? A.PdfColor_1_1_1_1 : A.PdfColor_RO8;
+        pdfCells = B._setArrayType([], t1);
+        for (t4 = !isHeader, i = 0; i < cells.length; ++i) {
+          cell = cells[i];
+          isFirstCol0 = i === 0 && isFirstCol;
+          cellFont = !t4 || isFirstCol0 ? fontBold : font;
+          cellContent = B._renderNodes(cell.children, cellFont, fontBold, fontMono);
+          t5 = new B.BorderSide(A.PdfColor_DNt, 0.5, A.BorderStyle_true);
+          t6 = cellContent.length === 0 ? B._setArrayType([B.Text$("", B.TextStyle$(_null, _null, _null, _null, _null, _null, cellFont, _null, _null, A.List_empty14, _null, _null, 10, _null, _null, _null, true, _null, _null, _null, _null))], t1) : cellContent;
+          A.JSArray_methods.add$1(pdfCells, B.Container$(_null, new B.Column(A.Axis_1, A.MainAxisAlignment_0, A.MainAxisSize_1, A.CrossAxisAlignment_0, A.VerticalDirection_1, new B.FlexContext(), t6), rowBg, new B.BoxDecoration(_null, new B.Border(t5, t5, t5, t5), _null), _null, A.EdgeInsets_6_4_6_4, _null));
+        }
+        A.JSArray_methods.add$1(tableRows, new B.TableRow(pdfCells));
+      }
+      t1 = type$.JSArray_double;
+      return new B.Padding(A.EdgeInsets_0_8_0_8, new B.Table(tableRows, B._setArrayType([], t1), B._setArrayType([], t1), new B.TableContext(), columnWidths));
     },
     _convertInline(node, font, fontBold, fontMono) {
       var t1, t2, href, link, _null = null;
@@ -23897,6 +24142,18 @@
     },
     _wrap_closure: function _wrap_closure(t0) {
       this.label = t0;
+    },
+    PromptHistory$() {
+      var t1 = new B.PromptHistory(B._setArrayType([], type$.JSArray_String));
+      t1.PromptHistory$0();
+      return t1;
+    },
+    PromptHistory: function PromptHistory(t0) {
+      this._promptHistory = t0;
+      this._historyCursor = -1;
+      this._historyDraft = "";
+    },
+    PromptHistory_closure: function PromptHistory_closure() {
     },
     initializeToolSets(config, secrets) {
       var $async$goto = 0,
@@ -28841,19 +29098,19 @@
     call$1(o) {
       return this.getTag(o);
     },
-    $signature: 36
+    $signature: 35
   };
   B.initHooks_closure0.prototype = {
     call$2(o, tag) {
       return this.getUnknownTag(o, tag);
     },
-    $signature: 123
+    $signature: 126
   };
   B.initHooks_closure1.prototype = {
     call$1(tag) {
       return this.prototypeForTag(B._asString(tag));
     },
-    $signature: 52
+    $signature: 51
   };
   B._Record.prototype = {
     get$runtimeType(_) {
@@ -29473,19 +29730,19 @@
       t2 = this.span;
       t1.firstChild ? t1.removeChild(t2) : t1.appendChild(t2);
     },
-    $signature: 122
+    $signature: 125
   };
   B._AsyncRun__scheduleImmediateJsOverride_internalCallback.prototype = {
     call$0() {
       this.callback.call$0();
     },
-    $signature: 1
+    $signature: 2
   };
   B._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback.prototype = {
     call$0() {
       this.callback.call$0();
     },
-    $signature: 1
+    $signature: 2
   };
   B._TimerImpl.prototype = {
     _TimerImpl$2(milliseconds, callback) {
@@ -29548,13 +29805,13 @@
     call$2(error, stackTrace) {
       this.bodyFunction.call$2(1, new B.ExceptionAndStackTrace(error, type$.StackTrace._as(stackTrace)));
     },
-    $signature: 217
+    $signature: 248
   };
   B._wrapJsFunctionForAsync_closure.prototype = {
     call$2(errorCode, result) {
       this.$protected(B._asInt(errorCode), result);
     },
-    $signature: 313
+    $signature: 323
   };
   B._asyncStarHelper_closure.prototype = {
     call$0() {
@@ -29590,7 +29847,7 @@
     call$0() {
       B.scheduleMicrotask(new B._AsyncStarStreamController__resumeBody_closure(this.body));
     },
-    $signature: 1
+    $signature: 2
   };
   B._AsyncStarStreamController__resumeBody_closure.prototype = {
     call$0() {
@@ -29628,7 +29885,7 @@
         return t1.cancelationFuture;
       }
     },
-    $signature: 92
+    $signature: 97
   };
   B._AsyncStarStreamController__closure.prototype = {
     call$0() {
@@ -30477,7 +30734,7 @@
       type$.StackTrace._as(s);
       this.joinedResult._completeErrorObject$1(new B.AsyncError(e, s));
     },
-    $signature: 12
+    $signature: 13
   };
   B._Future__propagateToListeners_handleValueCallback.prototype = {
     call$0() {
@@ -30577,7 +30834,7 @@
         this._future._completeErrorObject$1(new B.AsyncError(e, s));
       }
     },
-    $signature: 12
+    $signature: 13
   };
   B._AsyncCallbackEntry.prototype = {};
   B.Stream.prototype = {
@@ -30777,7 +31034,7 @@
   B.Stream_forEach__closure0.prototype = {
     call$1(__wc0_formal) {
     },
-    $signature: 218
+    $signature: 250
   };
   B.Stream_length_closure.prototype = {
     call$1(__wc0_formal) {
@@ -31109,13 +31366,13 @@
       t1._addError$2(B._asObject(e), type$.StackTrace._as(s));
       t1._close$0();
     },
-    $signature: 12
+    $signature: 13
   };
   B._AddStreamState_cancel_closure.prototype = {
     call$0() {
       this.$this.addStreamFuture._asyncComplete$1(null);
     },
-    $signature: 1
+    $signature: 2
   };
   B._StreamControllerAddStreamState.prototype = {};
   B._BufferingStreamSubscription.prototype = {
@@ -31378,13 +31635,13 @@
       else
         t1._completeErrorObject$1(new B.AsyncError(error, stackTrace));
     },
-    $signature: 12
+    $signature: 13
   };
   B._BufferingStreamSubscription_asFuture__closure.prototype = {
     call$0() {
       this.result._completeErrorObject$1(new B.AsyncError(this.error, this.stackTrace));
     },
-    $signature: 1
+    $signature: 2
   };
   B._BufferingStreamSubscription__sendError_sendError.prototype = {
     call$0() {
@@ -32412,7 +32669,7 @@
     call$1(v) {
       return this.K._is(v);
     },
-    $signature: 38
+    $signature: 37
   };
   B._HashMapKeyIterable.prototype = {
     get$length(_) {
@@ -32493,7 +32750,7 @@
     call$1(v) {
       return this.K._is(v);
     },
-    $signature: 38
+    $signature: 37
   };
   B._LinkedHashSet.prototype = {
     _newSimilarSet$1$0($R) {
@@ -32705,7 +32962,7 @@
     call$2(k, v) {
       this.result.$indexSet(0, this.K._as(k), this.V._as(v));
     },
-    $signature: 121
+    $signature: 124
   };
   B.ListBase.prototype = {
     get$iterator(receiver) {
@@ -33107,7 +33364,7 @@
       t2 = B.S(v);
       t1._contents += t2;
     },
-    $signature: 40
+    $signature: 39
   };
   B._MapBaseValueIterable.prototype = {
     get$length(_) {
@@ -33172,6 +33429,9 @@
     },
     clear$0(_) {
       throw B.wrapException(B.UnsupportedError$("Cannot modify unmodifiable map"));
+    },
+    remove$1(_, key) {
+      throw B.wrapException(B.UnsupportedError$("Cannot modify unmodifiable map"));
     }
   };
   B.MapView.prototype = {
@@ -33208,6 +33468,9 @@
     },
     get$keys() {
       return this._collection$_map.get$keys();
+    },
+    remove$1(_, key) {
+      return this._collection$_map.remove$1(0, key);
     },
     toString$0(_) {
       return this._collection$_map.toString$0(0);
@@ -33521,7 +33784,7 @@
       map._original = t1;
       return map;
     },
-    $signature: 36
+    $signature: 35
   };
   B._JsonMap.prototype = {
     $index(_, key) {
@@ -33651,7 +33914,7 @@
     call$1(each) {
       return this.$this.$index(0, B._asString(each));
     },
-    $signature: 52
+    $signature: 51
   };
   B._JsonMapKeyIterable.prototype = {
     get$length(_) {
@@ -33706,7 +33969,7 @@
       }
       return null;
     },
-    $signature: 88
+    $signature: 83
   };
   B._Utf8Decoder__decoderNonfatal_closure.prototype = {
     call$0() {
@@ -33718,7 +33981,7 @@
       }
       return null;
     },
-    $signature: 88
+    $signature: 83
   };
   B.AsciiCodec.prototype = {
     get$name() {
@@ -34207,7 +34470,7 @@
     call$1(sink) {
       return new B._ConverterStreamEventSink(sink, this.$this.startChunkedConversion$1(sink), type$._ConverterStreamEventSink_dynamic_dynamic);
     },
-    $signature: 124
+    $signature: 132
   };
   B.Encoding.prototype = {
     decodeStream$1(byteStream) {
@@ -34221,14 +34484,14 @@
       buffer._contents += B._asString(string);
       return buffer;
     },
-    $signature: 169
+    $signature: 173
   };
   B.Encoding_decodeStream_closure0.prototype = {
     call$1(buffer) {
       var t1 = type$.StringBuffer._as(buffer)._contents;
       return t1.charCodeAt(0) == 0 ? t1 : t1;
     },
-    $signature: 171
+    $signature: 175
   };
   B.HtmlEscapeMode.prototype = {
     toString$0(_) {
@@ -34595,7 +34858,7 @@
       A.JSArray_methods.$indexSet(t1, t2.i++, key);
       A.JSArray_methods.$indexSet(t1, t2.i++, value);
     },
-    $signature: 40
+    $signature: 39
   };
   B._JsonPrettyPrintMixin.prototype = {
     writeList$1(list) {
@@ -34659,7 +34922,7 @@
       A.JSArray_methods.$indexSet(t1, t2.i++, key);
       A.JSArray_methods.$indexSet(t1, t2.i++, value);
     },
-    $signature: 40
+    $signature: 39
   };
   B._JsonStringStringifier.prototype = {
     get$_partialResult() {
@@ -34898,7 +35161,7 @@
       type$.EventSink_String._as(sink);
       return new B._LineSplitterEventSink(sink, new B._StringAdapterSink(sink));
     },
-    $signature: 188
+    $signature: 197
   };
   B._LineSplitterSink.prototype = {
     addSlice$4(chunk, start, end, isLast) {
@@ -35609,7 +35872,7 @@
       t1._contents += t3;
       t2.comma = ", ";
     },
-    $signature: 210
+    $signature: 220
   };
   B._Uri__makeQueryFromParameters_closure.prototype = {
     call$2(key, value) {
@@ -35637,7 +35900,7 @@
       var _this = this;
       return B.throwExpression(B.ArgumentError$("(" + _this.year + ", " + _this.month + ", " + _this.day + ", " + _this.hour + ", " + _this.minute + ", " + _this.second + ", " + _this.millisecond + ", " + _this.microsecond + ")", null));
     },
-    $signature: 50
+    $signature: 80
   };
   B.DateTime.prototype = {
     _addMicroseconds$1(durationMicroseconds) {
@@ -35725,7 +35988,7 @@
         return 0;
       return B.int_parse(matched, null);
     },
-    $signature: 83
+    $signature: 50
   };
   B.DateTime_parse_parseMilliAndMicroseconds.prototype = {
     call$1(matched) {
@@ -35742,7 +36005,7 @@
       }
       return result;
     },
-    $signature: 83
+    $signature: 50
   };
   B.Duration.prototype = {
     get$inSeconds() {
@@ -36498,13 +36761,13 @@
       }
       return map;
     },
-    $signature: 314
+    $signature: 324
   };
   B.Uri_parseIPv6Address_error.prototype = {
     call$2(msg, position) {
       throw B.wrapException(B.FormatException$("Illegal IPv6 address, " + msg, this.host, position));
     },
-    $signature: 329
+    $signature: 347
   };
   B._Uri.prototype = {
     get$_text() {
@@ -36831,7 +37094,7 @@
     call$1(s) {
       return B._Uri__uriEncode(64, B._asString(s), A.C_Utf8Codec, false);
     },
-    $signature: 2
+    $signature: 1
   };
   B._Uri__makeQueryFromParametersDefault_writeParameter.prototype = {
     call$2(key, value) {
@@ -36847,7 +37110,7 @@
         t1._contents += t2;
       }
     },
-    $signature: 339
+    $signature: 367
   };
   B._Uri__makeQueryFromParametersDefault_closure.prototype = {
     call$2(key, value) {
@@ -37239,7 +37502,7 @@
       } else
         return o;
     },
-    $signature: 344
+    $signature: 93
   };
   B.promiseToFuture_closure.prototype = {
     call$1(r) {
@@ -37335,7 +37598,7 @@
     call$1(p) {
       return type$.StandardPart._as(p) instanceof B.ThinkingPart;
     },
-    $signature: 9
+    $signature: 10
   };
   B.Agent0.prototype = {
     get$name() {
@@ -37384,7 +37647,7 @@
       return value;
     },
     get$messages() {
-      var t1 = this._conversationManager._history,
+      var t1 = this._conversationManager._persistent_conversation_manager$_history,
         t2 = B._arrayInstanceType(t1);
       return new B.WhereIterable(t1, t2._eval$1("bool(1)")._as(new B.Agent_messages_closure()), t2._eval$1("WhereIterable<1>"));
     },
@@ -37424,7 +37687,7 @@
     invokeStream$body$Agent($prompt, token) {
       var $async$goto = 0,
         $async$completer = B._makeAsyncAwaitCompleter(type$.String),
-        $async$returnValue, $async$handler = 2, $async$errorStack = [], $async$next = [], $async$self = this, accumulator, sub, finalResult, ex, st, recovery, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, thinking, t12, exception, $async$exception;
+        $async$returnValue, $async$handler = 2, $async$errorStack = [], $async$next = [], $async$self = this, accumulator, sub, finalResult, ex, st, recovery, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, thinking, t11, exception, $async$exception;
       var $async$invokeStream$2$token = B._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1) {
           $async$errorStack.push($async$result);
@@ -37451,40 +37714,45 @@
               return B._asyncAwait(t8, $async$invokeStream$2$token);
             case 8:
               // returning from await.
-              t7 = type$.String;
-              t8 = type$.dynamic;
-              accumulator = new B.AgentResponseAccumulator0(B._setArrayType([], type$.JSArray_ChatMessage), new B.StringBuffer(""), new B.StringBuffer(""), B.LinkedHashMap_LinkedHashMap$_empty(t7, t8), t6, t5, B.ChatResult$(A.FinishReason_5, null, A.List_empty6, A.Map_empty3, "", null, null, t7));
+              t8 = type$.String;
+              t9 = type$.dynamic;
+              accumulator = new B.AgentResponseAccumulator0(B._setArrayType([], type$.JSArray_ChatMessage), new B.StringBuffer(""), new B.StringBuffer(""), B.LinkedHashMap_LinkedHashMap$_empty(t8, t9), t6, t5, B.ChatResult$(A.FinishReason_5, null, A.List_empty6, A.Map_empty3, "", null, null, t8));
               sub = B._Cell$named("sub");
-              t9 = $async$self._conversationManager;
-              sub._value = $async$self.get$agent().sendStream$2$history($prompt, t9._history).listen$3$onDone$onError(J.get$add$ax(accumulator), new B.Agent_invokeStream_closure1(), new B.Agent_invokeStream_closure2());
+              t5 = $async$self._conversationManager;
+              sub._value = $async$self.get$agent().sendStream$2$history($prompt, t5._persistent_conversation_manager$_history).listen$3$onDone$onError(J.get$add$ax(accumulator), new B.Agent_invokeStream_closure1(), new B.Agent_invokeStream_closure2());
+              t6 = sub._readLocal$0().asFuture$1$0(t9);
               t10 = token == null;
-              if (!t10)
-                token._canceler.future.then$1$1(new B.Agent_invokeStream_closure3(sub, accumulator), type$.Null);
-              t11 = sub._readLocal$0().asFuture$1$0(t8);
               $async$goto = 9;
-              return B._asyncAwait(B.Future_any(new B.WhereTypeIterable(B._setArrayType([t11, t10 ? null : token._canceler.future], type$.JSArray_nullable_Future_dynamic), type$.WhereTypeIterable_Future_dynamic), t8).catchError$1(new B.Agent_invokeStream_closure4()), $async$invokeStream$2$token);
+              return B._asyncAwait(B.Future_any(new B.WhereTypeIterable(B._setArrayType([t6, t10 ? null : token._canceler.future.then$1$1(new B.Agent_invokeStream_closure3(sub), t7)], type$.JSArray_nullable_Future_void), type$.WhereTypeIterable_Future_dynamic), t9), $async$invokeStream$2$token);
             case 9:
               // returning from await.
-              t8 = accumulator;
-              t11 = t8.__accumulator$_finalThinkingBuffer._contents;
-              thinking = t11.charCodeAt(0) == 0 ? t11 : t11;
-              t11 = t8.__accumulator$_finalResult;
-              t12 = t8.__accumulator$_finalOutputBuffer._contents;
-              t10 = thinking.length === 0 ? null : thinking;
-              finalResult = B.ChatResult$(t11.finishReason, t11.id, t8.__accumulator$_allNewMessages, t8.__accumulator$_accumulatedMetadata, t12.charCodeAt(0) == 0 ? t12 : t12, t10, t11.usage, t7);
+              t6 = accumulator;
+              t7 = t6.__accumulator$_finalThinkingBuffer._contents;
+              thinking = t7.charCodeAt(0) == 0 ? t7 : t7;
+              t7 = t6.__accumulator$_finalResult;
+              t9 = t6.__accumulator$_finalOutputBuffer._contents;
+              t11 = thinking.length === 0 ? null : thinking;
+              finalResult = B.ChatResult$(t7.finishReason, t7.id, t6.__accumulator$_allNewMessages, t6.__accumulator$_accumulatedMetadata, t9.charCodeAt(0) == 0 ? t9 : t9, t11, t7.usage, t8);
               $async$goto = 10;
-              return B._asyncAwait(t9.register$1(finalResult), $async$invokeStream$2$token);
+              return B._asyncAwait(t5.register$1(finalResult), $async$invokeStream$2$token);
             case 10:
               // returning from await.
-              t5.finish$0();
-              t6.finish$0();
               t4.append$1(finalResult.output);
-              t4 = finalResult.output;
-              $async$returnValue = t4;
-              $async$next = [1];
-              // goto finally
-              $async$goto = 5;
-              break;
+              if (!t10 && token._cancelable_token$_exception != null) {
+                t4 = token._cancelable_token$_exception;
+                t4 = t4 == null ? null : t4.message;
+                if (t4 == null)
+                  t4 = "Cancelled at your request.";
+                t5 = A.JSString_methods.trim$0(finalResult.output);
+                throw B.wrapException(new B.UserCancellationException(t5, t4));
+              } else {
+                t4 = finalResult.output;
+                $async$returnValue = t4;
+                $async$next = [1];
+                // goto finally
+                $async$goto = 5;
+                break;
+              }
               $async$next.push(6);
               // goto finally
               $async$goto = 5;
@@ -37580,7 +37848,7 @@
     call$1(t) {
       return type$.Tool_Object._as(t).name;
     },
-    $signature: 51
+    $signature: 45
   };
   B.Agent_messages_closure.prototype = {
     call$1(m) {
@@ -37599,19 +37867,19 @@
     call$0() {
       return "[" + this.$this.get$name() + "] RECEIVED PROMPT: " + this.prompt;
     },
-    $signature: 7
+    $signature: 8
   };
   B.Agent_invokeStream_closure0.prototype = {
     call$0() {
       return "[" + this.$this.get$name() + "] PROCESSING PROMPT " + this.prompt;
     },
-    $signature: 7
+    $signature: 8
   };
   B.Agent_invokeStream_closure2.prototype = {
     call$2(ex, st) {
       B.print(B.S(ex) + " @ " + B.S(st));
     },
-    $signature: 17
+    $signature: 25
   };
   B.Agent_invokeStream_closure1.prototype = {
     call$0() {
@@ -37622,16 +37890,9 @@
   B.Agent_invokeStream_closure3.prototype = {
     call$1(__wc0_formal) {
       type$.CanceledException._as(__wc0_formal);
-      this.sub._readLocal$0().cancel$0();
-      this.accumulator.add$1(0, B.ChatResult$(A.FinishReason_0, null, A.List_empty6, A.Map_empty3, "User cancelled.", null, null, type$.String));
+      return this.sub._readLocal$0().cancel$0();
     },
-    $signature: 130
-  };
-  B.Agent_invokeStream_closure4.prototype = {
-    call$2(ex, st) {
-      B.print(B.S(ex) + " @ " + B.S(st));
-    },
-    $signature: 17
+    $signature: 133
   };
   B.AgentConfiguration.prototype = {
     AgentConfiguration$8$apiKeyName$displayName$instructor$mcp$modelInfo$role$roots$secrets(apiKeyName, displayName, instructor, mcp, modelInfo, role, roots, secrets) {
@@ -37705,31 +37966,31 @@
     call$0() {
       return B.CohereProvider$(this.apiKey, A.Map_empty1);
     },
-    $signature: 131
+    $signature: 135
   };
   B.AgentConfiguration__setupCustomProvider_closure0.prototype = {
     call$0() {
       return B.GoogleProvider$(this.apiKey, null, A.Map_empty1);
     },
-    $signature: 133
+    $signature: 137
   };
   B.AgentConfiguration__setupCustomProvider_closure1.prototype = {
     call$0() {
       return B.MistralProvider$(this.apiKey, A.Map_empty1);
     },
-    $signature: 135
+    $signature: 144
   };
   B.AgentConfiguration__setupCustomProvider_closure2.prototype = {
     call$0() {
       return B.OpenAIProvider$(A.List_empty3, this.apiKey, "OPENAI_API_KEY", null, A.Map_jHFMB, "OpenAI", A.Map_empty1, "openai");
     },
-    $signature: 142
+    $signature: 146
   };
   B.AgentConfiguration__setupCustomProvider_closure3.prototype = {
     call$0() {
       return B.OpenAIResponsesProvider$(A.List_empty3, this.apiKey, null, A.Map_empty1);
     },
-    $signature: 144
+    $signature: 157
   };
   B.InteractiveAgent.prototype = {
     interactWithUser$2$handleUserCommand$tokenFactory(handleUserCommand, tokenFactory) {
@@ -37773,7 +38034,7 @@
       cmd = this.handleUserCommand.call$2(label, args);
       return new B._Record_2(cmd == null ? this.$this.commandRegistry.lookup$1(label) : cmd, args);
     },
-    $signature: 155
+    $signature: 166
   };
   B.InteractiveAgent_interactWithUser_$handleUserInput.prototype = {
     call$0() {
@@ -37928,6 +38189,7 @@
     },
     $signature: 23
   };
+  B.UserCancellationException.prototype = {};
   B.HttpChannel.prototype = {
     get$sink() {
       return this._http_channel$_input;
@@ -37966,17 +38228,23 @@
           switch ($async$goto) {
             case 0:
               // Function start
-              $async$goto = ($async$self._pendingOperation.future._state & 30) === 0 ? 3 : 4;
-              break;
             case 3:
-              // then
+              // while condition
+              if (!(($async$self._pendingOperation.future._state & 30) === 0)) {
+                // goto after while
+                $async$goto = 4;
+                break;
+              }
               B.trace("AWAITING PENDING OPERATION...");
               $async$goto = 5;
               return B._asyncAwait($async$self._pendingOperation.future, $async$_http_channel$_process$1);
             case 5:
               // returning from await.
+              // goto while condition
+              $async$goto = 3;
+              break;
             case 4:
-              // join
+              // after while
               t1 = type$._Future_void;
               $async$self._pendingOperation = new B._AsyncCompleter(new B._Future($.Zone__current, t1), type$._AsyncCompleter_void);
               t2 = type$.String;
@@ -38218,13 +38486,13 @@
     call$1(v) {
       return B._asString(v) + "\n" + this.value;
     },
-    $signature: 2
+    $signature: 1
   };
   B.HttpChannel__eventStream_closure0.prototype = {
     call$0() {
       return this.value;
     },
-    $signature: 7
+    $signature: 8
   };
   B._HttpChannel_Object_StreamChannelMixin.prototype = {};
   B.DbgClient.prototype = {
@@ -38416,14 +38684,14 @@
       type$.MapEntry_String_String._as(e);
       return "[" + this.id + "]   > " + e.key + ": " + e.value;
     },
-    $signature: 70
+    $signature: 69
   };
   B.DbgClient__traceResponse_closure.prototype = {
     call$1(e) {
       type$.MapEntry_String_String._as(e);
       return "[" + this.id + "]   < " + e.key + ": " + e.value;
     },
-    $signature: 70
+    $signature: 69
   };
   B._DbgClient_Object_BaseClient.prototype = {};
   B.Command.prototype = {
@@ -38490,13 +38758,13 @@
       t1._as(b);
       return A.JSString_methods.compareTo$1(a.get$name(), b.get$name());
     },
-    $signature: 173
+    $signature: 180
   };
   B.HelpCommand_handle_closure0.prototype = {
     call$1(a) {
       return "/" + B._asString(a);
     },
-    $signature: 2
+    $signature: 1
   };
   B.HistoryCommand.prototype = {
     get$name() {
@@ -38508,7 +38776,7 @@
     handle$2(agent, args) {
       var t1, t2, t3;
       type$.List_String._as(args);
-      for (t1 = agent._conversationManager._history, t2 = B._arrayInstanceType(t1), t3 = t2._eval$1("bool(1)")._as(new B.HistoryCommand_handle_closure()), t1 = A.JSArray_methods.get$iterator(t1), t2 = new B.WhereIterator(t1, t3, t2._eval$1("WhereIterator<1>")), t3 = "Full conversation history:\n---\n"; t2.moveNext$0();)
+      for (t1 = agent._conversationManager._persistent_conversation_manager$_history, t2 = B._arrayInstanceType(t1), t3 = t2._eval$1("bool(1)")._as(new B.HistoryCommand_handle_closure()), t1 = A.JSArray_methods.get$iterator(t1), t2 = new B.WhereIterator(t1, t3, t2._eval$1("WhereIterator<1>")), t3 = "Full conversation history:\n---\n"; t2.moveNext$0();)
         t3 += B.ChatMessageDbgExt_dump(t1.get$current()) + "\n";
       t1 = t3 + "---\n";
       t2 = this.output;
@@ -38575,7 +38843,7 @@
               return B._asyncAwait(agent.summarizeConversation$0(), $async$handle$2);
             case 3:
               // returning from await.
-              for (t1 = agent._conversationManager._history, t4 = B._arrayInstanceType(t1), t5 = t4._eval$1("bool(1)")._as(new B.SummarizeCommand_handle_closure()), t1 = A.JSArray_methods.get$iterator(t1), t4 = new B.WhereIterator(t1, t5, t4._eval$1("WhereIterator<1>")), t5 = "Summarized conversation:\n---\n"; t4.moveNext$0();)
+              for (t1 = agent._conversationManager._persistent_conversation_manager$_history, t4 = B._arrayInstanceType(t1), t5 = t4._eval$1("bool(1)")._as(new B.SummarizeCommand_handle_closure()), t1 = A.JSArray_methods.get$iterator(t1), t4 = new B.WhereIterator(t1, t5, t4._eval$1("WhereIterator<1>")), t5 = "Summarized conversation:\n---\n"; t4.moveNext$0();)
                 t5 += B.ChatMessageDbgExt_dump(t1.get$current()) + "\n";
               t1 = t5 + "---\n";
               t2 = t3._as(t2.get$add(t2));
@@ -38635,14 +38903,14 @@
       type$.StandardPart._as(p);
       return !(p instanceof B.ToolPart || p instanceof B.ThinkingPart);
     },
-    $signature: 9
+    $signature: 10
   };
   B.ConversationManager.prototype = {};
   B.PersistentConversationManager.prototype = {
     _register$1(message) {
       type$.nullable_ChatMessage._as(message);
       if (message != null) {
-        A.JSArray_methods.add$1(this._history, message);
+        A.JSArray_methods.add$1(this._persistent_conversation_manager$_history, message);
         A.JSArray_methods.add$1(this._checkpoints, this._uniqueId.string$0());
       }
     },
@@ -38662,7 +38930,7 @@
                 $async$goto = 1;
                 break;
               }
-              t1 = $async$self._history;
+              t1 = $async$self._persistent_conversation_manager$_history;
               t2 = B._arrayInstanceType(t1);
               t3 = t2._eval$1("MappedListIterable<1,Map<String,Object?>>");
               t1 = B.List_List$_of(new B.MappedListIterable(t1, t2._eval$1("Map<String,Object?>(1)")._as(new B.PersistentConversationManager__save_closure()), t3), t3._eval$1("ListIterable.E"));
@@ -38692,7 +38960,7 @@
             case 0:
               // Function start
               conversationId = $async$self._uniqueId.next$0();
-              A.JSArray_methods.clear$0($async$self._history);
+              A.JSArray_methods.clear$0($async$self._persistent_conversation_manager$_history);
               A.JSArray_methods.clear$0($async$self._checkpoints);
               $async$self._register$1(systemInstructions);
               $async$self._conversationId = conversationId;
@@ -38739,7 +39007,7 @@
                 // returning from await.
               case 4:
                 // join
-                for (t1 = $async$self._history, i = t1.length - 1, t2 = $async$self._checkpoints; i >= 0; --i) {
+                for (t1 = $async$self._persistent_conversation_manager$_history, i = t1.length - 1, t2 = $async$self._checkpoints; i >= 0; --i) {
                   if (!(i < t1.length)) {
                     $async$returnValue = B.ioore(t1, i);
                     // goto return
@@ -38810,7 +39078,7 @@
     },
     compact$0() {
       var t1, i, t2;
-      for (t1 = this._history, i = t1.length - 1, t2 = this._checkpoints; i >= 0; --i) {
+      for (t1 = this._persistent_conversation_manager$_history, i = t1.length - 1, t2 = this._checkpoints; i >= 0; --i) {
         if (!(i < t1.length))
           return B.ioore(t1, i);
         A.JSArray_methods.$indexSet(t1, i, B.ChatMessageExt_compact(t1[i]));
@@ -38827,7 +39095,7 @@
     call$1(m) {
       return type$.ChatMessage._as(m).toJson$0();
     },
-    $signature: 179
+    $signature: 187
   };
   B.PersistentFileSystem.prototype = {$isFileSystem: 1};
   B.FileSystem_normalizePath_closure.prototype = {
@@ -38843,6 +39111,27 @@
       var t1 = this._secrets.$index(0, key.toLowerCase());
       return t1 == null ? "" : t1;
     }
+  };
+  B.JsonToMarkdownConverter_convert_closure.prototype = {
+    call$1(__wc0_formal) {
+      B._asString(__wc0_formal);
+      return "---";
+    },
+    $signature: 1
+  };
+  B.JsonToMarkdownConverter_convert_closure0.prototype = {
+    call$1(key) {
+      var t1,
+        value = this.row.$index(0, B._asString(key));
+      if (value == null)
+        t1 = "";
+      else {
+        t1 = J.toString$0$(value);
+        t1 = A.JSString_methods.trim$0(B.stringReplaceAllUnchecked(t1, "|", "\\|"));
+      }
+      return t1;
+    },
+    $signature: 1
   };
   B.McpToolSet.prototype = {
     initialize$1$toolsAcl(toolsAcl) {
@@ -38911,7 +39200,7 @@
                 inputSchema = t5._as(t10.$index(0, "inputSchema"));
                 if (inputSchema == null)
                   B.throwExpression(B.ArgumentError$("Missing inputSchema field in " + A.Type_Map_9Aj.toString$0(0), null));
-                t10 = t6._as(B.Tool$0(description, inputSchema, t7 + $name, $async$self._getHandlerFor$1(t10), t2));
+                t10 = t6._as(B.Tool$0(description, B.z__removeEmptyEnums(inputSchema), t7 + $name, $async$self._getHandlerFor$1(t10), t2));
                 t11 = t10.name;
                 if ($async$self.getTool$1(t11) != null)
                   B.throwExpression(B.StateError$("A tool is already registered for " + t11));
@@ -38942,7 +39231,7 @@
     $call$body$McpToolSet__getHandlerFor_closure(args) {
       var $async$goto = 0,
         $async$completer = B._makeAsyncAwaitCompleter(type$.Map_of_String_and_nullable_Object),
-        $async$returnValue, $async$handler = 2, $async$errorStack = [], $async$self = this, res, ex, st, message, t1, exception, $async$exception;
+        $async$returnValue, $async$handler = 2, $async$errorStack = [], $async$self = this, res, structured, table, _0_0, data, _1_0, _1_4, _1_4_isSet, data0, ex, st, t1, t2, t3, t4, _1_40, exception, $async$exception;
       var $async$call$1 = B._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1) {
           $async$errorStack.push($async$result);
@@ -38953,14 +39242,83 @@
             case 0:
               // Function start
               $async$handler = 4;
-              t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.nullable_Object);
-              t1.$indexSet(0, "name", $async$self.name);
-              t1.$indexSet(0, "arguments", args);
+              t1 = $async$self.name;
+              B.trace("Calling tool " + t1 + "...");
+              t2 = type$.String;
+              t3 = B.LinkedHashMap_LinkedHashMap$_empty(t2, type$.nullable_Object);
+              t3.$indexSet(0, "name", t1);
+              t3.$indexSet(0, "arguments", args);
               $async$goto = 7;
-              return B._asyncAwait($async$self.$this._connection.callTool$1(t1), $async$call$1);
+              return B._asyncAwait($async$self.$this._connection.callTool$1(t3), $async$call$1);
             case 7:
               // returning from await.
               res = $async$result;
+              B.trace("Tool " + t1 + " results: " + B.S(res));
+              t3 = res.containsKey$1("structuredContent");
+              if (t3) {
+                structured = B.McpToolSet__decodeIfNeeded(J.$index$asx(res, "structuredContent"));
+                if (structured != null) {
+                  table = null;
+                  _0_0 = structured;
+                  data = null;
+                  t3 = type$.List_dynamic;
+                  if (t3._is(_0_0)) {
+                    data = _0_0;
+                    table = B.JsonToMarkdownConverter_convert(data);
+                  } else {
+                    _1_0 = structured;
+                    _1_4 = null;
+                    _1_4_isSet = false;
+                    data0 = null;
+                    if (type$.Map_dynamic_dynamic._is(_1_0)) {
+                      if (_1_4_isSet)
+                        t4 = _1_4;
+                      else {
+                        _1_4_isSet = true;
+                        _1_40 = _1_0.$index(0, "content");
+                        _1_4 = _1_40;
+                        t4 = _1_40;
+                      }
+                      if (t4 == null)
+                        t4 = _1_0.containsKey$1("content");
+                      else
+                        t4 = true;
+                      if (t4)
+                        if (!_1_4_isSet) {
+                          _1_4_isSet = true;
+                          _1_4 = _1_0.$index(0, "content");
+                        }
+                    } else
+                      t4 = false;
+                    if (t4) {
+                      if (_1_4_isSet)
+                        data = _1_4;
+                      else {
+                        _1_4_isSet = true;
+                        _1_40 = _1_0.$index(0, "content");
+                        _1_4 = _1_40;
+                        data = _1_40;
+                      }
+                      data0 = data;
+                      data0 = B.McpToolSet__decodeIfNeeded(data0);
+                      if (t3._is(data0)) {
+                        table = B.JsonToMarkdownConverter_convert(data0);
+                        if (table != null) {
+                          structured.remove$1(0, "content");
+                          t3 = structured;
+                          if (t3.get$isNotEmpty(t3))
+                            table = A.C_JsonCodec.encode$2$toEncodable(structured, null) + "\n\n" + table;
+                        }
+                      }
+                    }
+                  }
+                  if (table != null) {
+                    J.remove$1$ax(res, "structuredContent");
+                    J.$indexSet$ax(res, "content", B.LinkedHashMap_LinkedHashMap$_literal(["type", "text", "text", table], t2, t2));
+                  }
+                }
+                B.trace("[EXPERIMENTAL] Tool " + t1 + " results: " + B.S(res));
+              }
               $async$returnValue = res;
               // goto return
               $async$goto = 1;
@@ -38975,9 +39333,9 @@
               $async$exception = $async$errorStack.pop();
               ex = B.unwrapException($async$exception);
               st = B.getTraceFromException($async$exception);
-              message = "Error executing " + $async$self.name + ": " + B.S(ex) + "\nStacktrace: " + B.S(st);
-              B.trace(message);
-              t1 = B.LinkedHashMap_LinkedHashMap$_literal(["error", message, "stacktrace", J.toString$0$(st)], type$.String, type$.nullable_Object);
+              t1 = "Error executing " + $async$self.name + ": ";
+              B.trace(t1 + B.S(ex) + "\nStacktrace: " + B.S(st));
+              t1 = B.LinkedHashMap_LinkedHashMap$_literal(["error", t1 + B.S(ex), "stacktrace", J.toString$0$(st)], type$.String, type$.nullable_Object);
               $async$returnValue = t1;
               // goto return
               $async$goto = 1;
@@ -39002,7 +39360,7 @@
       });
       return B._asyncStartSync($async$call$1, $async$completer);
     },
-    $signature: 186
+    $signature: 190
   };
   B.ToolSet.prototype = {
     get$tools() {
@@ -39029,13 +39387,13 @@
     call$1(t) {
       return type$.Tool_Object._as(t).name;
     },
-    $signature: 51
+    $signature: 45
   };
   B.ToolSet_getTool_closure.prototype = {
     call$1(t) {
       return type$.Tool_Object._as(t).name === this.name;
     },
-    $signature: 195
+    $signature: 203
   };
   B.EmptyToolSet.prototype = {
     get$names() {
@@ -39067,7 +39425,7 @@
     call$1(ts) {
       return type$.ToolSet._as(ts).get$tools();
     },
-    $signature: 201
+    $signature: 212
   };
   B.CombinedToolSet_names_closure.prototype = {
     call$1(ts) {
@@ -39102,54 +39460,37 @@
     call$1(l) {
       return "[" + this.$this.name + "] " + B._asString(l);
     },
-    $signature: 2
+    $signature: 1
   };
   B.trace_closure.prototype = {
     call$1(l) {
       return "[TRACE] " + B._asString(l);
     },
-    $signature: 2
+    $signature: 1
   };
   B.AccessControlList.prototype = {
     check$1($name) {
-      var t1;
-      if (A.JSArray_methods.any$1(this._blackList, new B.AccessControlList_check_closure($name)))
+      if (A.JSArray_methods.any$1(A.List_empty13, new B.AccessControlList_check_closure($name)))
         return false;
-      t1 = this._whiteList;
-      if (t1.length !== 0)
-        return A.JSArray_methods.any$1(t1, new B.AccessControlList_check_closure0($name));
       return true;
     },
     toString$0(_) {
-      var t2, _this = this, _s2_ = ", ",
-        t1 = _this._whiteList;
-      if (t1.length === 0) {
-        t1 = _this._blackList;
-        return t1.length === 0 ? B.getRuntimeTypeOfDartObject(_this).toString$0(0) + ": allow all" : B.getRuntimeTypeOfDartObject(_this).toString$0(0) + ": allow all except " + A.JSArray_methods.join$1(t1, _s2_);
-      } else {
-        t2 = _this._blackList;
-        return t2.length === 0 ? B.getRuntimeTypeOfDartObject(_this).toString$0(0) + ": only allow " + A.JSArray_methods.join$1(t1, _s2_) : B.getRuntimeTypeOfDartObject(_this).toString$0(0) + ": only allow " + A.JSArray_methods.join$1(t1, _s2_) + " unless " + A.JSArray_methods.join$1(t2, _s2_);
-      }
+      var t1 = B.getRuntimeTypeOfDartObject(this).toString$0(0);
+      return t1 + ": allow all";
     }
   };
   B.AccessControlList_check_closure.prototype = {
     call$1(p) {
       return !J.allMatches$1$s(type$.Pattern._as(p), this.name).get$isEmpty(0);
     },
-    $signature: 80
-  };
-  B.AccessControlList_check_closure0.prototype = {
-    call$1(p) {
-      return !J.allMatches$1$s(type$.Pattern._as(p), this.name).get$isEmpty(0);
-    },
-    $signature: 80
+    $signature: 214
   };
   B.ChatMessageDbgExt_dump_closure.prototype = {
     call$1(p) {
       type$.StandardPart._as(p);
       return "* part " + B.getRuntimeTypeOfDartObject(p).toString$0(0) + " = ```\n" + p.toJson$0().toString$0(0) + "\n```";
     },
-    $signature: 212
+    $signature: 219
   };
   B.Log.prototype = {
     append$1(message) {
@@ -39193,7 +39534,7 @@
     call$1(l) {
       return this.ts + " " + B._asString(l);
     },
-    $signature: 2
+    $signature: 1
   };
   B.UniqueIdGenerator.prototype = {
     next$0() {
@@ -39218,6 +39559,18 @@
     string$0() {
       return this.string$1(6);
     }
+  };
+  B.z__removeEmptyEnums_closure.prototype = {
+    call$1(e) {
+      return A.JSString_methods.trim$0(J.toString$0$(e)).length === 0;
+    },
+    $signature: 7
+  };
+  B.z__removeEmptyEnums_closure0.prototype = {
+    call$1(e) {
+      return A.JSString_methods.trim$0(J.toString$0$(e)).length !== 0;
+    },
+    $signature: 7
   };
   B.AuthCredentials.prototype = {};
   B.ApiKeyCredentials.prototype = {};
@@ -39376,13 +39729,13 @@
     call$1(e) {
       return B.Citation_Citation$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 246
+    $signature: 251
   };
   B.TextBlock_toJson_closure.prototype = {
     call$1(e) {
       return type$.Citation._as(e).toJson$0();
     },
-    $signature: 248
+    $signature: 256
   };
   B.ThinkingBlock.prototype = {
     toJson$0() {
@@ -39705,13 +40058,13 @@
       type$.Map_String_dynamic._as(e);
       return new B.WebSearchResultItem(B._asString(e.$index(0, "url")), B._asString(e.$index(0, "title")), B._asStringQ(e.$index(0, "encrypted_content")), B._asStringQ(e.$index(0, "page_age")));
     },
-    $signature: 249
+    $signature: 284
   };
   B.WebSearchResultSuccess_toJson_closure.prototype = {
     call$1(e) {
       return type$.WebSearchResultItem._as(e).toJson$0();
     },
-    $signature: 254
+    $signature: 292
   };
   B.WebSearchResultItem.prototype = {
     toJson$0() {
@@ -40049,7 +40402,7 @@
     call$1(e) {
       return B.LinkedHashMap_LinkedHashMap$_literal(["type", "text", "text", type$.ToolResultContent._as(e).text], type$.String, type$.dynamic);
     },
-    $signature: 282
+    $signature: 293
   };
   B.MessageContent.prototype = {};
   B.TextMessageContent.prototype = {
@@ -40102,7 +40455,7 @@
     call$1(e) {
       return type$.InputContentBlock._as(e).toJson$0();
     },
-    $signature: 290
+    $signature: 300
   };
   B.InputMessage.prototype = {
     toJson$0() {
@@ -40141,6 +40494,9 @@
       t2 = _this.stopReason;
       if (t2 != null)
         t1.$indexSet(0, "stop_reason", t2.value);
+      t2 = _this.stopDetails;
+      if (t2 != null)
+        t1.$indexSet(0, "stop_details", t2.toJson$0());
       t2 = _this.stopSequence;
       if (t2 != null)
         t1.$indexSet(0, "stop_sequence", t2);
@@ -40155,31 +40511,31 @@
       if (other == null)
         return false;
       if (_this !== other)
-        t1 = other instanceof B.Message && B.getRuntimeTypeOfDartObject(_this) === B.getRuntimeTypeOfDartObject(other) && _this.id === other.id && _this.type === other.type && _this.role === other.role && B.listsEqual(_this.content, other.content, type$.ContentBlock) && _this.model === other.model && _this.stopReason == other.stopReason && _this.stopSequence == other.stopSequence && _this.usage.$eq(0, other.usage) && J.$eq$(_this.container, other.container);
+        t1 = other instanceof B.Message && B.getRuntimeTypeOfDartObject(_this) === B.getRuntimeTypeOfDartObject(other) && _this.id === other.id && _this.type === other.type && _this.role === other.role && B.listsEqual(_this.content, other.content, type$.ContentBlock) && _this.model === other.model && _this.stopReason == other.stopReason && J.$eq$(_this.stopDetails, other.stopDetails) && _this.stopSequence == other.stopSequence && _this.usage.$eq(0, other.usage) && J.$eq$(_this.container, other.container);
       else
         t1 = true;
       return t1;
     },
     get$hashCode(_) {
       var _this = this;
-      return B.Object_hash(_this.id, _this.type, _this.role, B.listHash(_this.content, type$.ContentBlock), _this.model, _this.stopReason, _this.stopSequence, _this.usage, _this.container, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
+      return B.Object_hash(_this.id, _this.type, _this.role, B.listHash(_this.content, type$.ContentBlock), _this.model, _this.stopReason, _this.stopDetails, _this.stopSequence, _this.usage, _this.container, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
     },
     toString$0(_) {
       var _this = this;
-      return "Message(id: " + _this.id + ", type: " + _this.type + ", role: " + _this.role.toString$0(0) + ", content: " + B.S(_this.content) + ", model: " + _this.model + ", stopReason: " + B.S(_this.stopReason) + ", stopSequence: " + B.S(_this.stopSequence) + ", usage: " + _this.usage.toString$0(0) + ", container: " + B.S(_this.container) + ")";
+      return "Message(id: " + _this.id + ", type: " + _this.type + ", role: " + _this.role.toString$0(0) + ", content: " + B.S(_this.content) + ", model: " + _this.model + ", stopReason: " + B.S(_this.stopReason) + ", stopDetails: " + B.S(_this.stopDetails) + ", stopSequence: " + B.S(_this.stopSequence) + ", usage: " + _this.usage.toString$0(0) + ", container: " + B.S(_this.container) + ")";
     }
   };
   B.Message_Message$fromJson_closure.prototype = {
     call$1(e) {
       return B.ContentBlock_ContentBlock$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 291
+    $signature: 306
   };
   B.Message_toJson_closure.prototype = {
     call$1(e) {
       return type$.ContentBlock._as(e).toJson$0();
     },
-    $signature: 302
+    $signature: 312
   };
   B.SystemPrompt.prototype = {};
   B.TextSystemPrompt.prototype = {
@@ -40267,13 +40623,13 @@
     call$1(e) {
       return type$.InputMessage._as(e).toJson$0();
     },
-    $signature: 308
+    $signature: 315
   };
   B.MessageCreateRequest_toJson_closure0.prototype = {
     call$1(e) {
       return type$.ToolDefinition._as(e).toJson$0();
     },
-    $signature: 311
+    $signature: 317
   };
   B.MessageRole.prototype = {
     _enumToString$0() {
@@ -40321,6 +40677,49 @@
     },
     toJson$0() {
       return this.value;
+    }
+  };
+  B.RefusalCategory.prototype = {
+    _enumToString$0() {
+      return "RefusalCategory." + this._core$_name;
+    },
+    toJson$0() {
+      return this.value;
+    }
+  };
+  B.RefusalCategory_RefusalCategory$fromJson_closure.prototype = {
+    call$1(e) {
+      return type$.RefusalCategory._as(e).value === this.json;
+    },
+    $signature: 318
+  };
+  B.RefusalCategory_RefusalCategory$fromJson_closure0.prototype = {
+    call$0() {
+      return A.RefusalCategory_unknown_0_unknown;
+    },
+    $signature: 321
+  };
+  B.RefusalStopDetails.prototype = {
+    toJson$0() {
+      var t1 = this.category;
+      t1 = t1 == null ? null : t1.value;
+      return B.LinkedHashMap_LinkedHashMap$_literal(["type", this.type, "category", t1, "explanation", this.explanation], type$.String, type$.dynamic);
+    },
+    $eq(_, other) {
+      var t1, _this = this;
+      if (other == null)
+        return false;
+      if (_this !== other)
+        t1 = other instanceof B.RefusalStopDetails && B.getRuntimeTypeOfDartObject(_this) === B.getRuntimeTypeOfDartObject(other) && _this.type === other.type && _this.category == other.category && _this.explanation == other.explanation;
+      else
+        t1 = true;
+      return t1;
+    },
+    get$hashCode(_) {
+      return B.Object_hash(this.type, this.category, this.explanation, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
+    },
+    toString$0(_) {
+      return "RefusalStopDetails(type: " + this.type + ", category: " + B.S(this.category) + ", explanation: " + B.S(this.explanation) + ")";
     }
   };
   B.CacheCreation.prototype = {
@@ -40489,7 +40888,7 @@
     call$1(e) {
       return B.IterationUsage_IterationUsage$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 57
+    $signature: 81
   };
   B.Usage_toJson_closure.prototype = {
     call$1(e) {
@@ -40657,14 +41056,18 @@
   };
   B.MessageDelta.prototype = {
     toJson$0() {
-      var t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic),
-        t2 = this.container;
+      var _this = this,
+        t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic),
+        t2 = _this.container;
       if (t2 != null)
         t1.$indexSet(0, "container", t2.toJson$0());
-      t2 = this.stopReason;
+      t2 = _this.stopReason;
       if (t2 != null)
         t1.$indexSet(0, "stop_reason", t2.value);
-      t2 = this.stopSequence;
+      t2 = _this.stopDetails;
+      if (t2 != null)
+        t1.$indexSet(0, "stop_details", t2.toJson$0());
+      t2 = _this.stopSequence;
       if (t2 != null)
         t1.$indexSet(0, "stop_sequence", t2);
       return t1;
@@ -40674,16 +41077,18 @@
       if (other == null)
         return false;
       if (_this !== other)
-        t1 = other instanceof B.MessageDelta && B.getRuntimeTypeOfDartObject(_this) === B.getRuntimeTypeOfDartObject(other) && J.$eq$(_this.container, other.container) && _this.stopReason == other.stopReason && _this.stopSequence == other.stopSequence;
+        t1 = other instanceof B.MessageDelta && B.getRuntimeTypeOfDartObject(_this) === B.getRuntimeTypeOfDartObject(other) && J.$eq$(_this.container, other.container) && _this.stopReason == other.stopReason && J.$eq$(_this.stopDetails, other.stopDetails) && _this.stopSequence == other.stopSequence;
       else
         t1 = true;
       return t1;
     },
     get$hashCode(_) {
-      return B.Object_hash(this.container, this.stopReason, this.stopSequence, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
+      var _this = this;
+      return B.Object_hash(_this.container, _this.stopReason, _this.stopDetails, _this.stopSequence, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
     },
     toString$0(_) {
-      return "MessageDelta(container: " + B.S(this.container) + ", stopReason: " + B.S(this.stopReason) + ", stopSequence: " + B.S(this.stopSequence) + ")";
+      var _this = this;
+      return "MessageDelta(container: " + B.S(_this.container) + ", stopReason: " + B.S(_this.stopReason) + ", stopDetails: " + B.S(_this.stopDetails) + ", stopSequence: " + B.S(_this.stopSequence) + ")";
     }
   };
   B.MessageDeltaUsage.prototype = {
@@ -40738,7 +41143,7 @@
     call$1(e) {
       return B.IterationUsage_IterationUsage$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 57
+    $signature: 81
   };
   B.MessageDeltaUsage_toJson_closure.prototype = {
     call$1(e) {
@@ -41138,6 +41543,7 @@
       return "BuiltInToolDefinition(tool: " + this.tool.toString$0(0) + ")";
     }
   };
+  B.AgentsResource.prototype = {};
   B.ResourceBase.prototype = {};
   B.FilesResource.prototype = {};
   B.MessageBatchesResource.prototype = {};
@@ -41219,6 +41625,7 @@
   };
   B._MessagesResource_ResourceBase_StreamingResource.prototype = {};
   B.ModelsResource.prototype = {};
+  B.SessionsResource.prototype = {};
   B.SkillsResource.prototype = {};
   B.StreamingResource.prototype = {
     postStream$4$abortTrigger$body$headers(path, abortTrigger, body, headers) {
@@ -41381,6 +41788,7 @@
       return B._asyncStartSync($async$_applyAuthentication$1, $async$completer);
     }
   };
+  B.VaultsResource.prototype = {};
   B.SseParser.prototype = {
     parse$1(bytes) {
       return this.parse$body$SseParser(type$.Stream_List_int._as(bytes));
@@ -43699,7 +44107,7 @@
     $defaultValues() {
       return [null];
     },
-    $signature: 41
+    $signature: 40
   };
   B.SettledResults.prototype = {
     $get$1$1(key, $T) {
@@ -43828,13 +44236,13 @@
       type$.Computation._as(c);
       return (c.__computation$_completer.future._state & 30) !== 0 && c.error != null;
     },
-    $signature: 320
+    $signature: 342
   };
   B.Results__done_closure0.prototype = {
     call$2(k, c) {
       return new B.MapEntry(B._asString(k), type$.Computation._as(c).get$result(), type$.MapEntry_of_String_and_nullable_Object);
     },
-    $signature: 327
+    $signature: 343
   };
   B.BetterFuture_settle_closure.prototype = {
     call$1(m) {
@@ -43859,8 +44267,8 @@
     }
   };
   B.BetterFuture__waiter_closure.prototype = {
-    call$1(__wc0_formal) {
-      return this.computation.call$0();
+    call$1(r) {
+      return this.computation.call$1(r);
     },
     $signature: 32
   };
@@ -43871,8 +44279,8 @@
     $signature: 32
   };
   B.BetterFuture__waiter_closure1.prototype = {
-    call$1(r) {
-      return this.computation.call$1(r);
+    call$1(__wc0_formal) {
+      return this.computation.call$0();
     },
     $signature: 32
   };
@@ -43933,7 +44341,7 @@
     $defaultValues() {
       return [null];
     },
-    $signature: 41
+    $signature: 40
   };
   B.BetterOutcome.prototype = {};
   B.BetterSuccess.prototype = {
@@ -44348,7 +44756,8 @@
   B.CancelationToken.prototype = {};
   B.CanceledException.prototype = {
     toString$0(_) {
-      return A.JSString_methods.trim$0("Operation was canceled.").length === 0 ? B.getRuntimeTypeOfDartObject(this).toString$0(0) : B.getRuntimeTypeOfDartObject(this).toString$0(0) + ": Operation was canceled.";
+      var t1 = this.message;
+      return A.JSString_methods.trim$0(t1).length === 0 ? B.getRuntimeTypeOfDartObject(this).toString$0(0) : B.getRuntimeTypeOfDartObject(this).toString$0(0) + ": " + t1;
     },
     $isException: 1
   };
@@ -44411,6 +44820,13 @@
     },
     map$2$1(_, transform, $K2, $V2) {
       return this._base.map$2$1(0, new B.CanonicalizedMap_map_closure(this, this.$ti._bind$1($K2)._bind$1($V2)._eval$1("MapEntry<1,2>(CanonicalizedMap.K,CanonicalizedMap.V)")._as(transform), $K2, $V2), $K2, $V2);
+    },
+    remove$1(_, key) {
+      var pair, _this = this;
+      if (!_this._isValidKey$1(key))
+        return null;
+      pair = _this._base.remove$1(0, _this._canonicalize.call$1(_this.$ti._eval$1("CanonicalizedMap.K")._as(key)));
+      return pair == null ? null : pair.value;
     },
     get$values() {
       var t1 = this._base,
@@ -44903,7 +45319,7 @@
     call$1(v) {
       return type$.ProtocolVersion._as(v).versionString === this.version;
     },
-    $signature: 343
+    $signature: 368
   };
   B.MCPClient.prototype = {
     connectServer$1(channel) {
@@ -44919,7 +45335,7 @@
     call$1(__wc0_formal) {
       return this.$this.connections.remove$1(0, this.connection);
     },
-    $signature: 13
+    $signature: 7
   };
   B.ServerConnection.prototype = {
     ServerConnection$fromStreamChannel$7$elicitationFormSupport$elicitationSupport$elicitationUrlSupport$protocolLogSink$rootsSupport$samplingSupport(channel, elicitationSupport, elicitationUrlSupport, protocolLogSink, rootsSupport, samplingSupport, _box_0) {
@@ -45281,7 +45697,7 @@
       t1 = t1 == null ? null : t1.cast$2$0(0, type$.String, type$.nullable_Object);
       return this.impl.call$1(this.T._as(t1));
     },
-    $signature: 90
+    $signature: 92
   };
   B.Agent.prototype = {
     send$2$history($prompt, $history) {
@@ -45597,7 +46013,7 @@
     call$1(p) {
       return type$.StandardPart._as(p) instanceof B.ThinkingPart;
     },
-    $signature: 9
+    $signature: 10
   };
   B.MessageAccumulator.prototype = {
     accumulate$2(accumulated, newChunk) {
@@ -45690,14 +46106,14 @@
         }
       return t1;
     },
-    $signature: 9
+    $signature: 10
   };
   B.MessageAccumulator_consolidate_closure.prototype = {
     call$1(part) {
       type$.StandardPart._as(part);
       return !(part instanceof B.TextPart) && !(part instanceof B.ThinkingPart);
     },
-    $signature: 9
+    $signature: 10
   };
   B.MessageAccumulator_consolidate_closure0.prototype = {
     call$1(p) {
@@ -45709,7 +46125,7 @@
     call$1(p) {
       return type$.ThinkingPart._as(p).text;
     },
-    $signature: 54
+    $signature: 53
   };
   B.ModelStringParser.prototype = {
     toString$0(_) {
@@ -45737,7 +46153,7 @@
     call$1(model) {
       return B.throwExpression(B.Exception_Exception('Invalid model string format: "' + model + '".'));
     },
-    $signature: 93
+    $signature: 95
   };
   B.DefaultStreamingOrchestrator.prototype = {
     initialize$1(state) {
@@ -46129,13 +46545,13 @@
     call$1(result) {
       return type$.ToolExecutionResult._as(result).resultPart;
     },
-    $signature: 94
+    $signature: 96
   };
   B.DefaultStreamingOrchestrator_extractToolCalls_closure.prototype = {
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_0;
     },
-    $signature: 10
+    $signature: 11
   };
   B.DefaultStreamingOrchestrator_hasRecentToolExecution_closure.prototype = {
     call$1(message) {
@@ -46149,7 +46565,7 @@
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_1;
     },
-    $signature: 10
+    $signature: 11
   };
   B._extractText_closure.prototype = {
     call$1(p) {
@@ -46161,7 +46577,7 @@
     call$1(p) {
       return type$.ThinkingPart._as(p).text;
     },
-    $signature: 54
+    $signature: 53
   };
   B.StreamingIterationResult.prototype = {};
   B.StreamingState.prototype = {
@@ -46677,7 +47093,7 @@
         t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic);
       return new B.ToolUseInputBlock(toolPart.callId, toolPart.toolName, t1);
     },
-    $signature: 96
+    $signature: 98
   };
   B.MessageStreamEventTransformer.prototype = {
     recordSignatureDelta$1(signature) {
@@ -47038,14 +47454,14 @@
       }
       return t1;
     },
-    $signature: 97
+    $signature: 99
   };
   B.MessageStreamEventTransformer__buildServerToolMetadataChunk_closure.prototype = {
     call$2(__wc0_formal, value) {
       B._asString(__wc0_formal);
       return value == null;
     },
-    $signature: 98
+    $signature: 100
   };
   B.MessageStreamEventTransformer__extractWebFetchDataParts_closure.prototype = {
     call$0() {
@@ -47061,13 +47477,13 @@
       t1 = this.extension;
       return t1 != null ? "web_fetch_document." + t1 : "web_fetch_document";
     },
-    $signature: 7
+    $signature: 8
   };
   B._mapMessageContent_closure.prototype = {
     call$1(t) {
       return new B.TextPart(type$.TextBlock._as(t).text);
     },
-    $signature: 99
+    $signature: 101
   };
   B.ToolSpecListMapper_get__mapTool_closure.prototype = {
     call$1(tool) {
@@ -47082,7 +47498,7 @@
       t1 = t2 == null ? null : J.cast$1$0$ax(t2, t1);
       return new B.CustomToolDefinition(B.Tool$(tool.description, new B.InputSchema(properties, t1), tool.name, null));
     },
-    $signature: 100
+    $signature: 102
   };
   B.AnthropicEventMappingState.prototype = {
     toMetadata$0() {
@@ -47180,13 +47596,13 @@
       t1 = this.$this.name;
       return B.GenerateContentResponseMapper_toChatResult(response, A.JSString_methods.contains$1(t1, "/") ? t1 : "models/" + t1);
     },
-    $signature: 101
+    $signature: 103
   };
   B.GoogleChatModel__buildRequest_closure.prototype = {
     call$1(c) {
       return type$.Content._as(c).parts.length === 0;
     },
-    $signature: 102
+    $signature: 104
   };
   B.GoogleChatModel__extractSystemInstruction_closure.prototype = {
     call$1(part) {
@@ -47211,13 +47627,13 @@
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_1;
     },
-    $signature: 10
+    $signature: 11
   };
   B.MessageListMapper_toContentList_closure1.prototype = {
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_1;
     },
-    $signature: 10
+    $signature: 11
   };
   B.GenerateContentResponseMapper_toChatResult_closure.prototype = {
     call$1(rating) {
@@ -47226,26 +47642,26 @@
       t1 = type$.String;
       return B.LinkedHashMap_LinkedHashMap$_literal(["category", B.harmCategoryToString(rating.category), "probability", B.harmProbabilityToString(rating.probability)], t1, t1);
     },
-    $signature: 103
+    $signature: 105
   };
   B.GenerateContentResponseMapper_toChatResult_closure0.prototype = {
     call$1(s) {
       type$.CitationSource._as(s);
       return B.LinkedHashMap_LinkedHashMap$_literal(["start_index", s.startIndex, "end_index", s.endIndex, "uri", s.uri, "license", s.license], type$.String, type$.nullable_Object);
     },
-    $signature: 104
+    $signature: 106
   };
   B.GenerateContentResponseMapper_toChatResult_closure1.prototype = {
     call$1(code) {
       return type$.ExecutableCode._as(code).toJson$0();
     },
-    $signature: 105
+    $signature: 107
   };
   B.GenerateContentResponseMapper_toChatResult_closure2.prototype = {
     call$1(result) {
       return type$.CodeExecutionResult._as(result).toJson$0();
     },
-    $signature: 106
+    $signature: 108
   };
   B.GenerateContentResponseMapper_toChatResult_closure3.prototype = {
     call$2(__wc0_formal, value) {
@@ -47257,14 +47673,14 @@
         t1 = true;
       return t1;
     },
-    $signature: 107
+    $signature: 109
   };
   B.ChatToolListMapper_toToolList_closure.prototype = {
     call$1(tool) {
       type$.Tool_Object._as(tool);
       return new B.FunctionDeclaration(tool.name, tool.description, B._parametersSchemaFromTool(tool));
     },
-    $signature: 108
+    $signature: 110
   };
   B.GoogleServerSideTool.prototype = {
     _enumToString$0() {
@@ -47304,7 +47720,7 @@
       result = B.CreateChatCompletionStreamResponseMapper_toChatResult(completion);
       return B.ChatResult$(result.finishReason, result.id, result.messages, result.metadata, result.output, null, result.usage, type$.ChatMessage);
     },
-    $signature: 109
+    $signature: 111
   };
   B.MistralChatModelOptions.prototype = {};
   B.ToolListMapper_toMistralTools_closure.prototype = {
@@ -47312,7 +47728,7 @@
       type$.Tool_Object._as(tool);
       return new B.FunctionTool0(new B.FunctionDefinition0(tool.name, tool.description, B.LinkedHashMap_LinkedHashMap$from(tool.inputSchema, type$.String, type$.dynamic)));
     },
-    $signature: 110
+    $signature: 112
   };
   B.MessageListMapper__mapMessage_closure0.prototype = {
     call$1(p) {
@@ -47329,7 +47745,7 @@
         t1 = true;
       return t1;
     },
-    $signature: 9
+    $signature: 10
   };
   B.MessageListMapper__mapMessage_closure1.prototype = {
     call$1(p) {
@@ -47342,7 +47758,7 @@
       }
       return new B.ToolCall2(p.callId, "function", new B.FunctionCall1(p.toolName, A.C_JsonCodec.encode$1(t1)));
     },
-    $signature: 111
+    $signature: 113
   };
   B.CreateChatCompletionStreamResponseMapper_toChatResult_closure.prototype = {
     call$1(tc) {
@@ -47360,7 +47776,7 @@
         t3 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.nullable_Object);
       return new B.ToolPart(A.ToolPartKind_0, t1, t2.name, t3, null);
     },
-    $signature: 112
+    $signature: 114
   };
   B.OllamaChatModel.prototype = {
     sendStream$2$outputSchema(messages, outputSchema) {
@@ -47494,33 +47910,33 @@
       type$.Tool_Object._as(tool);
       return new B.ToolDefinition0(A.ToolType_0, new B.ToolFunction(tool.name, tool.description, B.LinkedHashMap_LinkedHashMap$from(tool.inputSchema, type$.String, type$.dynamic)));
     },
-    $signature: 113
+    $signature: 115
   };
   B.MessageListMapper_toMessages_closure.prototype = {
     call$1(msg) {
       return type$.List_ChatMessage_2._as(msg);
     },
-    $signature: 114
+    $signature: 116
   };
   B.MessageListMapper_get__mapMessage_closure.prototype = {
     call$1(message) {
       return B.MessageListMapper__mapMessage(this._this, type$.ChatMessage._as(message));
     },
-    $signature: 115
+    $signature: 117
   };
   B.MessageListMapper__mapMessage_closure.prototype = {
     call$1(p) {
       var t1 = type$.ToolPart._as(p).result;
       return new B.ChatMessage0(A.MessageRole_3, typeof t1 == "string" ? t1 : A.C_JsonCodec.encode$1(t1), null, null);
     },
-    $signature: 116
+    $signature: 118
   };
   B.MessageListMapper__mapUserMessage_closure.prototype = {
     call$1(p) {
       var t1 = type$.Base64Codec._eval$1("Codec.S")._as(type$.DataPart._as(p).bytes);
       return A.C_Base64Codec.get$encoder().convert$1(t1);
     },
-    $signature: 117
+    $signature: 119
   };
   B.MessageListMapper__mapUserMessage_closure0.prototype = {
     call$1(part) {
@@ -47534,7 +47950,7 @@
       }
       return _null;
     },
-    $signature: 118
+    $signature: 120
   };
   B.MessageListMapper__mapModelMessage_closure0.prototype = {
     call$1(p) {
@@ -47545,7 +47961,7 @@
         t1 = B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic);
       return new B.ToolCall(new B.ToolCallFunction(p.toolName, null, t1));
     },
-    $signature: 119
+    $signature: 121
   };
   B.OpenAIChatModel.prototype = {
     sendStream$2$outputSchema(messages, outputSchema) {
@@ -47776,7 +48192,7 @@
       t1 = p.$arguments;
       return new B.ToolCall0(p.callId, "function", new B.FunctionCall(p.toolName, A.C_JsonCodec.encode$2$toEncodable(t1 == null ? B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic) : t1, null)));
     },
-    $signature: 120
+    $signature: 122
   };
   B.createChatCompletionRequest_closure.prototype = {
     call$1(tool) {
@@ -49079,7 +49495,7 @@
       type$.Tool_Object._as(tool);
       return new B.FunctionTool(tool.name, tool.description, B.OpenAIUtils_prepareSchemaForOpenAI(B.LinkedHashMap_LinkedHashMap$from(tool.inputSchema, type$.String, type$.dynamic), true), null, null);
     },
-    $signature: 81
+    $signature: 67
   };
   B.OpenAIResponsesChatModelOptions.prototype = {};
   B.OpenAIReasoningEffort.prototype = {
@@ -49175,7 +49591,7 @@
     call$0() {
       return B._setArrayType([], type$.JSArray_Map_of_String_and_nullable_Object);
     },
-    $signature: 30
+    $signature: 36
   };
   B.StreamingFunctionCall.prototype = {};
   B.OpenAIResponsesInvocation.prototype = {};
@@ -49256,14 +49672,14 @@
     call$1(p) {
       return !(type$.StandardPart._as(p) instanceof B.TextPart);
     },
-    $signature: 9
+    $signature: 10
   };
   B.OpenAIResponsesHistorySegment.prototype = {};
   B.OpenAIResponsesMessageMapper_mapHistory_closure.prototype = {
     call$1(p) {
       return B.getRuntimeTypeOfDartObject(type$.StandardPart._as(p));
     },
-    $signature: 125
+    $signature: 127
   };
   B.OpenAIResponsesMessageMapper__mapMessageParts_flushContent.prototype = {
     call$0() {
@@ -49814,14 +50230,14 @@
       type$.Tool_Object._as(tool);
       return new B.FunctionTool(tool.name, tool.description, B.OpenAIUtils_prepareSchemaForOpenAI(B.LinkedHashMap_LinkedHashMap$from(tool.inputSchema, type$.String, type$.dynamic), true), null, null);
     },
-    $signature: 81
+    $signature: 67
   };
   B.XAIResponsesChatModel__toOpenAIOptionsStatic_closure.prototype = {
     call$1(tool) {
       type$.XAIServerSideTool._as(tool);
       return tool !== A.XAIServerSideTool_4 && tool !== A.XAIServerSideTool_1;
     },
-    $signature: 126
+    $signature: 128
   };
   B.XAIResponsesChatModelOptions.prototype = {};
   B.XAIReasoningEffort.prototype = {
@@ -50747,7 +51163,7 @@
     call$0() {
       return B._setArrayType([], type$.JSArray_Map_of_String_and_nullable_Object);
     },
-    $signature: 30
+    $signature: 36
   };
   B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure.prototype = {
     call$1(file) {
@@ -50768,7 +51184,7 @@
         t1 = true;
       return !t1;
     },
-    $signature: 127
+    $signature: 129
   };
   B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure0.prototype = {
     call$2(a, b) {
@@ -50782,7 +51198,7 @@
       bTime = b.createdAt;
       return aTime.compareTo$1(0, bTime == null ? B.DateTime$fromMillisecondsSinceEpoch(0) : bTime);
     },
-    $signature: 128
+    $signature: 130
   };
   B.ToolDeliverableEmission.prototype = {};
   B._FileRef.prototype = {};
@@ -50845,6 +51261,9 @@
       t11.__AnthropicClient_models_F = new B.ModelsResource(t8, t10, t13, t12, t14);
       t11.__AnthropicClient_files_F = new B.FilesResource();
       t11.__AnthropicClient_skills_F = new B.SkillsResource(t8, t10, t13, t12, t14);
+      t11.__AnthropicClient_agents_F = new B.AgentsResource(t8, t10, t13, t12, t14);
+      t11.__AnthropicClient_sessions_F = new B.SessionsResource(t8, t10, t13, t12, t14);
+      t11.__AnthropicClient_vaults_F = new B.VaultsResource(t8, t10, t13, t12, t14);
       t8 = B.AnthropicChatModel__hasCodeExecution(t5);
       if (t8) {
         t8 = B.LinkedHashSet_LinkedHashSet$_literal(["files-api-2025-04-14", "code-execution-2025-08-25"], t9);
@@ -50876,7 +51295,7 @@
       var _null = null;
       return new B.AnthropicChatOptions(_null, _null, _null, _null, _null, _null, _null, _null, _null, _null);
     },
-    $signature: 129
+    $signature: 131
   };
   B.CohereProvider.prototype = {
     createChatModel$5$enableThinking$name$options$temperature$tools(enableThinking, $name, options, temperature, tools) {
@@ -51037,7 +51456,7 @@
       t7 = new B.AudioResource(t1, t4, t7, t6, t8);
       t7.__AudioResource_transcriptions_F = new B.TranscriptionsResource(t1, t4, t6, t8);
       t5.__MistralClient_audio_F = t7;
-      t5.__MistralClient_agents_F = new B.AgentsResource(t1, t4, t6, t8);
+      t5.__MistralClient_agents_F = new B.AgentsResource0(t1, t4, t6, t8);
       t5.__MistralClient_conversations_F = new B.ConversationsResource(t1, t4, t6, t8);
       t5.__MistralClient_libraries_F = new B.LibrariesResource(t1, t4, t6, t8);
       t1 = $.$get$MistralChatModel__logger();
@@ -51418,19 +51837,19 @@
     call$1(t) {
       return !J.$eq$(t, "null");
     },
-    $signature: 13
+    $signature: 7
   };
   B.PartHelpers_extensionFromMimeType_closure.prototype = {
     call$1(e) {
       return type$.MapEntry_String_String._as(e).value === this.mimeType;
     },
-    $signature: 85
+    $signature: 88
   };
   B.PartHelpers_extensionFromMimeType_closure0.prototype = {
     call$0() {
       return A.MapEntry_KXI;
     },
-    $signature: 46
+    $signature: 85
   };
   B.MessagePartHelpers_get_text_closure.prototype = {
     call$1(p) {
@@ -51442,13 +51861,13 @@
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_0;
     },
-    $signature: 10
+    $signature: 11
   };
   B.MessagePartHelpers_get_toolResults_closure.prototype = {
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_1;
     },
-    $signature: 10
+    $signature: 11
   };
   B.ChatModel.prototype = {};
   B.ChatModelOptions.prototype = {};
@@ -51764,7 +52183,7 @@
     call$1(p) {
       return type$.Part._as(p).toJson$0();
     },
-    $signature: 132
+    $signature: 134
   };
   B.Parts_text_closure.prototype = {
     call$1(p) {
@@ -51776,13 +52195,13 @@
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_0;
     },
-    $signature: 10
+    $signature: 11
   };
   B.Parts_toolResults_closure.prototype = {
     call$1(p) {
       return type$.ToolPart._as(p).kind === A.ToolPartKind_1;
     },
-    $signature: 10
+    $signature: 11
   };
   B.StandardPart.prototype = {};
   B.TextPart.prototype = {
@@ -51838,13 +52257,13 @@
     call$1(e) {
       return type$.MapEntry_String_String._as(e).value === this.mimeType;
     },
-    $signature: 85
+    $signature: 88
   };
   B.DataPart_extensionFromMimeType_closure0.prototype = {
     call$0() {
       return A.MapEntry_KXI;
     },
-    $signature: 46
+    $signature: 85
   };
   B.LinkPart.prototype = {
     toJson$0() {
@@ -52104,7 +52523,7 @@
     call$1(e) {
       return B._asString(e);
     },
-    $signature: 25
+    $signature: 17
   };
   B.Image.prototype = {
     toJson$0() {
@@ -52215,7 +52634,7 @@
     call$1(e) {
       return B.SafetyRating_SafetyRating$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 47
+    $signature: 46
   };
   B.Candidate_Candidate$fromJson_closure0.prototype = {
     call$1(e) {
@@ -52243,19 +52662,19 @@
         t1 = _null;
       return new B.GroundingAttribution(t2, t1);
     },
-    $signature: 134
+    $signature: 136
   };
   B.Candidate_toJson_closure.prototype = {
     call$1(e) {
       return type$.SafetyRating._as(e).toJson$0();
     },
-    $signature: 48
+    $signature: 47
   };
   B.Candidate_toJson_closure0.prototype = {
     call$1(e) {
       return type$.GroundingAttribution._as(e).toJson$0();
     },
-    $signature: 136
+    $signature: 138
   };
   B.CitationSource.prototype = {
     toJson$0() {
@@ -52308,13 +52727,13 @@
       t5 = B._asStringQ(e.$index(0, "title"));
       return new B.CitationSource(t1, t2, t3, t4, t5, e.$index(0, _s15_) != null ? B.DateTime_parse(B._asString(e.$index(0, _s15_))) : null);
     },
-    $signature: 137
+    $signature: 139
   };
   B.CitationMetadata_toJson_closure.prototype = {
     call$1(e) {
       return type$.CitationSource._as(e).toJson$0();
     },
-    $signature: 138
+    $signature: 140
   };
   B.Content.prototype = {
     toJson$0() {
@@ -52335,13 +52754,13 @@
     call$1(e) {
       return B.Part_Part$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 139
+    $signature: 141
   };
   B.Content_toJson_closure.prototype = {
     call$1(e) {
       return type$.Part_2._as(e).toJson$0();
     },
-    $signature: 140
+    $signature: 142
   };
   B.FileData.prototype = {
     toJson$0() {
@@ -52379,25 +52798,25 @@
     call$1(e) {
       return B.TopCandidates_TopCandidates$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 141
+    $signature: 143
   };
   B.LogprobsResult_LogprobsResult$fromJson_closure0.prototype = {
     call$1(e) {
       return B.LogprobCandidate_LogprobCandidate$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 49
+    $signature: 48
   };
   B.LogprobsResult_toJson_closure.prototype = {
     call$1(e) {
       return type$.TopCandidates._as(e).toJson$0();
     },
-    $signature: 143
+    $signature: 145
   };
   B.LogprobsResult_toJson_closure0.prototype = {
     call$1(e) {
       return type$.LogprobCandidate._as(e).toJson$0();
     },
-    $signature: 45
+    $signature: 49
   };
   B.TopCandidates.prototype = {
     toJson$0() {
@@ -52417,13 +52836,13 @@
     call$1(e) {
       return B.LogprobCandidate_LogprobCandidate$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 49
+    $signature: 48
   };
   B.TopCandidates_toJson_closure.prototype = {
     call$1(e) {
       return type$.LogprobCandidate._as(e).toJson$0();
     },
-    $signature: 45
+    $signature: 49
   };
   B.LogprobCandidate.prototype = {
     toJson$0() {
@@ -52614,13 +53033,13 @@
     call$1(e) {
       return type$.Content._as(e).toJson$0();
     },
-    $signature: 145
+    $signature: 147
   };
   B.GenerateContentRequest_toJson_closure0.prototype = {
     call$1(e) {
       return type$.Tool._as(e).toJson$0();
     },
-    $signature: 146
+    $signature: 148
   };
   B.GenerateContentResponse.prototype = {
     toJson$0() {
@@ -52655,13 +53074,13 @@
     call$1(e) {
       return B.Candidate_Candidate$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 147
+    $signature: 149
   };
   B.GenerateContentResponse_toJson_closure.prototype = {
     call$1(e) {
       return type$.Candidate._as(e).toJson$0();
     },
-    $signature: 148
+    $signature: 150
   };
   B.GenerationConfig.prototype = {
     toJson$0() {
@@ -52725,13 +53144,13 @@
     call$1(e) {
       return B.SafetyRating_SafetyRating$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 47
+    $signature: 46
   };
   B.PromptFeedback_toJson_closure.prototype = {
     call$1(e) {
       return type$.SafetyRating._as(e).toJson$0();
     },
-    $signature: 48
+    $signature: 47
   };
   B.SchemaType.prototype = {
     _enumToString$0() {
@@ -52774,13 +53193,13 @@
     call$2(k, v) {
       return new B.MapEntry(B._asString(k), B.Schema_Schema$fromJson(type$.Map_String_dynamic._as(v)), type$.MapEntry_String_Schema);
     },
-    $signature: 149
+    $signature: 151
   };
   B.Schema_toJson_closure.prototype = {
     call$2(k, v) {
       return new B.MapEntry(B._asString(k), type$.Schema._as(v).toJson$0(), type$.MapEntry_of_String_and_Map_String_dynamic);
     },
-    $signature: 150
+    $signature: 152
   };
   B.SemanticRetrieverChunk.prototype = {
     toJson$0() {
@@ -52891,37 +53310,37 @@
         t1 = _null;
       return new B.GroundingChunk(t2, t3, t4, t1);
     },
-    $signature: 151
+    $signature: 153
   };
   B.GroundingMetadata_GroundingMetadata$fromJson_closure0.prototype = {
     call$1(e) {
       return B.GroundingSupport_GroundingSupport$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 152
+    $signature: 154
   };
   B.GroundingMetadata_GroundingMetadata$fromJson_closure1.prototype = {
     call$1(e) {
       return B._asString(e);
     },
-    $signature: 25
+    $signature: 17
   };
   B.GroundingMetadata_GroundingMetadata$fromJson_closure2.prototype = {
     call$1(e) {
       return B._asString(e);
     },
-    $signature: 25
+    $signature: 17
   };
   B.GroundingMetadata_toJson_closure.prototype = {
     call$1(e) {
       return type$.GroundingChunk._as(e).toJson$0();
     },
-    $signature: 153
+    $signature: 155
   };
   B.GroundingMetadata_toJson_closure0.prototype = {
     call$1(e) {
       return type$.GroundingSupport._as(e).toJson$0();
     },
-    $signature: 154
+    $signature: 156
   };
   B.GroundingSupport.prototype = {
     toJson$0() {
@@ -52956,7 +53375,7 @@
     call$1(e) {
       return B._asNum(e);
     },
-    $signature: 156
+    $signature: 158
   };
   B.GroundingSupport_GroundingSupport$fromJson_closure1.prototype = {
     call$1(e) {
@@ -53012,13 +53431,13 @@
       type$.Map_String_dynamic._as(e);
       return new B.ReviewSnippet(B._asStringQ(e.$index(0, "reviewId")), B._asStringQ(e.$index(0, "googleMapsUri")), B._asStringQ(e.$index(0, "title")));
     },
-    $signature: 157
+    $signature: 159
   };
   B.PlaceAnswerSources_toJson_closure.prototype = {
     call$1(e) {
       return type$.ReviewSnippet._as(e).toJson$0();
     },
-    $signature: 158
+    $signature: 160
   };
   B.RetrievalMetadata.prototype = {
     toJson$0() {
@@ -53074,13 +53493,13 @@
       t1 = e.$index(0, _s15_) != null ? B.GroundingChunkStringList_GroundingChunkStringList$fromJson(t1._as(e.$index(0, _s15_))) : null;
       return new B.GroundingChunkCustomMetadata(t2, t3, t1, B._asStringQ(e.$index(0, "stringValue")));
     },
-    $signature: 159
+    $signature: 161
   };
   B.RetrievedContext_toJson_closure.prototype = {
     call$1(e) {
       return type$.GroundingChunkCustomMetadata._as(e).toJson$0();
     },
-    $signature: 160
+    $signature: 162
   };
   B.ReviewSnippet.prototype = {
     toJson$0() {
@@ -53341,13 +53760,13 @@
         t1 = null;
       return new B.FunctionResponseInlinePart(t1);
     },
-    $signature: 161
+    $signature: 163
   };
   B.FunctionResponse_toJson_closure.prototype = {
     call$1(e) {
       return type$.FunctionResponseInlinePart._as(e).toJson$0();
     },
-    $signature: 162
+    $signature: 164
   };
   B.Tool1.prototype = {
     toJson$0() {
@@ -53381,7 +53800,7 @@
     call$1(e) {
       return type$.FunctionDeclaration._as(e).toJson$0();
     },
-    $signature: 163
+    $signature: 165
   };
   B.ToolCall1.prototype = {
     toJson$0() {
@@ -53810,19 +54229,19 @@
     call$1(match) {
       return '"' + this.field + '": "***REDACTED***"';
     },
-    $signature: 11
+    $signature: 12
   };
   B.Redactor_redactString_closure0.prototype = {
     call$1(match) {
       return this.field + "=***REDACTED***";
     },
-    $signature: 11
+    $signature: 12
   };
   B.Redactor_redactString_closure1.prototype = {
     call$1(match) {
       return this.field + ": ***REDACTED***";
     },
-    $signature: 11
+    $signature: 12
   };
   B.RequestAbortedException.prototype = {};
   B.BaseClient.prototype = {
@@ -53888,7 +54307,7 @@
     call$2(key1, key2) {
       return B._asString(key1).toLowerCase() === B._asString(key2).toLowerCase();
     },
-    $signature: 165
+    $signature: 167
   };
   B.BaseRequest_closure0.prototype = {
     call$1(key) {
@@ -54087,13 +54506,13 @@
     $defaultValues() {
       return [null];
     },
-    $signature: 166
+    $signature: 168
   };
   B._bodyToStream_closure.prototype = {
     call$1(listener) {
       return B._readStreamBody(this.request, this.response, type$.MultiStreamController_List_int._as(listener));
     },
-    $signature: 167
+    $signature: 169
   };
   B._readStreamBody_closure.prototype = {
     call$0() {
@@ -54172,7 +54591,7 @@
     call$1(bytes) {
       return this.completer.complete$1(new Uint8Array(B._ensureNativeList(type$.List_int._as(bytes))));
     },
-    $signature: 168
+    $signature: 170
   };
   B.ClientException.prototype = {
     toString$0(_) {
@@ -54353,7 +54772,7 @@
       t1 = this._box_0;
       t1.length = t1.length + (74 + A.C_Utf8Encoder.convert$1(this.$this._headerForField$2($name, value)).length + A.C_Utf8Encoder.convert$1(value).length + 2);
     },
-    $signature: 53
+    $signature: 52
   };
   B.Request.prototype = {
     get$contentLength() {
@@ -54513,7 +54932,7 @@
       scanner.expectDone$0();
       return B.MediaType$(t4, t5, parameters);
     },
-    $signature: 170
+    $signature: 172
   };
   B.MediaType_toString_closure.prototype = {
     call$2(attribute, value) {
@@ -54532,13 +54951,13 @@
       } else
         t1._contents = t3 + value;
     },
-    $signature: 53
+    $signature: 52
   };
   B.MediaType_toString__closure.prototype = {
     call$1(match) {
       return "\\" + B.S(match.$index(0, 0));
     },
-    $signature: 11
+    $signature: 12
   };
   B.expectQuotedString_closure.prototype = {
     call$1(match) {
@@ -54546,7 +54965,7 @@
       t1.toString;
       return t1;
     },
-    $signature: 11
+    $signature: 12
   };
   B.ChannelIterator.prototype = {
     moveNext$0() {
@@ -54691,7 +55110,7 @@
       }
       t1.clear$0(0);
     },
-    $signature: 1
+    $signature: 2
   };
   B.Client$withoutJson_closure0.prototype = {
     call$1(_) {
@@ -54704,7 +55123,7 @@
       t1._client0$_done.completeError$2(B._asObject(error), type$.StackTrace._as(stackTrace));
       t1._channel.sink.close$0();
     },
-    $signature: 12
+    $signature: 13
   };
   B.Client_listen_closure.prototype = {
     call$0() {
@@ -54721,7 +55140,7 @@
     call$0() {
       return this._box_0.nextId++;
     },
-    $signature: 39
+    $signature: 38
   };
   B.RpcException.prototype = {
     serialize$1(request) {
@@ -54817,7 +55236,7 @@
         return A.C_JsonCodec.encode$2$toEncodable(key, null);
       return key;
     },
-    $signature: 2
+    $signature: 1
   };
   B.Parameter__path_computePath.prototype = {
     call$1(params) {
@@ -54831,19 +55250,19 @@
       t1 = params._key;
       return B._isInt(t1) ? path + "[" + B.S(t1) + "]" : path + "." + B.S(this.quoteKey.call$1(B._asString(t1)));
     },
-    $signature: 172
+    $signature: 174
   };
   B.Parameter_asList_closure.prototype = {
     call$1(value) {
       return type$.List_dynamic._is(value);
     },
-    $signature: 13
+    $signature: 7
   };
   B.Parameter_asMap_closure.prototype = {
     call$1(value) {
       return type$.Map_dynamic_dynamic._is(value);
     },
-    $signature: 13
+    $signature: 7
   };
   B._MissingParameter.prototype = {
     get$value() {
@@ -54934,7 +55353,7 @@
       t1._serverIncomingForwarder.addError$2(error, stackTrace);
       t1._clientIncomingForwarder.addError$2(error, stackTrace);
     },
-    $signature: 12
+    $signature: 13
   };
   B.Server.prototype = {
     listen$0() {
@@ -55170,7 +55589,7 @@
       t1._server$_done.completeError$2(B._asObject(error), type$.StackTrace._as(stackTrace));
       t1._server$_channel.sink.close$0();
     },
-    $signature: 12
+    $signature: 13
   };
   B.Server_listen_closure.prototype = {
     call$0() {
@@ -55184,7 +55603,7 @@
     call$1(result) {
       return result != null;
     },
-    $signature: 13
+    $signature: 7
   };
   B.Server__tryFallbacks_tryNext.prototype = {
     $call$body$Server__tryFallbacks_tryNext() {
@@ -55269,7 +55688,7 @@
     call$1(stream) {
       return stream.handleError$2$test(new B._RespondToFormatExceptionsTransformer_bind__closure(this.channel), new B._RespondToFormatExceptionsTransformer_bind__closure0());
     },
-    $signature: 175
+    $signature: 177
   };
   B._RespondToFormatExceptionsTransformer_bind__closure.prototype = {
     call$1(error) {
@@ -55284,7 +55703,7 @@
     call$1(error) {
       return type$.FormatException._is(error);
     },
-    $signature: 13
+    $signature: 7
   };
   B.Level.prototype = {
     $eq(_, other) {
@@ -55380,7 +55799,7 @@
         $parent._children.$indexSet(0, thisName, t1);
       return t1;
     },
-    $signature: 176
+    $signature: 178
   };
   B.Element.prototype = {
     accept$1(visitor) {
@@ -55419,7 +55838,7 @@
     call$1(child) {
       return type$.Node._as(child).get$textContent();
     },
-    $signature: 177
+    $signature: 179
   };
   B.Text.prototype = {
     accept$1(visitor) {
@@ -55871,7 +56290,7 @@
         t2 = B._arrayInstanceType(t1);
       return new B.WhereIterable(t1, t2._eval$1("bool(1)")._as(new B.FootnoteDefSyntax_parseChildLines__closure()), t2._eval$1("WhereIterable<1>"));
     },
-    $signature: 180
+    $signature: 182
   };
   B.FootnoteDefSyntax_parseChildLines__closure.prototype = {
     call$1(s) {
@@ -56118,7 +56537,7 @@
       t2.toString;
       return new B.LinkReference(t2, t1._title);
     },
-    $signature: 181
+    $signature: 183
   };
   B.ListItem.prototype = {};
   B.TaskListItemState.prototype = {
@@ -56431,7 +56850,7 @@
         return text;
       }
     },
-    $signature: 2
+    $signature: 1
   };
   B.ListSyntax_parse_parseTaskListItem_closure.prototype = {
     call$1(match) {
@@ -56443,7 +56862,7 @@
       this._box_0.taskListItemState = taskListItemState;
       return "";
     },
-    $signature: 11
+    $signature: 12
   };
   B.ListSyntax_parse_tryMatch.prototype = {
     call$1(pattern) {
@@ -56456,7 +56875,7 @@
       t1._value = pattern.firstMatch$1(t3[t2].content);
       return t1._readLocal$0() != null;
     },
-    $signature: 183
+    $signature: 185
   };
   B.OrderedListSyntax.prototype = {
     get$pattern() {
@@ -56868,7 +57287,7 @@
       t1 = t1.$index(0, idr);
       return t2 - (t1 == null ? 0 : t1);
     },
-    $signature: 184
+    $signature: 186
   };
   B.LinkReference.prototype = {};
   B.ExtensionSet.prototype = {};
@@ -56932,7 +57351,7 @@
     call$1(line) {
       return A.JSString_methods.trimLeft$0(B._asString(line));
     },
-    $signature: 2
+    $signature: 1
   };
   B.InlineParser.prototype = {
     InlineParser$2(source, $document) {
@@ -57152,26 +57571,26 @@
     call$1(syntax) {
       return type$.InlineSyntax._as(syntax).tryMatch$1(this.$this);
     },
-    $signature: 74
+    $signature: 57
   };
   B.InlineParser__linkOrImage_closure.prototype = {
     call$1(d) {
       type$.Delimiter._as(d);
       return d.get$char() === 91 || d.get$char() === 33;
     },
-    $signature: 59
+    $signature: 74
   };
   B.InlineParser__linkOrImage_closure0.prototype = {
     call$1(e) {
       return type$.InlineSyntax._as(e) instanceof B.LinkSyntax;
     },
-    $signature: 74
+    $signature: 57
   };
   B.InlineParser__linkOrImage_closure1.prototype = {
     call$1(n) {
       return type$.Node._as(n) === this.delimiter.node;
     },
-    $signature: 187
+    $signature: 189
   };
   B.InlineParser__linkOrImage_closure2.prototype = {
     call$0() {
@@ -57184,13 +57603,13 @@
       A.JSArray_methods.removeRange$2(t1, t2, t1.length);
       return children;
     },
-    $signature: 60
+    $signature: 59
   };
   B.InlineParser__processDelimiterRun_closure.prototype = {
     call$0() {
       return B.List_List$filled(3, this.bottomIndex, false, type$.int);
     },
-    $signature: 189
+    $signature: 191
   };
   B.InlineParser__processDelimiterRun_closure0.prototype = {
     call$1(d) {
@@ -57199,20 +57618,20 @@
       t1 = this.closer;
       return d.get$char() === t1.char && d.get$canOpen() && this.$this._canFormEmphasis$2(d, t1);
     },
-    $signature: 59
+    $signature: 74
   };
   B.InlineParser__processDelimiterRun_closure1.prototype = {
     call$1(e) {
       var t1 = type$.DelimiterTag._as(e).indicatorLength;
       return this.opener.node.text.length >= t1 && this.closer.node.text.length >= t1;
     },
-    $signature: 190
+    $signature: 192
   };
   B.InlineParser__processDelimiterRun_closure2.prototype = {
     call$0() {
       return A.JSArray_methods.sublist$2(this.$this._tree, this.openerTextNodeIndex + 1, this._box_0.closerTextNodeIndex);
     },
-    $signature: 60
+    $signature: 59
   };
   B.AutolinkExtensionSyntax.prototype = {
     tryMatch$1(parser) {
@@ -57487,7 +57906,7 @@
       var t1 = type$.DelimiterTag;
       return A.JSInt_methods.compareTo$1(t1._as(a).indicatorLength, t1._as(b).indicatorLength);
     },
-    $signature: 191
+    $signature: 193
   };
   B.EmailAutolinkSyntax.prototype = {
     onMatch$2(parser, match) {
@@ -57553,7 +57972,7 @@
     call$0() {
       return "";
     },
-    $signature: 7
+    $signature: 8
   };
   B.ImageSyntax.prototype = {
     createNode$3$getChildren(destination, title, getChildren) {
@@ -57575,7 +57994,7 @@
         return node.attributes.$index(0, "alt");
       return node.get$textContent();
     },
-    $signature: 192
+    $signature: 194
   };
   B.InlineHtmlSyntax.prototype = {};
   B.InlineSyntax.prototype = {
@@ -57932,7 +58351,7 @@
     $defaultValues() {
       return [null];
     },
-    $signature: 193
+    $signature: 195
   };
   B.InlineLink.prototype = {};
   B.SoftLineBreakSyntax.prototype = {
@@ -58158,7 +58577,7 @@
       t1.toString;
       return t1;
     },
-    $signature: 11
+    $signature: 12
   };
   B.normalizeLinkDestination_closure0.prototype = {
     call$1(e) {
@@ -58171,7 +58590,7 @@
       }
       return B._Uri__uriEncode(4, B.stringReplaceAllFuncUnchecked(e, $.$get$htmlCharactersPattern(), type$.nullable_String_Function_Match._as(type$.String_Function_Match._as(B.util__decodeHtmlCharacterFromMatch$closure())), null), A.C_Utf8Codec, false);
     },
-    $signature: 2
+    $signature: 1
   };
   B.DedentedText.prototype = {};
   B.MagicNumber.prototype = {
@@ -58396,13 +58815,13 @@
       t3 = B._asStringQ(t3.$index(0, "arguments"));
       return new B.ToolCall2(t1, t2, new B.FunctionCall1(t4, t3 == null ? "{}" : t3));
     },
-    $signature: 194
+    $signature: 196
   };
   B.DeltaContent_toJson_closure.prototype = {
     call$1(e) {
       return type$.ToolCall._as(e).toJson$0();
     },
-    $signature: 61
+    $signature: 60
   };
   B.ChatCompletionRequest.prototype = {
     toJson$0() {
@@ -58462,13 +58881,13 @@
     call$1(e) {
       return type$.ChatMessage_2._as(e).toJson$0();
     },
-    $signature: 196
+    $signature: 198
   };
   B.ChatCompletionRequest_toJson_closure0.prototype = {
     call$1(e) {
       return type$.Tool_2._as(e).toJson$0();
     },
-    $signature: 197
+    $signature: 199
   };
   B.ChatCompletionStreamResponse.prototype = {
     toJson$0() {
@@ -58516,13 +58935,13 @@
       t2 = type$.nullable_Map_String_dynamic._as(e.$index(0, "delta"));
       return new B.ChatChoiceDelta(t1, B.DeltaContent_DeltaContent$fromJson(t2 == null ? B.LinkedHashMap_LinkedHashMap$_empty(type$.String, type$.dynamic) : t2), B.finishReasonFromString0(B._asStringQ(e.$index(0, "finish_reason"))));
     },
-    $signature: 198
+    $signature: 200
   };
   B.ChatCompletionStreamResponse_toJson_closure.prototype = {
     call$1(e) {
       return type$.ChatChoiceDelta._as(e).toJson$0();
     },
-    $signature: 199
+    $signature: 201
   };
   B.ChatMessage1.prototype = {};
   B.SystemMessage0.prototype = {
@@ -58598,7 +59017,7 @@
     call$1(e) {
       return type$.ContentPart._as(e).toJson$0();
     },
-    $signature: 200
+    $signature: 202
   };
   B.AssistantMessage0.prototype = {
     toJson$0() {
@@ -58663,7 +59082,7 @@
     call$1(e) {
       return type$.ToolCall._as(e).toJson$0();
     },
-    $signature: 61
+    $signature: 60
   };
   B.ToolMessage0.prototype = {
     toJson$0() {
@@ -58853,7 +59272,7 @@
       return "ToolCall(id: " + this.id + ", type: " + this.type + ", function: " + this.$function.toString$0(0) + ")";
     }
   };
-  B.AgentsResource.prototype = {};
+  B.AgentsResource0.prototype = {};
   B._AgentsResource_ResourceBase_StreamingResource.prototype = {};
   B.AudioResource.prototype = {};
   B.TranscriptionsResource.prototype = {};
@@ -59261,7 +59680,7 @@
     call$1(e) {
       return type$.ToolCall_2._as(e).toJson$0();
     },
-    $signature: 62
+    $signature: 61
   };
   B.ChatRequest.prototype = {
     toJson$0() {
@@ -59320,13 +59739,13 @@
     call$1(e) {
       return type$.ChatMessage_3._as(e).toJson$0();
     },
-    $signature: 202
+    $signature: 204
   };
   B.ChatRequest_toJson_closure0.prototype = {
     call$1(e) {
       return type$.ToolDefinition_2._as(e).toJson$0();
     },
-    $signature: 203
+    $signature: 205
   };
   B.ChatResponseMessage.prototype = {
     toJson$0() {
@@ -59384,13 +59803,13 @@
         t1 = null;
       return new B.ToolCall(t1);
     },
-    $signature: 204
+    $signature: 206
   };
   B.ChatResponseMessage_toJson_closure.prototype = {
     call$1(e) {
       return type$.ToolCall_2._as(e).toJson$0();
     },
-    $signature: 62
+    $signature: 61
   };
   B.ChatResponse.prototype = {
     toJson$0() {
@@ -59467,13 +59886,13 @@
     call$1(e) {
       return B.Logprob_Logprob$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 205
+    $signature: 207
   };
   B.ChatResponse_toJson_closure.prototype = {
     call$1(e) {
       return type$.Logprob._as(e).toJson$0();
     },
-    $signature: 206
+    $signature: 208
   };
   B.DoneReason.prototype = {
     _enumToString$0() {
@@ -59570,13 +59989,13 @@
       t3 = type$.nullable_List_dynamic._as(e.$index(0, "bytes"));
       return new B.TokenLogprob(t1, t2, t3 == null ? null : J.cast$1$0$ax(t3, type$.int));
     },
-    $signature: 207
+    $signature: 209
   };
   B.Logprob_toJson_closure.prototype = {
     call$1(e) {
       return type$.TokenLogprob._as(e).toJson$0();
     },
-    $signature: 208
+    $signature: 210
   };
   B.ModelOptions.prototype = {
     toJson$0() {
@@ -59777,7 +60196,7 @@
       type$.MapEntry_String_String._as(e);
       return B.Object_hash(e.key, e.value, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue, A.C_SentinelValue);
     },
-    $signature: 209
+    $signature: 211
   };
   B.InterceptorChain1.prototype = {
     _buildChain$1(index) {
@@ -59840,7 +60259,7 @@
         return B.ioore(t2, t3);
       return t2[t3].intercept$2(context, t1._buildChain$1(t3 + 1));
     },
-    $signature: 63
+    $signature: 62
   };
   B.InterceptorChain__executeTransport_createRequest.prototype = {
     call$0() {
@@ -59873,7 +60292,7 @@
         t1.headers.$indexSet(0, _s12_, _this.correlationId);
       return t1;
     },
-    $signature: 211
+    $signature: 213
   };
   B.InterceptorChain__executeTransport_executeTransport.prototype = {
     call$0() {
@@ -59887,7 +60306,7 @@
       t1 = new B.InterceptorChain__executeTransport_executeTransport_sendRequest(t1, _this.context, requestToSend, _this.correlationId).call$0().timeout$2$onTimeout(_0_0, new B.InterceptorChain__executeTransport_executeTransport_closure(t2));
       return t1;
     },
-    $signature: 64
+    $signature: 63
   };
   B.InterceptorChain__executeTransport_executeTransport_sendRequest.prototype = {
     call$0() {
@@ -59917,7 +60336,7 @@
       });
       return B._asyncStartSync($async$call$0, $async$completer);
     },
-    $signature: 64
+    $signature: 63
   };
   B.InterceptorChain__executeTransport_executeTransport_closure.prototype = {
     call$0() {
@@ -59925,7 +60344,7 @@
         t2 = t1.timeoutDuration.get$inSeconds();
       throw B.wrapException(new B.RequestTimeoutException(t1.timeoutDuration, "Request timed out after " + t2 + "s"));
     },
-    $signature: 50
+    $signature: 80
   };
   B._AbortableRequestWrapper.prototype = {};
   B.OpenAIClient.prototype = {
@@ -60613,13 +61032,13 @@
     call$1(m) {
       return type$.ChatMessage_4._as(m).toJson$0();
     },
-    $signature: 213
+    $signature: 215
   };
   B.ChatCompletionCreateRequest_toJson_closure0.prototype = {
     call$1(t) {
       return type$.Tool_3._as(t).toJson$0();
     },
-    $signature: 214
+    $signature: 216
   };
   B.StreamOptions.prototype = {
     toJson$0() {
@@ -60785,7 +61204,7 @@
     call$1(tc) {
       return type$.ToolCall_3._as(tc).toJson$0();
     },
-    $signature: 215
+    $signature: 217
   };
   B.ToolMessage.prototype = {
     toJson$0() {
@@ -61010,7 +61429,7 @@
     call$1(p) {
       return type$.ContentPart_2._as(p).toJson$0();
     },
-    $signature: 216
+    $signature: 218
   };
   B._UnsetCopyWithSentinel.prototype = {};
   B.FinishReason2.prototype = {
@@ -61092,25 +61511,25 @@
     call$1(e) {
       return B.TokenLogprob_TokenLogprob$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 65
+    $signature: 64
   };
   B.Logprobs_Logprobs$fromJson_closure0.prototype = {
     call$1(e) {
       return B.TokenLogprob_TokenLogprob$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 65
+    $signature: 64
   };
   B.Logprobs_toJson_closure.prototype = {
     call$1(e) {
       return type$.TokenLogprob_2._as(e).toJson$0();
     },
-    $signature: 66
+    $signature: 65
   };
   B.Logprobs_toJson_closure0.prototype = {
     call$1(e) {
       return type$.TokenLogprob_2._as(e).toJson$0();
     },
-    $signature: 66
+    $signature: 65
   };
   B.TokenLogprob0.prototype = {
     toJson$0() {
@@ -61156,13 +61575,13 @@
       t3 = type$.nullable_List_dynamic._as(e.$index(0, "bytes"));
       return new B.TopLogprob(t1, t2, t3 == null ? null : J.cast$1$0$ax(t3, type$.int));
     },
-    $signature: 219
+    $signature: 221
   };
   B.TokenLogprob_toJson_closure.prototype = {
     call$1(e) {
       return type$.TopLogprob._as(e).toJson$0();
     },
-    $signature: 220
+    $signature: 222
   };
   B.TopLogprob.prototype = {
     toJson$0() {
@@ -61320,13 +61739,13 @@
     call$1(e) {
       return type$.ClickButton._as(e).value === this.json;
     },
-    $signature: 221
+    $signature: 223
   };
   B.ClickButton_ClickButton$fromJson_closure0.prototype = {
     call$0() {
       return A.ClickButton_unknown_0_unknown;
     },
-    $signature: 222
+    $signature: 224
   };
   B.FunctionCallOutputStatus.prototype = {
     _enumToString$0() {
@@ -61340,13 +61759,13 @@
     call$1(e) {
       return type$.FunctionCallOutputStatus._as(e).value === this.json;
     },
-    $signature: 223
+    $signature: 225
   };
   B.FunctionCallOutputStatus_FunctionCallOutputStatus$fromJson_closure0.prototype = {
     call$0() {
       return A.FunctionCallOutputStatus_unknown_0_unknown;
     },
-    $signature: 224
+    $signature: 226
   };
   B.Include.prototype = {
     _enumToString$0() {
@@ -61360,13 +61779,13 @@
     call$1(e) {
       return type$.Include._as(e).value === this.json;
     },
-    $signature: 225
+    $signature: 227
   };
   B.Include_Include$fromJson_closure0.prototype = {
     call$0() {
       return A.Include_unknown_0_unknown;
     },
-    $signature: 226
+    $signature: 228
   };
   B.ItemStatus.prototype = {
     _enumToString$0() {
@@ -61380,13 +61799,13 @@
     call$1(e) {
       return type$.ItemStatus._as(e).value === this.json;
     },
-    $signature: 227
+    $signature: 229
   };
   B.ItemStatus_ItemStatus$fromJson_closure0.prototype = {
     call$0() {
       return A.ItemStatus_unknown_0_unknown;
     },
-    $signature: 228
+    $signature: 230
   };
   B.MessagePhase.prototype = {
     _enumToString$0() {
@@ -61400,13 +61819,13 @@
     call$1(e) {
       return type$.MessagePhase._as(e).value === this.json;
     },
-    $signature: 229
+    $signature: 231
   };
   B.MessagePhase_MessagePhase$fromJson_closure0.prototype = {
     call$0() {
       return A.MessagePhase_unknown_0_unknown;
     },
-    $signature: 230
+    $signature: 232
   };
   B.MessageRole1.prototype = {
     _enumToString$0() {
@@ -61420,13 +61839,13 @@
     call$1(e) {
       return type$.MessageRole._as(e).value === this.json;
     },
-    $signature: 231
+    $signature: 233
   };
   B.MessageRole_MessageRole$fromJson_closure0.prototype = {
     call$0() {
       return A.MessageRole_unknown_0_unknown;
     },
-    $signature: 232
+    $signature: 234
   };
   B.PromptCacheRetention.prototype = {
     _enumToString$0() {
@@ -61440,13 +61859,13 @@
     call$1(e) {
       return type$.PromptCacheRetention._as(e).value === this.json;
     },
-    $signature: 233
+    $signature: 235
   };
   B.PromptCacheRetention_PromptCacheRetention$fromJson_closure0.prototype = {
     call$0() {
       return A.PromptCacheRetention_unknown_0_unknown;
     },
-    $signature: 234
+    $signature: 236
   };
   B.ReasoningConfig.prototype = {
     toJson$0() {
@@ -61504,13 +61923,13 @@
     call$1(e) {
       return type$.ResponseStatus._as(e).value === this.json;
     },
-    $signature: 235
+    $signature: 237
   };
   B.ResponseStatus_ResponseStatus$fromJson_closure0.prototype = {
     call$0() {
       return A.ResponseStatus_unknown_0_unknown;
     },
-    $signature: 236
+    $signature: 238
   };
   B.SearchContentType.prototype = {
     _enumToString$0() {
@@ -61524,13 +61943,13 @@
     call$1(e) {
       return type$.SearchContentType._as(e).value === this.json;
     },
-    $signature: 237
+    $signature: 239
   };
   B.SearchContentType_SearchContentType$fromJson_closure0.prototype = {
     call$0() {
       return A.SearchContentType_unknown_0_unknown;
     },
-    $signature: 238
+    $signature: 240
   };
   B.ServiceTier0.prototype = {
     _enumToString$0() {
@@ -61544,13 +61963,13 @@
     call$1(e) {
       return type$.ServiceTier._as(e).value === this.json;
     },
-    $signature: 239
+    $signature: 241
   };
   B.ServiceTier_ServiceTier$fromJson_closure0.prototype = {
     call$0() {
       return A.ServiceTier_unknown_0_unknown;
     },
-    $signature: 240
+    $signature: 242
   };
   B.TextConfig.prototype = {
     toJson$0() {
@@ -61590,13 +62009,13 @@
     call$1(e) {
       return type$.ToolSearchExecutionType._as(e).value === this.json;
     },
-    $signature: 241
+    $signature: 243
   };
   B.ToolSearchExecutionType_ToolSearchExecutionType$fromJson_closure0.prototype = {
     call$0() {
       return A.ToolSearchExecutionType_unknown_0_unknown;
     },
-    $signature: 242
+    $signature: 244
   };
   B.Annotation.prototype = {};
   B.UrlCitation.prototype = {
@@ -61840,13 +62259,13 @@
       t3 = type$.nullable_List_dynamic._as(e.$index(0, "bytes"));
       return new B.TopLogProb(t1, t2, t3 == null ? null : J.cast$1$0$ax(t3, type$.int));
     },
-    $signature: 365
+    $signature: 369
   };
   B.LogProb_toJson_closure.prototype = {
     call$1(e) {
       return type$.TopLogProb._as(e).toJson$0();
     },
-    $signature: 244
+    $signature: 246
   };
   B.TopLogProb.prototype = {
     toJson$0() {
@@ -61927,25 +62346,25 @@
     call$1(e) {
       return B.Annotation_Annotation$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 245
+    $signature: 247
   };
   B.OutputTextContent_OutputTextContent$fromJson_closure0.prototype = {
     call$1(e) {
       return B.LogProb_LogProb$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 42
+    $signature: 41
   };
   B.OutputTextContent_toJson_closure.prototype = {
     call$1(e) {
       return type$.Annotation._as(e).toJson$0();
     },
-    $signature: 247
+    $signature: 249
   };
   B.OutputTextContent_toJson_closure0.prototype = {
     call$1(e) {
       return type$.LogProb._as(e).toJson$0();
     },
-    $signature: 35
+    $signature: 42
   };
   B.ReasoningTextContent.prototype = {
     toJson$0() {
@@ -62153,19 +62572,19 @@
     call$1(e) {
       return type$.ResponseTool._as(e).toJson$0();
     },
-    $signature: 69
+    $signature: 87
   };
   B.CreateResponseRequest_toJson_closure0.prototype = {
     call$1(v) {
       return v != null;
     },
-    $signature: 13
+    $signature: 7
   };
   B.CreateResponseRequest_toJson_closure1.prototype = {
     call$1(e) {
       return type$.Include._as(e).value;
     },
-    $signature: 250
+    $signature: 252
   };
   B.IncompleteDetails.prototype = {
     toJson$0() {
@@ -62237,7 +62656,7 @@
     call$1(e) {
       return type$.InputContent._as(e).toJson$0();
     },
-    $signature: 251
+    $signature: 253
   };
   B.FunctionCallItem.prototype = {
     toJson$0() {
@@ -62365,13 +62784,13 @@
     call$1(e) {
       return B.OutputContent_OutputContent$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 252
+    $signature: 254
   };
   B.MessageOutputItem_toJson_closure.prototype = {
     call$1(e) {
       return type$.OutputContent._as(e).toJson$0();
     },
-    $signature: 253
+    $signature: 255
   };
   B.FunctionCallOutputItemResponse.prototype = {
     toJson$0() {
@@ -62456,13 +62875,13 @@
     call$1(e) {
       return new B.ReasoningSummaryContent(B._asString(type$.Map_String_dynamic._as(e).$index(0, "text")));
     },
-    $signature: 255
+    $signature: 257
   };
   B.ReasoningItem_toJson_closure.prototype = {
     call$1(e) {
       return B.LinkedHashMap_LinkedHashMap$_literal(["type", "summary_text", "text", type$.ReasoningSummaryContent._as(e).text], type$.String, type$.dynamic);
     },
-    $signature: 256
+    $signature: 258
   };
   B.ReasoningSummaryContent.prototype = {
     toJson$0() {
@@ -62675,13 +63094,13 @@
     call$1(e) {
       return B.CodeInterpreterOutput_CodeInterpreterOutput$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 257
+    $signature: 259
   };
   B.CodeInterpreterCallOutputItem_toJson_closure.prototype = {
     call$1(e) {
       return type$.CodeInterpreterOutput._as(e).toJson$0();
     },
-    $signature: 258
+    $signature: 260
   };
   B.ImageGenerationCallOutputItem.prototype = {
     toJson$0() {
@@ -62938,13 +63357,13 @@
       t1._as(e);
       return new B.ShellCallOutputContent(B._asString(e.$index(0, "stdout")), B._asString(e.$index(0, "stderr")), B.ShellCallOutcome_ShellCallOutcome$fromJson(t1._as(e.$index(0, "outcome"))));
     },
-    $signature: 259
+    $signature: 261
   };
   B.ShellCallOutputResultItem_toJson_closure.prototype = {
     call$1(e) {
       return type$.ShellCallOutputContent._as(e).toJson$0();
     },
-    $signature: 260
+    $signature: 262
   };
   B.ShellCallOutputContent.prototype = {
     toJson$0() {
@@ -63170,13 +63589,13 @@
     call$1(e) {
       return B.ResponseTool_ResponseTool$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 261
+    $signature: 263
   };
   B.ToolSearchOutputItem_toJson_closure.prototype = {
     call$1(e) {
       return type$.ResponseTool._as(e).toJson$0();
     },
-    $signature: 69
+    $signature: 87
   };
   B.ComputerCallOutputItem.prototype = {
     toJson$0() {
@@ -63228,7 +63647,7 @@
     call$1(e) {
       return B.ComputerAction_ComputerAction$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 262
+    $signature: 264
   };
   B.ComputerCallOutputItem_ComputerCallOutputItem$fromJson_closure0.prototype = {
     call$1(e) {
@@ -63240,7 +63659,7 @@
     call$1(e) {
       return type$.ComputerAction._as(e).toJson$0();
     },
-    $signature: 263
+    $signature: 265
   };
   B.Response0.prototype = {
     toJson$0() {
@@ -63344,13 +63763,13 @@
     call$1(e) {
       return B.OutputItem_OutputItem$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 264
+    $signature: 266
   };
   B.Response_toJson_closure.prototype = {
     call$1(e) {
       return type$.OutputItem._as(e).toJson$0();
     },
-    $signature: 265
+    $signature: 267
   };
   B.ResponseError.prototype = {
     toJson$0() {
@@ -63427,7 +63846,7 @@
     call$1(e) {
       return type$.Item._as(e).toJson$0();
     },
-    $signature: 266
+    $signature: 268
   };
   B.ResponseUsage.prototype = {
     toJson$0() {
@@ -63852,13 +64271,13 @@
     call$1(e) {
       return B.LogProb_LogProb$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 42
+    $signature: 41
   };
   B.OutputTextDeltaEvent_toJson_closure.prototype = {
     call$1(e) {
       return type$.LogProb._as(e).toJson$0();
     },
-    $signature: 35
+    $signature: 42
   };
   B.OutputTextDoneEvent.prototype = {
     toJson$0() {
@@ -63906,13 +64325,13 @@
     call$1(e) {
       return B.LogProb_LogProb$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 42
+    $signature: 41
   };
   B.OutputTextDoneEvent_toJson_closure.prototype = {
     call$1(e) {
       return type$.LogProb._as(e).toJson$0();
     },
-    $signature: 35
+    $signature: 42
   };
   B.OutputTextAnnotationAddedEvent.prototype = {
     toJson$0() {
@@ -65611,13 +66030,13 @@
     call$1(e) {
       return B.SearchContentType_SearchContentType$fromJson(B._asString(e));
     },
-    $signature: 267
+    $signature: 269
   };
   B.WebSearchTool_toJson_closure.prototype = {
     call$1(e) {
       return type$.SearchContentType._as(e).value;
     },
-    $signature: 268
+    $signature: 270
   };
   B.FileSearchFilter.prototype = {};
   B.ComparisonFilter.prototype = {
@@ -65682,13 +66101,13 @@
     call$1(e) {
       return B.FileSearchFilter_FileSearchFilter$fromJson(type$.Map_String_dynamic._as(e));
     },
-    $signature: 269
+    $signature: 271
   };
   B.CompoundFilter_toJson_closure.prototype = {
     call$1(f) {
       return type$.FileSearchFilter._as(f).toJson$0();
     },
-    $signature: 270
+    $signature: 272
   };
   B.FileSearchTool.prototype = {
     toJson$0() {
@@ -65969,13 +66388,13 @@
       }
       return t1;
     },
-    $signature: 271
+    $signature: 273
   };
   B.NamespaceTool_toJson_closure.prototype = {
     call$1(e) {
       return type$.NamespaceAllowedTool._as(e).toJson$0();
     },
-    $signature: 272
+    $signature: 274
   };
   B.ToolSearchTool.prototype = {
     toJson$0() {
@@ -66151,13 +66570,13 @@
       t4 = e.$index(0, _s13_) != null ? B.FinishReason_fromJson(B._asString(e.$index(0, _s13_))) : null;
       return new B.ChatStreamChoice(t2, t3, t4, e.$index(0, _s8_) != null ? B.Logprobs_Logprobs$fromJson(t1._as(e.$index(0, _s8_))) : null);
     },
-    $signature: 273
+    $signature: 275
   };
   B.ChatStreamEvent_toJson_closure.prototype = {
     call$1(c) {
       return type$.ChatStreamChoice._as(c).toJson$0();
     },
-    $signature: 274
+    $signature: 276
   };
   B.ChatStreamChoice.prototype = {
     toJson$0() {
@@ -66282,26 +66701,26 @@
         t1 = null;
       return new B.ToolCallDelta(t3, t4, t5, t1);
     },
-    $signature: 275
+    $signature: 277
   };
   B.ChatDelta_ChatDelta$fromJson_closure0.prototype = {
     call$1(e) {
       type$.Map_String_dynamic._as(e);
       return new B.ReasoningDetail(B._asString(e.$index(0, "type")), B._asStringQ(e.$index(0, "text")), B._asStringQ(e.$index(0, "data")));
     },
-    $signature: 276
+    $signature: 278
   };
   B.ChatDelta_toJson_closure.prototype = {
     call$1(tc) {
       return type$.ToolCallDelta._as(tc).toJson$0();
     },
-    $signature: 277
+    $signature: 279
   };
   B.ChatDelta_toJson_closure0.prototype = {
     call$1(rd) {
       return type$.ReasoningDetail._as(rd).toJson$0();
     },
-    $signature: 278
+    $signature: 280
   };
   B.ToolCallDelta.prototype = {
     toJson$0() {
@@ -66441,7 +66860,7 @@
         this.$this.throwInlineStreamError$3(json, sseEvent, error);
       return B.ChatStreamEvent_ChatStreamEvent$fromJson(json);
     },
-    $signature: 279
+    $signature: 281
   };
   B._ChatCompletionsResource_ResourceBase_StreamingResource.prototype = {};
   B.ContainersResource.prototype = {
@@ -67236,7 +67655,7 @@
       B._asStringQ(arg);
       return arg == null ? "null" : '"' + arg + '"';
     },
-    $signature: 280
+    $signature: 282
   };
   B.InternalStyle.prototype = {
     getRoot$1(path) {
@@ -67760,13 +68179,13 @@
       type$.PdfObjectBase_PdfDataType._as(object);
       return input;
     },
-    $signature: 281
+    $signature: 283
   };
   B.PdfDocument__write_closure.prototype = {
     call$1(e) {
       return type$.PdfObject_PdfDataType._as(e).inUse;
     },
-    $signature: 71
+    $signature: 70
   };
   B.PdfDocument_save_closure.prototype = {
     call$0() {
@@ -67796,7 +68215,7 @@
       });
       return B._asyncStartSync($async$call$0, $async$completer);
     },
-    $signature: 283
+    $signature: 285
   };
   B.PdfFontMetrics.prototype = {
     toString$0(_) {
@@ -67889,13 +68308,13 @@
       type$.PdfObjectBase_PdfDataType._as(e);
       return new B.PdfIndirect(e.objser, e.objgen);
     },
-    $signature: 284
+    $signature: 286
   };
   B.PdfArray_fromNum_closure.prototype = {
     call$1(e) {
       return new B.PdfNum(B._asNum(e));
     },
-    $signature: 285
+    $signature: 287
   };
   B.Ascii85Encoder.prototype = {
     convert$1(input) {
@@ -68085,13 +68504,13 @@
       type$.PdfObjectBase_PdfDataType._as(value);
       return new B.MapEntry(key, new B.PdfIndirect(value.objser, value.objgen), type$.MapEntry_String_PdfIndirect);
     },
-    $signature: 286
+    $signature: 288
   };
   B.PdfDict_output_closure.prototype = {
     call$2(p, e) {
       return Math.max(B._asInt(p), B._asString(e).length);
     },
-    $signature: 287
+    $signature: 289
   };
   B.PdfDict_output_closure0.prototype = {
     call$2(k, v) {
@@ -68558,7 +68977,7 @@
       A.JSArray_methods.add$1(t1, unit >>> 8 & 255);
       A.JSArray_methods.add$1(t1, unit & 255);
     },
-    $signature: 288
+    $signature: 290
   };
   B.PdfCrossRefEntryType.prototype = {
     _enumToString$0() {
@@ -68603,7 +69022,7 @@
         ++t2.ofs;
       }
     },
-    $signature: 289
+    $signature: 291
   };
   B.PdfXrefTable.prototype = {
     _writeBlock$3(s, firstId, block) {
@@ -68767,20 +69186,20 @@
       var t1 = type$.PdfXref;
       return A.JSInt_methods.compareTo$1(t1._as(a).ser, t1._as(b).ser);
     },
-    $signature: 72
+    $signature: 71
   };
   B.PdfXrefTable__outputCompressed_closure.prototype = {
     call$2(a, b) {
       var t1 = type$.PdfXref;
       return A.JSInt_methods.compareTo$1(t1._as(a).ser, t1._as(b).ser);
     },
-    $signature: 72
+    $signature: 71
   };
   B.PdfXrefTable__outputCompressed_closure0.prototype = {
     call$2(a, b) {
       return B._asInt(a) + B._asInt(b);
     },
-    $signature: 73
+    $signature: 72
   };
   B._PdfXrefTable_PdfDataType_PdfDiagnostic.prototype = {};
   B.PdfGraphicStates.prototype = {
@@ -68944,13 +69363,13 @@
     call$1(e) {
       return A.JSInt_methods._shlPositive$1(1, type$.PdfAnnotFlags._as(e).index);
     },
-    $signature: 292
+    $signature: 294
   };
   B.PdfAnnotBase_flagValue_closure0.prototype = {
     call$2(a, b) {
       return (B._asInt(a) | B._asInt(b)) >>> 0;
     },
-    $signature: 73
+    $signature: 72
   };
   B.PdfAnnotNamedLink.prototype = {
     build$3(page, object, params) {
@@ -69165,7 +69584,7 @@
     call$1(e) {
       return type$.PdfObject_PdfDataType._as(e).inUse;
     },
-    $signature: 71
+    $signature: 70
   };
   B._PdfPage_PdfObject_PdfGraphicStream.prototype = {
     prepare$0() {
@@ -69276,7 +69695,7 @@
     call$1(e) {
       return A.JSNumber_methods.toInt$0(B._asDouble(e) * 1000);
     },
-    $signature: 294
+    $signature: 296
   };
   B.PdfXObject.prototype = {};
   B.PdfPageFormat.prototype = {
@@ -69703,7 +70122,7 @@
         default:
           _margin = null;
       }
-      container = B.Container$(A.Alignment_m1_1, _this.child, _this.decoration, _margin, _this.padding, null);
+      container = B.Container$(A.Alignment_m1_1, _this.child, null, _this.decoration, _margin, _this.padding, null);
       return container;
     }
   };
@@ -69723,32 +70142,40 @@
     }
   };
   B.BoxDecoration.prototype = {
-    paint$2(context, box) {
-      var t1, t2,
+    paint$3(context, box, phase) {
+      var t1, t2, t3,
         resolvedBorderRadius = this.borderRadius;
       if (resolvedBorderRadius == null)
         resolvedBorderRadius = null;
       else
         B.Directionality_of(context);
-      t1 = this.color;
-      if (t1 != null) {
-        switch (1) {
-          case 1:
-            if (resolvedBorderRadius == null)
-              context._canvas.drawBox$1(box);
-            else
-              resolvedBorderRadius.paint$2(context, box);
-            break;
+      t1 = phase !== A.PaintPhase_0;
+      if (!t1 || phase === A.PaintPhase_1) {
+        t2 = this.color;
+        if (t2 != null) {
+          switch (1) {
+            case 1:
+              if (resolvedBorderRadius == null)
+                context._canvas.drawBox$1(box);
+              else
+                resolvedBorderRadius.paint$2(context, box);
+              break;
+          }
+          t3 = context._canvas;
+          t3.setFillColor$1(t2);
+          t2 = t3._buf;
+          t2.putBytes$1(new B.CodeUnits("f "));
+          t3._page.PdfGraphicStream__altered = true;
         }
-        t2 = context._canvas;
-        t2.setFillColor$1(t1);
-        t1 = t2._buf;
-        t1.putBytes$1(new B.CodeUnits("f "));
-        t2._page.PdfGraphicStream__altered = true;
       }
-      t1 = this.border;
-      if (t1 != null)
-        t1.paint$4$borderRadius$shape(context, box, resolvedBorderRadius, A.BoxShape_1);
+      if (!t1 || phase === A.PaintPhase_2) {
+        t1 = this.border;
+        if (t1 != null)
+          t1.paint$4$borderRadius$shape(context, box, resolvedBorderRadius, A.BoxShape_1);
+      }
+    },
+    paint$2(context, box) {
+      return this.paint$3(context, box, A.PaintPhase_0);
     }
   };
   B.Document0.prototype = {
@@ -70172,7 +70599,7 @@
         t1 = false;
       return t1;
     },
-    $signature: 295
+    $signature: 297
   };
   B.Font_buildFont_closure0.prototype = {
     call$0() {
@@ -70211,7 +70638,7 @@
           return B.PdfFont_PdfFont$helvetica(_this.pdfDocument);
       }
     },
-    $signature: 296
+    $signature: 298
   };
   B.BoxConstraints.prototype = {
     constrain$1(size) {
@@ -70490,7 +70917,7 @@
     call$1(_) {
       return new B.SizedBox(null, null, null);
     },
-    $signature: 297
+    $signature: 299
   };
   B.PageOrientation.prototype = {
     _enumToString$0() {
@@ -70566,6 +70993,268 @@
       t1.strokePath$0();
     }
   };
+  B.TableRow.prototype = {};
+  B.TableCellVerticalAlignment.prototype = {
+    _enumToString$0() {
+      return "TableCellVerticalAlignment." + this._core$_name;
+    }
+  };
+  B.TableWidth.prototype = {
+    _enumToString$0() {
+      return "TableWidth." + this._core$_name;
+    }
+  };
+  B.TableContext.prototype = {
+    apply$1(other) {
+      type$.TableContext._as(other);
+      this.firstLine = other.firstLine;
+      this.lastLine = other.lastLine;
+    },
+    clone$0() {
+      var t1 = new B.TableContext();
+      t1.firstLine = this.firstLine;
+      t1.lastLine = this.lastLine;
+      return t1;
+    },
+    toString$0(_) {
+      return B.getRuntimeTypeOfDartObject(this).toString$0(0) + " firstLine: " + this.firstLine + " lastLine: " + this.lastLine;
+    }
+  };
+  B.ColumnLayout.prototype = {};
+  B.TableColumnWidth.prototype = {};
+  B.IntrinsicColumnWidth.prototype = {
+    layout$3(child, context, constraints) {
+      var calculatedWidth, t1, childFlex;
+      child.layout$2(context, A.BoxConstraints_0Yu);
+      calculatedWidth = child.box.width;
+      t1 = calculatedWidth === 1 / 0;
+      if (t1)
+        calculatedWidth = 0;
+      t1 = t1 ? 1 : 0;
+      childFlex = t1;
+      return new B.ColumnLayout(calculatedWidth, childFlex);
+    }
+  };
+  B.FlexColumnWidth.prototype = {
+    layout$3(child, context, constraints) {
+      return new B.ColumnLayout(0, 1);
+    }
+  };
+  B.Table.prototype = {
+    get$canSpan() {
+      return true;
+    },
+    get$hasMoreWidgets() {
+      return true;
+    },
+    saveContext$0() {
+      return this._table$_context;
+    },
+    restoreContext$1(context) {
+      var t1;
+      type$.TableContext._as(context);
+      t1 = this._table$_context;
+      t1.firstLine = context.firstLine;
+      t1.firstLine = t1.lastLine = context.lastLine;
+    },
+    layout$3$parentUsesSize(context, constraints, parentUsesSize) {
+      var flex, t1, t2, t3, t4, t5, _i, t6, index, child, columnWidth, columnLayout, t7, maxWidth, totalFlex, flexSpace, n, newWidth, spacePerFlex, totalWidth, totalHeight, row, index0, t8, x, lineHeight, _i0, t9, t10, totalHeight0, heightIndex, childY, _this = this;
+      type$.BoxConstraints._as(constraints);
+      flex = B._setArrayType([], type$.JSArray_double);
+      t1 = _this._widths;
+      A.JSArray_methods.clear$0(t1);
+      t2 = _this._heights;
+      A.JSArray_methods.clear$0(t2);
+      for (t3 = _this.children, t4 = t3.length, t5 = _this.columnWidths, _i = 0; _i < t3.length; t3.length === t4 || (0, B.throwConcurrentModificationError)(t3), ++_i)
+        for (t6 = t3[_i].children, index = 0; index < t6.length; ++index) {
+          child = t6[index];
+          columnWidth = t5.$index(0, index);
+          columnLayout = (columnWidth == null ? A.C_IntrinsicColumnWidth : columnWidth).layout$3(child, context, constraints);
+          if (index >= flex.length) {
+            A.JSArray_methods.add$1(flex, columnLayout.flex);
+            A.JSArray_methods.add$1(t1, columnLayout.width);
+          } else {
+            t7 = columnLayout.flex;
+            if (t7 > 0)
+              A.JSArray_methods.$indexSet(flex, index, Math.max(flex[index], t7));
+            if (!(index < t1.length))
+              return B.ioore(t1, index);
+            A.JSArray_methods.$indexSet(t1, index, Math.max(t1[index], columnLayout.width));
+          }
+        }
+      if (t1.length === 0) {
+        _this.box = new B.PdfRect(0, 0, A.JSInt_methods.clamp$2(0, constraints.minWidth, constraints.maxWidth), A.JSInt_methods.clamp$2(0, constraints.minHeight, constraints.maxHeight));
+        return;
+      }
+      t4 = type$.double;
+      maxWidth = A.JSArray_methods.fold$1$2(t1, 0, new B.Table_layout_closure(), t4);
+      t5 = constraints.maxWidth;
+      if (t5 < 1 / 0) {
+        totalFlex = A.JSArray_methods.reduce$1(flex, new B.Table_layout_closure0());
+        for (t6 = totalFlex !== 0, flexSpace = 0, n = 0; n < t1.length; ++n) {
+          if (!(n < flex.length))
+            return B.ioore(flex, n);
+          if (flex[n] === 0) {
+            t7 = t1[n];
+            newWidth = t7 / maxWidth * t5;
+            if (!t6 || newWidth < t7)
+              A.JSArray_methods.$indexSet(t1, n, newWidth);
+            if (!(n < t1.length))
+              return B.ioore(t1, n);
+            flexSpace += t1[n];
+          }
+        }
+        spacePerFlex = totalFlex > 0 ? (t5 - flexSpace) / totalFlex : 0 / 0;
+        for (n = 0; n < t1.length; ++n) {
+          if (!(n < flex.length))
+            return B.ioore(flex, n);
+          t5 = flex[n];
+          if (t5 > 0)
+            A.JSArray_methods.$indexSet(t1, n, spacePerFlex * t5);
+        }
+      }
+      totalWidth = A.JSArray_methods.fold$1$2(t1, 0, new B.Table_layout_closure1(), t4);
+      for (t4 = t3.length, t5 = constraints.maxHeight, t6 = _this._table$_context, index = 0, totalHeight = 0, _i = 0; _i < t3.length; t3.length === t4 || (0, B.throwConcurrentModificationError)(t3), ++_i, index = index0) {
+        row = t3[_i];
+        index0 = index + 1;
+        t7 = t6.firstLine;
+        if (index < t7)
+          continue;
+        for (t7 = row.children, t8 = t7.length, n = 0, x = 0, lineHeight = 0, _i0 = 0; _i0 < t7.length; t7.length === t8 || (0, B.throwConcurrentModificationError)(t7), ++_i0) {
+          child = t7[_i0];
+          if (!(n < t1.length))
+            return B.ioore(t1, n);
+          child.layout$2(context, B.BoxConstraints$tightFor(null, t1[n]));
+          t9 = child.box;
+          t10 = t9.width;
+          t9 = t9.height;
+          child.box = new B.PdfRect(x, totalHeight, t10, t9);
+          if (!(n < t1.length))
+            return B.ioore(t1, n);
+          x += t1[n];
+          lineHeight = Math.max(lineHeight, t9);
+          ++n;
+        }
+        totalHeight0 = totalHeight + lineHeight;
+        if (totalHeight0 > t5) {
+          index = index0 - 1;
+          break;
+        }
+        A.JSArray_methods.add$1(t2, lineHeight);
+        totalHeight = totalHeight0;
+      }
+      t6.lastLine = index;
+      for (t1 = t3.length, index = 0, heightIndex = 0, _i = 0; _i < t3.length; t3.length === t1 || (0, B.throwConcurrentModificationError)(t3), ++_i, index = index0) {
+        row = t3[_i];
+        index0 = index + 1;
+        t2 = t6.firstLine;
+        if (index < t2)
+          continue;
+        for (t2 = row.children, t4 = t2.length, _i0 = 0; _i0 < t4; ++_i0) {
+          child = t2[_i0];
+          switch (2) {
+            case 2:
+            case 3:
+              t5 = child.box;
+              childY = totalHeight - t5.bottom - t5.height;
+              break;
+          }
+          t5 = child.box;
+          child.box = new B.PdfRect(t5.left, childY, t5.width, t5.height);
+        }
+        if (index0 >= t6.lastLine)
+          break;
+        ++heightIndex;
+      }
+      _this.box = new B.PdfRect(0, 0, totalWidth, totalHeight);
+    },
+    paint$1(context) {
+      var t1, mat, t2, t3, t4, t5, t6, index, _i, row, index0, t7, t8, _i0, child, t9, t10, t11, t12, _this = this;
+      _this.super$Widget$paint(context);
+      t1 = _this._table$_context;
+      if (t1.lastLine === 0)
+        return;
+      mat = new B.Matrix4(new Float64Array(16));
+      mat.setIdentity$0();
+      t2 = _this.box;
+      mat.translateByDouble$4(t2.left, t2.bottom, 0, 1);
+      t2 = context._canvas;
+      t2.saveContext$0();
+      t2.setTransform$1(mat);
+      for (t3 = _this.children, t4 = t3.length, t5 = type$.List_int, t6 = type$.JSArray_num, index = 0, _i = 0; _i < t3.length; t3.length === t4 || (0, B.throwConcurrentModificationError)(t3), ++_i, index = index0) {
+        row = t3[_i];
+        index0 = index + 1;
+        t7 = t1.firstLine;
+        if (index < t7)
+          continue;
+        for (t7 = row.children, t8 = t7.length, _i0 = 0; _i0 < t7.length; t7.length === t8 || (0, B.throwConcurrentModificationError)(t7), ++_i0) {
+          child = t7[_i0];
+          t9 = t2._buf;
+          t10 = t5._as(new B.CodeUnits("q "));
+          t9._ensureCapacity$1(t10.get$length(0));
+          A.NativeUint8List_methods.setAll$2(t9._stream$_stream, t9._stream$_offset, t10);
+          t9._stream$_offset = t9._stream$_offset + t10.get$length(0);
+          t10 = t2._contextQueue;
+          t11 = t2.__PdfGraphics__context_A;
+          t11 === $ && B.throwLateFieldNI("_context");
+          t12 = new B.Matrix4(new Float64Array(16));
+          t12.setFrom$1(t11.ctm);
+          t10._add$1(t10.$ti._precomputed1._as(new B._PdfGraphicsContext(t12)));
+          t12 = child.box;
+          new B.PdfNumList(B._setArrayType([t12.left, t12.bottom, t12.width, t12.height], t6)).output$2(t2._page, t9);
+          t12 = t5._as(new B.CodeUnits(" re "));
+          t9._ensureCapacity$1(t12.get$length(0));
+          A.NativeUint8List_methods.setAll$2(t9._stream$_stream, t9._stream$_offset, t12);
+          t9._stream$_offset = t9._stream$_offset + t12.get$length(0);
+          t11 = t5._as(new B.CodeUnits("W n "));
+          t9._ensureCapacity$1(t11.get$length(0));
+          A.NativeUint8List_methods.setAll$2(t9._stream$_stream, t9._stream$_offset, t11);
+          t9._stream$_offset = t9._stream$_offset + t11.get$length(0);
+          child.paint$1(context);
+          if (!t10.get$isEmpty(0)) {
+            t11 = t5._as(new B.CodeUnits("Q "));
+            t9._ensureCapacity$1(t11.get$length(0));
+            A.NativeUint8List_methods.setAll$2(t9._stream$_stream, t9._stream$_offset, t11);
+            t9._stream$_offset = t9._stream$_offset + t11.get$length(0);
+            t2.__PdfGraphics__context_A = t10.removeLast$0(0);
+          }
+        }
+        if (index0 >= t1.lastLine)
+          break;
+      }
+      for (t3 = t3.length, t4 = t1.lastLine, t1 = t1.firstLine, index = 0, _i = 0; _i < t3; ++_i, index = index0) {
+        index0 = index + 1;
+        if (index < t1)
+          continue;
+        if (index0 >= t4)
+          break;
+      }
+      t2.restoreContext$0();
+    }
+  };
+  B.Table_layout_closure.prototype = {
+    call$2(sum, element) {
+      return B._asDouble(sum) + B._asDouble(element);
+    },
+    $signature: 73
+  };
+  B.Table_layout_closure0.prototype = {
+    call$2(a, b) {
+      B._asDoubleQ(a);
+      B._asDoubleQ(b);
+      a.toString;
+      b.toString;
+      return a + b;
+    },
+    $signature: 301
+  };
+  B.Table_layout_closure1.prototype = {
+    call$2(sum, element) {
+      return B._asDouble(sum) + B._asDouble(element);
+    },
+    $signature: 73
+  };
+  B._Table_Widget_SpanningWidget.prototype = {};
   B.TextAlign.prototype = {
     _enumToString$0() {
       return "TextAlign." + this._core$_name;
@@ -70914,7 +71603,7 @@
       t1._as(b);
       return a.get$height() > b.get$height() ? a : b;
     },
-    $signature: 298
+    $signature: 302
   };
   B.RichTextContext.prototype = {
     apply$1(other) {
@@ -71179,7 +71868,7 @@
       A.JSArray_methods.add$1(t3, _this.$this._addText$4$annotation$baseline$style$text(annotation, t4, style, text));
       return true;
     },
-    $signature: 299
+    $signature: 303
   };
   B.RichText_layout__buildLines.prototype = {
     call$0() {
@@ -72121,7 +72810,7 @@
     call$0() {
       return this.color;
     },
-    $signature: 300
+    $signature: 304
   };
   B.Highlighter$__closure.prototype = {
     call$1(line) {
@@ -72129,34 +72818,34 @@
         t2 = B._arrayInstanceType(t1);
       return new B.WhereIterable(t1, t2._eval$1("bool(1)")._as(new B.Highlighter$___closure()), t2._eval$1("WhereIterable<1>")).get$length(0);
     },
-    $signature: 301
+    $signature: 305
   };
   B.Highlighter$___closure.prototype = {
     call$1(highlight) {
       var t1 = type$._Highlight._as(highlight).span;
       return t1.get$start().get$line() !== t1.get$end().get$line();
     },
-    $signature: 37
+    $signature: 30
   };
   B.Highlighter$__closure0.prototype = {
     call$1(line) {
       return type$._Line._as(line).url;
     },
-    $signature: 303
+    $signature: 307
   };
   B.Highlighter__collateLines_closure.prototype = {
     call$1(highlight) {
       var t1 = type$._Highlight._as(highlight).span.get$sourceUrl();
       return t1 == null ? new B.Object() : t1;
     },
-    $signature: 304
+    $signature: 308
   };
   B.Highlighter__collateLines_closure0.prototype = {
     call$2(highlight1, highlight2) {
       var t1 = type$._Highlight;
       return t1._as(highlight1).span.compareTo$1(0, t1._as(highlight2).span);
     },
-    $signature: 305
+    $signature: 309
   };
   B.Highlighter__collateLines_closure1.prototype = {
     call$1(entry) {
@@ -72199,20 +72888,20 @@
       }
       return lines;
     },
-    $signature: 306
+    $signature: 310
   };
   B.Highlighter__collateLines__closure.prototype = {
     call$1(highlight) {
       return type$._Highlight._as(highlight).span.get$end().get$line() < this.line.number;
     },
-    $signature: 37
+    $signature: 30
   };
   B.Highlighter_highlight_closure.prototype = {
     call$1(highlight) {
       type$._Highlight._as(highlight);
       return true;
     },
-    $signature: 37
+    $signature: 30
   };
   B.Highlighter__writeFileStart_closure.prototype = {
     call$0() {
@@ -72227,7 +72916,7 @@
         t2 = this.startLine === this.line.number ? "\u250c" : "\u2514";
       t1._contents += t2;
     },
-    $signature: 1
+    $signature: 2
   };
   B.Highlighter__writeMultilineHighlights_closure0.prototype = {
     call$0() {
@@ -72235,7 +72924,7 @@
         t2 = this.highlight == null ? "\u2500" : "\u253c";
       t1._contents += t2;
     },
-    $signature: 1
+    $signature: 2
   };
   B.Highlighter__writeMultilineHighlights_closure1.prototype = {
     call$0() {
@@ -72270,7 +72959,7 @@
         }
       }
     },
-    $signature: 1
+    $signature: 2
   };
   B.Highlighter__writeMultilineHighlights__closure.prototype = {
     call$0() {
@@ -72278,13 +72967,13 @@
         t2 = this._box_0.openedOnThisLine ? "\u252c" : "\u250c";
       t1._contents += t2;
     },
-    $signature: 1
+    $signature: 2
   };
   B.Highlighter__writeMultilineHighlights__closure0.prototype = {
     call$0() {
       this.$this._highlighter$_buffer._contents += this.vertical;
     },
-    $signature: 1
+    $signature: 2
   };
   B.Highlighter__writeHighlightedText_closure.prototype = {
     call$0() {
@@ -72310,7 +72999,7 @@
       t2._contents = t4;
       return t4.length - t3.length;
     },
-    $signature: 39
+    $signature: 38
   };
   B.Highlighter__writeIndicator_closure0.prototype = {
     call$0() {
@@ -72330,7 +73019,7 @@
         t1._writeArrow$3$beginning(_this.line, Math.max(_this.highlight.span.get$end().get$column() - 1, 0), false);
       return t2._contents.length - t3.length;
     },
-    $signature: 39
+    $signature: 38
   };
   B.Highlighter__writeSidebar_closure.prototype = {
     call$0() {
@@ -72344,7 +73033,7 @@
       t3 = this.end;
       t2._contents = t1 + (t3 == null ? "\u2502" : t3);
     },
-    $signature: 1
+    $signature: 2
   };
   B._Highlight.prototype = {
     toString$0(_) {
@@ -72366,7 +73055,7 @@
       }
       return B._Highlight__normalizeEndOfLine(B._Highlight__normalizeTrailingNewline(B._Highlight__normalizeNewlines(newSpan)));
     },
-    $signature: 307
+    $signature: 311
   };
   B._Line.prototype = {
     toString$0(_) {
@@ -72594,7 +73283,7 @@
     call$1(trace) {
       return type$.Trace._as(trace).get$frames();
     },
-    $signature: 309
+    $signature: 313
   };
   B.Chain_toString_closure0.prototype = {
     call$1(trace) {
@@ -72602,7 +73291,7 @@
         t2 = B._arrayInstanceType(t1);
       return new B.MappedListIterable(t1, t2._eval$1("int(1)")._as(new B.Chain_toString__closure0()), t2._eval$1("MappedListIterable<1,int>")).fold$1$2(0, 0, A.CONSTANT0, type$.int);
     },
-    $signature: 310
+    $signature: 314
   };
   B.Chain_toString__closure0.prototype = {
     call$1(frame) {
@@ -72616,7 +73305,7 @@
         t2 = B._arrayInstanceType(t1);
       return new B.MappedListIterable(t1, t2._eval$1("String(1)")._as(new B.Chain_toString__closure(this.longest)), t2._eval$1("MappedListIterable<1,String>")).join$0(0);
     },
-    $signature: 312
+    $signature: 316
   };
   B.Chain_toString__closure.prototype = {
     call$1(frame) {
@@ -72768,7 +73457,7 @@
       columnMatch = t1[3];
       return new B.Frame(uri, line, columnMatch != null ? B.int_parse(columnMatch, _null) : _null, member);
     },
-    $signature: 315
+    $signature: 319
   };
   B.Frame_Frame$_parseFirefoxEval_closure.prototype = {
     call$0() {
@@ -73089,7 +73778,7 @@
       type$.EventSink_String._as(sink);
       sink._stream_sink$_sink.add$1(0, sink.$ti._precomputed1._as(A.C_JsonCodec.encode$2$toEncodable(data, null)));
     },
-    $signature: 316
+    $signature: 320
   };
   B._StreamChannel.prototype = {
     get$stream() {
@@ -73669,13 +74358,6 @@
       _this.__AgentUI_userCommandHandler_F !== $ && B.throwLateFieldAI("userCommandHandler");
       _this.__AgentUI_userCommandHandler_F = t1;
     },
-    _savePromptHistory$0() {
-      var exception;
-      try {
-        B._asJSObject(B._asJSObject(init.G.window).sessionStorage).setItem("agenteek_prompt_history", A.C_JsonCodec.encode$2$toEncodable(this._promptHistory, null));
-      } catch (exception) {
-      }
-    },
     _onToggleLogClick$1(e) {
       var t1;
       B._asJSObject(e);
@@ -73692,7 +74374,7 @@
     _onExportPdfClick$1(e) {
       var t1, t2, html;
       B._asJSObject(e);
-      t1 = this.conversationManager._history;
+      t1 = this.conversationManager._persistent_conversation_manager$_history;
       if (t1.length !== 0) {
         t2 = this.__AgentUI__exportPdfBtn_F;
         t2 === $ && B.throwLateFieldNI("_exportPdfBtn");
@@ -73879,7 +74561,7 @@
       t1 = t1 == null ? null : t1.agentConfiguration.displayName;
       return t1 == null ? "WEB AGENT" : t1;
     },
-    $signature: 7
+    $signature: 8
   };
   B.AgentUI_closure1.prototype = {
     call$0() {
@@ -73887,7 +74569,7 @@
       t1 = t1 == null ? null : t1.agentConfiguration.displayName;
       return (t1 == null ? "WEB AGENT" : t1) + " (working)";
     },
-    $signature: 7
+    $signature: 8
   };
   B.AgentUI_closure2.prototype = {
     call$0() {
@@ -73895,7 +74577,7 @@
       t1 = t1 == null ? null : t1.agentConfiguration.displayName;
       return (t1 == null ? "WEB AGENT" : t1) + " (thinking)";
     },
-    $signature: 7
+    $signature: 8
   };
   B.AgentUI__onExportPdfClick_closure.prototype = {
     call$0() {
@@ -73904,7 +74586,7 @@
       t1.innerHTML = this.html;
       t1.disabled = false;
     },
-    $signature: 1
+    $signature: 2
   };
   B.AgentUI_initializeAgent_closure.prototype = {
     call$2(ex, st) {
@@ -73918,7 +74600,7 @@
       B.print(B.S(ex) + " @ " + B.S(st));
       return null;
     },
-    $signature: 17
+    $signature: 25
   };
   B.AgentUI_reconfigureAgent_closure.prototype = {
     call$1(m) {
@@ -73930,7 +74612,7 @@
     call$1(m) {
       return B.CustomMcpData_get_url(type$.Map_of_String_and_nullable_Object._as(m));
     },
-    $signature: 321
+    $signature: 325
   };
   B.AgentUI_reconfigureAgent_closure1.prototype = {
     call$1(m) {
@@ -73955,16 +74637,14 @@
       t3.requestScroll$0();
       B.print(B.S(ex) + " @ " + B.S(st));
     },
-    $signature: 17
+    $signature: 25
   };
   B.AgentUI_bindUserInput_closure.prototype = {
     call$0() {
-      var t3, t4,
+      var t4,
         t1 = new B._Future($.Zone__current, type$._Future_String),
-        t2 = this.$this;
-      t2._historyCursor = J.get$length$asx(t2._promptHistory);
-      t2._historyDraft = "";
-      t3 = t2.__AgentUI__prompt_F;
+        t2 = this.$this,
+        t3 = t2.__AgentUI__prompt_F;
       t3 === $ && B.throwLateFieldNI("_prompt");
       t3.disabled = false;
       t3.focus();
@@ -73976,7 +74656,7 @@
       t3.onkeydown = B._functionToJS1(new B.AgentUI_bindUserInput__closure0(t2));
       return t1;
     },
-    $signature: 322
+    $signature: 326
   };
   B.AgentUI_bindUserInput_closure_submit.prototype = {
     call$0() {
@@ -73986,12 +74666,7 @@
       t2 === $ && B.throwLateFieldNI("_prompt");
       userInput = A.JSString_methods.trim$0(B._asString(t2.value));
       if (userInput.length !== 0) {
-        t3 = t1._promptHistory;
-        t4 = J.getInterceptor$asx(t3);
-        if (t4.get$isEmpty(t3) || !J.$eq$(t4.get$last(t3), userInput)) {
-          t4.add$1(t3, userInput);
-          t1._savePromptHistory$0();
-        }
+        t1._history.push$1(userInput);
         t3 = t1.__AgentUI_userOutput_F;
         t3 === $ && B.throwLateFieldNI("userOutput");
         t4 = t3._controller;
@@ -74015,46 +74690,31 @@
   };
   B.AgentUI_bindUserInput__closure0.prototype = {
     call$1(e) {
-      var key, t1, t2, t3, t4, len, t5,
-        _s7_ = "_prompt";
+      var key, t1, t2, len;
       B._asJSObject(e);
-      key = B._asString(e.key);
-      if (key === "ArrowUp") {
-        t1 = this.$this;
-        t2 = t1._promptHistory;
-        t3 = J.getInterceptor$asx(t2);
-        if (t3.get$isEmpty(t2))
-          return;
-        if (t1._historyCursor === t3.get$length(t2)) {
-          t4 = t1.__AgentUI__prompt_F;
-          t4 === $ && B.throwLateFieldNI(_s7_);
-          t1._historyDraft = B._asString(t4.value);
-        }
-        t4 = t1._historyCursor;
-        if (t4 > 0) {
-          --t4;
-          t1._historyCursor = t4;
+      if (B._asBool(e.altKey)) {
+        key = B._asString(e.key);
+        if (key === "ArrowUp") {
+          t1 = this.$this;
+          t2 = t1._history;
           t1 = t1.__AgentUI__prompt_F;
-          t1 === $ && B.throwLateFieldNI(_s7_);
-          t1.value = t3.$index(t2, t4);
+          t1 === $ && B.throwLateFieldNI("_prompt");
+          t2.init$1(B._asString(t1.value));
+          t1.value = t2.prev$0();
           len = B._asString(t1.value).length;
           t1.setSelectionRange(len, len);
+          e.preventDefault();
+        } else if (key === "ArrowDown") {
+          t1 = this.$this;
+          t2 = t1._history;
+          t1 = t1.__AgentUI__prompt_F;
+          t1 === $ && B.throwLateFieldNI("_prompt");
+          t2.init$1(B._asString(t1.value));
+          t1.value = t2.next$0();
+          len = B._asString(t1.value).length;
+          t1.setSelectionRange(len, len);
+          e.preventDefault();
         }
-        e.preventDefault();
-      } else if (key === "ArrowDown") {
-        t1 = this.$this;
-        t2 = t1._promptHistory;
-        t3 = J.getInterceptor$asx(t2);
-        if (t1._historyCursor < t3.get$length(t2)) {
-          t4 = ++t1._historyCursor;
-          t5 = t1.__AgentUI__prompt_F;
-          t5 === $ && B.throwLateFieldNI(_s7_);
-          t1 = t4 === t3.get$length(t2) ? t1._historyDraft : t3.$index(t2, t1._historyCursor);
-          t5.value = t1;
-          len = B._asString(t5.value).length;
-          t5.setSelectionRange(len, len);
-        }
-        e.preventDefault();
       }
     },
     $signature: 14
@@ -74067,7 +74727,7 @@
       if (t1 != null) {
         t2 = t1._cancelable_token$_exception;
         if (t2 == null)
-          t2 = t1._cancelable_token$_exception = new B.CanceledException();
+          t2 = t1._cancelable_token$_exception = new B.CanceledException("Operation was canceled.");
         t1 = t1._canceler;
         if ((t1.future._state & 30) === 0)
           t1.complete$1(t2);
@@ -74125,7 +74785,7 @@
           return null;
       }
     },
-    $signature: 323
+    $signature: 327
   };
   B.AgentUI_bindUserCommandHandler__closure.prototype = {
     call$0() {
@@ -74140,9 +74800,9 @@
       t1 === $ && B.throwLateFieldNI("catalog");
       t2 = context._widget$_page;
       t2.toString;
-      return B.Container$(A.Alignment_1_0, B.Text$("Page " + (A.JSArray_methods.indexOf$1(t1.pdfPageList.pages, t2) + 1) + " of " + t1.pdfPageList.pages.length, B.TextStyle$(_null, A.PdfColor_HN0, _null, _null, _null, _null, this.fontRegular, _null, _null, A.List_empty14, _null, _null, 9, _null, _null, _null, true, _null, _null, _null, _null)), _null, A.EdgeInsets_pSh, _null, _null);
+      return B.Container$(A.Alignment_1_0, B.Text$("Page " + (A.JSArray_methods.indexOf$1(t1.pdfPageList.pages, t2) + 1) + " of " + t1.pdfPageList.pages.length, B.TextStyle$(_null, A.PdfColor_HN0, _null, _null, _null, _null, this.fontRegular, _null, _null, A.List_empty14, _null, _null, 9, _null, _null, _null, true, _null, _null, _null, _null)), _null, _null, A.EdgeInsets_pSh, _null, _null);
     },
-    $signature: 324
+    $signature: 328
   };
   B.exportConversationToPdf_closure.prototype = {
     call$1(context) {
@@ -74161,7 +74821,7 @@
       A.JSArray_methods.addAll$1(t2, new B.MappedIterable(new B.WhereIterable(t3, t5._eval$1("bool(1)")._as(new B.exportConversationToPdf__closure()), t5._eval$1("WhereIterable<1>")), t5._eval$1("Widget(1)")._as(new B.exportConversationToPdf__closure0(t1, t4, _this.fontMono)), t5._eval$1("MappedIterable<1,Widget>")));
       return t2;
     },
-    $signature: 325
+    $signature: 329
   };
   B.exportConversationToPdf__closure.prototype = {
     call$1(m) {
@@ -74190,9 +74850,9 @@
       t2 = this.fontBold;
       t3 = B._setArrayType([B.Text$(label, B.TextStyle$(_null, accentColor, _null, _null, _null, _null, t2, _null, _null, A.List_empty14, _null, _null, 10, _null, _null, _null, true, 1.2, _null, _null, _null)), new B.SizedBox(_null, 8, _null)], type$.JSArray_Widget);
       A.JSArray_methods.addAll$1(t3, B._renderMarkdown(m.get$_chat_message$_parts().get$text(), this.fontRegular, t2, this.fontMono));
-      return B.Container$(_null, B.Column$(t3, A.CrossAxisAlignment_0), t1, A.EdgeInsets_0_0_0_20, A.EdgeInsets_14_14_14_14, _null);
+      return B.Container$(_null, B.Column$(t3, A.CrossAxisAlignment_0), _null, t1, A.EdgeInsets_0_0_0_20, A.EdgeInsets_14_14_14_14, 1 / 0);
     },
-    $signature: 326
+    $signature: 330
   };
   B._renderNodes_flushInlines.prototype = {
     call$0() {
@@ -74214,31 +74874,31 @@
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertNode_closure.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertNode_closure0.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertNode_closure1.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertNode_closure2.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertNode_closure3.prototype = {
     call$1(i) {
@@ -74246,25 +74906,25 @@
         marker = _this.isOrdered ? "" + (i + 1) + ". " : "* ";
       return B._convertNode(J.$index$asx(_this.children, i), _this.font, _this.fontBold, _this.fontMono, marker);
     },
-    $signature: 328
+    $signature: 332
   };
   B._convertInline_closure.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertInline_closure0.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B._convertInline_closure1.prototype = {
     call$1(c) {
       return B._convertInline(type$.Node._as(c), this.font, this.fontBold, this.fontMono);
     },
-    $signature: 8
+    $signature: 9
   };
   B.HtmlOutputController.prototype = {
     _onScroll$1(__wc0_formal) {
@@ -74370,17 +75030,97 @@
     call$0() {
       return J.toString$0$(this.label);
     },
-    $signature: 7
+    $signature: 8
+  };
+  B.PromptHistory.prototype = {
+    PromptHistory$0() {
+      var str, json, exception;
+      try {
+        str = B._asStringQ(B._asJSObject(B._asJSObject(init.G.window).sessionStorage).getItem("agenteek_prompt_history"));
+        if (str != null) {
+          json = A.C_JsonCodec.decode$2$reviver(str, null);
+          if (type$.List_dynamic._is(json))
+            A.JSArray_methods.addAll$1(this._promptHistory, J.map$1$1$ax(json, new B.PromptHistory_closure(), type$.String));
+        }
+      } catch (exception) {
+      }
+    },
+    init$1(draft) {
+      var _this = this;
+      if (_this._historyCursor < 0) {
+        _this._historyDraft = A.JSString_methods.trim$0(draft);
+        _this._historyCursor = _this._promptHistory.length;
+      }
+    },
+    push$1($prompt) {
+      var t1, i, exception;
+      this._historyDraft = "";
+      this._historyCursor = -1;
+      $prompt = A.JSString_methods.trim$0($prompt);
+      if ($prompt.length === 0)
+        return;
+      for (t1 = this._promptHistory, i = t1.length - 1; i >= 0; --i)
+        if (t1[i] === $prompt) {
+          A.JSArray_methods.removeAt$1(t1, i);
+          break;
+        }
+      A.JSArray_methods.add$1(t1, $prompt);
+      try {
+        B._asJSObject(B._asJSObject(init.G.window).sessionStorage).setItem("agenteek_prompt_history", A.C_JsonCodec.encode$2$toEncodable(t1, null));
+      } catch (exception) {
+      }
+    },
+    next$0() {
+      var t3, _this = this,
+        t1 = _this._promptHistory,
+        t2 = t1.length;
+      if (t2 === 0)
+        return _this._historyDraft;
+      t3 = _this._historyCursor;
+      if (t3 === t2) {
+        _this._historyCursor = 0;
+        return _this._historyDraft;
+      } else {
+        _this._historyCursor = t3 + 1;
+        if (!(t3 >= 0 && t3 < t2))
+          return B.ioore(t1, t3);
+        return t1[t3];
+      }
+    },
+    prev$0() {
+      var t3, _this = this,
+        t1 = _this._promptHistory,
+        t2 = t1.length;
+      if (t2 === 0)
+        return _this._historyDraft;
+      t3 = _this._historyCursor;
+      if (t3 === 0) {
+        t1 = _this._historyDraft;
+        _this._historyCursor = t1.length - 1;
+        return t1;
+      } else {
+        _this._historyCursor = t3 - 1;
+        if (!(t3 >= 0 && t3 < t2))
+          return B.ioore(t1, t3);
+        return t1[t3];
+      }
+    }
+  };
+  B.PromptHistory_closure.prototype = {
+    call$1(i) {
+      return J.toString$0$(i);
+    },
+    $signature: 17
   };
   B.initializeToolSets_closure.prototype = {
     call$0() {
-      return B.McpToolSetExt_setup($.$get$deepWikiMcpServer(), null, "deepwiki", "DeepWiki information for GitHub repositories", A.AccessControlList_List_empty_List_empty, B.Uri_parse("https://mcp.deepwiki.com/mcp", 0, null));
+      return B.McpToolSetExt_setup($.$get$deepWikiMcpServer(), null, "deepwiki", "DeepWiki information for GitHub repositories", A.C_AccessControlList, B.Uri_parse("https://mcp.deepwiki.com/mcp", 0, null));
     },
     $signature: 44
   };
   B.initializeToolSets_closure0.prototype = {
     call$0() {
-      return B.McpToolSetExt_setup($.$get$context7McpServer(), null, "context7", "Context7 Open-Source library documentation", A.AccessControlList_List_empty_List_empty, B.Uri_parse("https://mcp.context7.com/mcp", 0, null));
+      return B.McpToolSetExt_setup($.$get$context7McpServer(), null, "context7", "Context7 Open-Source library documentation", A.C_AccessControlList, B.Uri_parse("https://mcp.context7.com/mcp", 0, null));
     },
     $signature: 44
   };
@@ -74408,7 +75148,7 @@
               else {
                 t2 = $.$get$githubMcpServer();
                 t3 = B.Uri_parse("https://api.githubcopilot.com/mcp/", 0, null);
-                t3 = B.McpToolSetExt_setup(t2, B.LinkedHashMap_LinkedHashMap$_literal(["Authorization", "Bearer " + gitHubpat], t1, t1), "github", "GitHub information for repositories", A.AccessControlList_List_empty_List_empty, t3);
+                t3 = B.McpToolSetExt_setup(t2, B.LinkedHashMap_LinkedHashMap$_literal(["Authorization", "Bearer " + gitHubpat], t1, t1), "github", "GitHub information for repositories", A.C_AccessControlList, t3);
                 t1 = t3;
               }
               $async$returnValue = t1;
@@ -74422,13 +75162,13 @@
       });
       return B._asyncStartSync($async$call$1, $async$completer);
     },
-    $signature: 330
+    $signature: 334
   };
   B.initializeToolSets_closure2.prototype = {
     call$0() {
       var $async$goto = 0,
         $async$completer = B._makeAsyncAwaitCompleter(type$.nullable_McpToolSet),
-        $async$returnValue, $async$self = this, header, t2, t3, auth, t4, t5, t6, t7, t1, authHeader;
+        $async$returnValue, $async$self = this, header, t2, t3, auth, t4, t1, authHeader;
       var $async$call$0 = B._wrapJsFunctionForAsync(function($async$errorCode, $async$result) {
         if ($async$errorCode === 1)
           return B._asyncRethrow($async$result, $async$completer);
@@ -74461,12 +75201,7 @@
               t4 = B.CustomMcpData_get_name(t1);
               t1 = B.CustomMcpData_get_url(t1);
               t1.toString;
-              t5 = type$.JSArray_Pattern;
-              t6 = B._setArrayType(["custom_node"], t5);
-              t7 = B._setArrayType(A.List_empty13.slice(0), t5);
-              t5 = B._setArrayType(t6.slice(0), t5);
-              t5 = new B.AccessControlList(t7, t5);
-              $async$returnValue = B.McpToolSetExt_setup(t2, authHeader, t3.toLowerCase(), "Tools for " + t4, t5, t1);
+              $async$returnValue = B.McpToolSetExt_setup(t2, authHeader, t3.toLowerCase(), "Tools for " + t4, A.C_AccessControlList, t1);
               // goto return
               $async$goto = 1;
               break;
@@ -74484,19 +75219,19 @@
       var t1 = type$.MapEntry_of_String_and_BetterOutcome_nullable_ToolSet._as(e).value;
       return t1 instanceof B.BetterFailure || t1.get$result() == null;
     },
-    $signature: 331
+    $signature: 335
   };
   B.initializeToolSets_closure4.prototype = {
     call$1(e) {
       return type$.MapEntry_of_String_and_BetterOutcome_nullable_ToolSet._as(e).key;
     },
-    $signature: 332
+    $signature: 336
   };
   B.initializeToolSets_closure5.prototype = {
     call$1(v) {
       return type$.BetterSuccess_nullable_ToolSet._as(v).result;
     },
-    $signature: 333
+    $signature: 337
   };
   B.HelpCommand0.prototype = {
     get$name() {
@@ -74607,7 +75342,7 @@
       type$.MapEntry_String_dynamic._as(e);
       return this.validKeys.contains$1(0, e.key) && e.value != null;
     },
-    $signature: 334
+    $signature: 338
   };
   B.IDialogField.prototype = {};
   B.DialogConfig.prototype = {};
@@ -74622,7 +75357,7 @@
       if ((t1.future._state & 30) === 0)
         t1.complete$1(result);
     },
-    $signature: 335
+    $signature: 339
   };
   B.ModalDialog_show_closure.prototype = {
     call$1(e) {
@@ -74960,7 +75695,7 @@
       });
       return B._asyncStartSync($async$call$1, $async$completer);
     },
-    $signature: 336
+    $signature: 340
   };
   B.main__closure0.prototype = {
     call$2(error, st) {
@@ -74986,10 +75721,18 @@
               t3 = t1._controller;
               B._extension_1_appendMarkdown(t3._div, B._asString(t1._label.call$0()), "Error: " + t2, t1.cssClass, null);
               t3.requestScroll$0();
-              $async$returnValue = "I encountered an issue. Please try again or rephrase your request.";
-              // goto return
-              $async$goto = 1;
-              break;
+              if (error instanceof B.UserCancellationException) {
+                t1 = error.pendingOutput;
+                $async$returnValue = t1.length !== 0 ? "You cancelled this prompt while I was providing an answer. My current thoughts:\n\n" + t1 : "You cancelled this prompt; feel free to provide more context and try again.";
+                // goto return
+                $async$goto = 1;
+                break;
+              } else {
+                $async$returnValue = "I encountered an issue. Please try again or rephrase your request.";
+                // goto return
+                $async$goto = 1;
+                break;
+              }
             case 1:
               // return
               return B._asyncReturn($async$returnValue, $async$completer);
@@ -74997,7 +75740,7 @@
       });
       return B._asyncStartSync($async$call$2, $async$completer);
     },
-    $signature: 337
+    $signature: 341
   };
   B.main__closure.prototype = {
     call$0() {
@@ -75015,7 +75758,7 @@
       B._extension_1_appendMarkdown(t2._div, B._asString(t1._label.call$0()), "Hello, how can I help you today?", t1.cssClass, null);
       t2.requestScroll$0();
     },
-    $signature: 1
+    $signature: 2
   };
   B.main_closure0.prototype = {
     call$2(ex, st) {
@@ -75027,7 +75770,7 @@
       B._extension_1_appendMarkdown(t3._div, B._asString(t1._label.call$0()), "Error: " + t2, t1.cssClass, null);
       t3.requestScroll$0();
     },
-    $signature: 17
+    $signature: 25
   };
   (function aliases() {
     var _ = J.Interceptor.prototype;
@@ -75097,7 +75840,7 @@
       _static = hunkHelpers.installStaticTearOff;
     _static_2(J, "_interceptors_JSArray__compareAny$closure", "JSArray__compareAny", 84);
     _instance_1_u(B.CastStreamSubscription.prototype, "get$__internal$_onData", "__internal$_onData$1", 4);
-    _static_1(B, "_js_helper___stringIdentity$closure", "_stringIdentity", 2);
+    _static_1(B, "_js_helper___stringIdentity$closure", "_stringIdentity", 1);
     _static_1(B, "async__AsyncRun__scheduleImmediateJsOverride$closure", "_AsyncRun__scheduleImmediateJsOverride", 31);
     _static_1(B, "async__AsyncRun__scheduleImmediateWithSetImmediate$closure", "_AsyncRun__scheduleImmediateWithSetImmediate", 31);
     _static_1(B, "async__AsyncRun__scheduleImmediateWithTimer$closure", "_AsyncRun__scheduleImmediateWithTimer", 31);
@@ -75110,7 +75853,7 @@
     _instance_0_u(_, "get$_onResume", "_onResume$0", 0);
     _instance(B._Completer.prototype, "get$completeError", 0, 1, function() {
       return [null];
-    }, ["call$2", "call$1"], ["completeError$2", "completeError$1"], 41, 0, 0);
+    }, ["call$2", "call$1"], ["completeError$2", "completeError$1"], 40, 0, 0);
     _instance_2_u(B._Future.prototype, "get$_completeError", "_completeError$2", 6);
     _instance_1_u(_ = B._StreamController.prototype, "get$_async$_add", "_async$_add$1", 4);
     _instance_2_u(_, "get$_addError", "_addError$2", 6);
@@ -75129,7 +75872,7 @@
     _instance_0_u(_ = B._ForwardingStreamSubscription.prototype, "get$_onPause", "_onPause$0", 0);
     _instance_0_u(_, "get$_onResume", "_onResume$0", 0);
     _instance_1_u(_, "get$_handleData", "_handleData$1", 4);
-    _instance_2_u(_, "get$_handleError", "_handleError$2", 338);
+    _instance_2_u(_, "get$_handleError", "_handleError$2", 348);
     _instance_0_u(_, "get$_handleDone", "_handleDone$0", 0);
     _instance_0_u(_ = B._SinkTransformerStreamSubscription.prototype, "get$_onPause", "_onPause$0", 0);
     _instance_0_u(_, "get$_onResume", "_onResume$0", 0);
@@ -75139,114 +75882,114 @@
     _static_2(B, "collection___defaultEquals$closure", "_defaultEquals", 33);
     _static_1(B, "collection___defaultHashCode$closure", "_defaultHashCode", 34);
     _static_2(B, "collection_ListBase__compareAny$closure", "ListBase__compareAny", 84);
-    _instance(B._LinkedHashSet.prototype, "get$_newSimilarSet", 0, 0, null, ["call$1$0", "call$0"], ["_newSimilarSet$1$0", "_newSimilarSet$0"], 95, 0, 0);
+    _instance(B._LinkedHashSet.prototype, "get$_newSimilarSet", 0, 0, null, ["call$1$0", "call$0"], ["_newSimilarSet$1$0", "_newSimilarSet$0"], 123, 0, 0);
     _static(B, "convert__jsonDecode$closure", 1, function() {
       return {reviver: null};
     }, ["call$2$reviver", "call$1"], ["jsonDecode", function(source) {
       return B.jsonDecode(source, null);
-    }], 340, 0);
-    _static_1(B, "convert___defaultToEncodable$closure", "_defaultToEncodable", 36);
+    }], 344, 0);
+    _static_1(B, "convert___defaultToEncodable$closure", "_defaultToEncodable", 35);
     _instance_0_u(B._JsonDecoderSink.prototype, "get$close", "close$0", 0);
     _instance_1_i(_ = B._ByteCallbackSink.prototype, "get$add", "add$1", 4);
     _instance_0_u(_, "get$close", "close$0", 0);
-    _instance(B._JsonUtf8EncoderSink.prototype, "get$_addChunk", 0, 3, null, ["call$3"], ["_addChunk$3"], 185, 0, 0);
+    _instance(B._JsonUtf8EncoderSink.prototype, "get$_addChunk", 0, 3, null, ["call$3"], ["_addChunk$3"], 188, 0, 0);
     _static_1(B, "core__identityHashCode$closure", "identityHashCode", 34);
     _static_2(B, "core__identical$closure", "identical", 33);
     _static(B, "core_StringBuffer___new_tearOff$closure", 0, null, ["call$1", "call$0"], ["StringBuffer___new_tearOff", function() {
       return B.StringBuffer___new_tearOff("");
-    }], 341, 0);
+    }], 345, 0);
     _static(B, "core_Map___from_tearOff$closure", 1, null, ["call$2$1", "call$1"], ["Map___from_tearOff", function(other) {
       var t1 = type$.dynamic;
       return B.Map___from_tearOff(other, t1, t1);
-    }], 342, 1);
-    _static_1(B, "core_Uri_decodeComponent$closure", "Uri_decodeComponent", 2);
+    }], 346, 1);
+    _static_1(B, "core_Uri_decodeComponent$closure", "Uri_decodeComponent", 1);
     _static(B, "math__min$closure", 2, null, ["call$1$2", "call$2"], ["min", function(a, b) {
       return B.min(a, b, type$.num);
     }], 86, 1);
     _static(B, "math__max$closure", 2, null, ["call$1$2", "call$2"], ["max", function(a, b) {
       return B.max(a, b, type$.num);
     }], 86, 1);
-    _instance_1_u(B._JSSecureRandom.prototype, "get$nextInt", "nextInt$1", 91);
-    _instance_1_i(B.AgentResponseAccumulator0.prototype, "get$add", "add$1", 87);
+    _instance_1_u(B._JSSecureRandom.prototype, "get$nextInt", "nextInt$1", 94);
+    _instance_1_i(B.AgentResponseAccumulator0.prototype, "get$add", "add$1", 55);
     _instance_0_u(B.InteractiveAgent.prototype, "get$stopInteracting", "stopInteracting$0", 0);
-    _instance_1_u(B.HttpChannel.prototype, "get$_http_channel$_process", "_http_channel$_process$1", 164);
-    _static_1(B, "chat_message_ext__ChatMessageExt__isToolOrThinking$closure", "ChatMessageExt__isToolOrThinking", 9);
-    _instance_1_u(B.PersistentConversationManager.prototype, "get$_register", "_register$1", 178);
+    _instance_1_u(B.HttpChannel.prototype, "get$_http_channel$_process", "_http_channel$_process$1", 171);
+    _static_1(B, "chat_message_ext__ChatMessageExt__isToolOrThinking$closure", "ChatMessageExt__isToolOrThinking", 10);
+    _instance_1_u(B.PersistentConversationManager.prototype, "get$_register", "_register$1", 181);
     _static_1(B, "log_Log__enable$closure", "Log__enable", 68);
     _static_1(B, "log_Log__disable$closure", "Log__disable", 68);
-    _instance_1_u(B.UniqueIdGenerator.prototype, "get$_nextChar", "_nextChar$1", 25);
+    _instance_1_u(B.UniqueIdGenerator.prototype, "get$_nextChar", "_nextChar$1", 17);
     _instance_0_u(B.AnthropicClient.prototype, "get$_ensureNotClosed", "_ensureNotClosed$0", 0);
     _static_1(B, "equality_helpers___valueDeepHashCode$closure", "_valueDeepHashCode", 19);
-    _instance(B.ZLibEncoder.prototype, "get$encode", 0, 1, null, ["call$3$level$windowBits", "call$1"], ["encode$3$level$windowBits", "encode$1"], 317, 0, 0);
+    _instance(B.ZLibEncoder.prototype, "get$encode", 0, 1, null, ["call$3$level$windowBits", "call$1"], ["encode$3$level$windowBits", "encode$1"], 331, 0, 0);
     _static(B, "_utils__futureCast$closure", 1, null, ["call$1$1", "call$1"], ["futureCast", function(future) {
       return B.futureCast(future, type$.dynamic);
-    }], 345, 0);
-    _instance_1_u(B.Results.prototype, "get$_progress", "_progress$1", 319);
+    }], 349, 0);
+    _instance_1_u(B.Results.prototype, "get$_progress", "_progress$1", 333);
     _instance_2_u(_ = B.DeepCollectionEquality.prototype, "get$equals", "equals$2", 33);
     _instance_1_u(_, "get$hash", "hash$1", 34);
-    _instance_1_u(_, "get$isValidKey", "isValidKey$1", 38);
+    _instance_1_u(_, "get$isValidKey", "isValidKey$1", 37);
     _instance_0_u(B.ServerConnection.prototype, "get$shutdown", "shutdown$0", 23);
-    _instance(_ = B.MCPBase.prototype, "get$_handlePing", 0, 0, null, ["call$1", "call$0"], ["_handlePing$1", "_handlePing$0"], 363, 0, 0);
-    _instance_1_u(_, "get$_handleProgress", "_handleProgress$1", 364);
-    _static_0(B, "agent_Agent__createOpenRouterProvider$closure", "Agent__createOpenRouterProvider", 346);
-    _instance_1_i(B.AgentResponseAccumulator.prototype, "get$add", "add$1", 87);
-    _static_1(B, "anthropic_message_mappers___mapServerToolConfig$closure", "_mapServerToolConfig", 347);
-    _static_0(B, "anthropic_tool_event_state_AnthropicEventMappingState__createEventList$closure", "AnthropicEventMappingState__createEventList", 30);
-    _static_1(B, "google_chat_model___streamResponseHasCandidates$closure", "_streamResponseHasCandidates", 348);
-    _instance_2_u(B.OpenAIResponsesChatModel.prototype, "get$downloadContainerFile", "downloadContainerFile$2", 67);
-    _static_1(B, "xai_responses_chat_model_XAIResponsesChatModel__mapToolStatic$closure", "XAIResponsesChatModel__mapToolStatic", 349);
-    _instance_2_u(B.XAIResponsesChatModel.prototype, "get$_downloadContainerFile", "_downloadContainerFile$2", 67);
-    _static_1(B, "anthropic_files_client_AnthropicRemoteFile___fromJson_tearOff$closure", "AnthropicRemoteFile___fromJson_tearOff", 350);
+    _instance(_ = B.MCPBase.prototype, "get$_handlePing", 0, 0, null, ["call$1", "call$0"], ["_handlePing$1", "_handlePing$0"], 90, 0, 0);
+    _instance_1_u(_, "get$_handleProgress", "_handleProgress$1", 91);
+    _static_0(B, "agent_Agent__createOpenRouterProvider$closure", "Agent__createOpenRouterProvider", 350);
+    _instance_1_i(B.AgentResponseAccumulator.prototype, "get$add", "add$1", 55);
+    _static_1(B, "anthropic_message_mappers___mapServerToolConfig$closure", "_mapServerToolConfig", 351);
+    _static_0(B, "anthropic_tool_event_state_AnthropicEventMappingState__createEventList$closure", "AnthropicEventMappingState__createEventList", 36);
+    _static_1(B, "google_chat_model___streamResponseHasCandidates$closure", "_streamResponseHasCandidates", 352);
+    _instance_2_u(B.OpenAIResponsesChatModel.prototype, "get$downloadContainerFile", "downloadContainerFile$2", 66);
+    _static_1(B, "xai_responses_chat_model_XAIResponsesChatModel__mapToolStatic$closure", "XAIResponsesChatModel__mapToolStatic", 353);
+    _instance_2_u(B.XAIResponsesChatModel.prototype, "get$_downloadContainerFile", "_downloadContainerFile$2", 66);
+    _static_1(B, "anthropic_files_client_AnthropicRemoteFile___fromJson_tearOff$closure", "AnthropicRemoteFile___fromJson_tearOff", 354);
     _static(B, "anthropic_provider_AnthropicProvider___new_tearOff$closure", 0, null, ["call$2$apiKey$headers", "call$0"], ["AnthropicProvider___new_tearOff", function() {
       return B.AnthropicProvider___new_tearOff(null, A.Map_empty1);
-    }], 351, 0);
+    }], 355, 0);
     _static(B, "cohere_provider_CohereProvider___new_tearOff$closure", 0, null, ["call$2$apiKey$headers", "call$0"], ["CohereProvider___new_tearOff", function() {
       return B.CohereProvider___new_tearOff(null, A.Map_empty1);
-    }], 352, 0);
+    }], 356, 0);
     _static(B, "google_provider_GoogleProvider___new_tearOff$closure", 0, null, ["call$3$apiKey$baseUrl$headers", "call$0"], ["GoogleProvider___new_tearOff", function() {
       return B.GoogleProvider___new_tearOff(null, null, A.Map_empty1);
-    }], 353, 0);
+    }], 357, 0);
     _static(B, "mistral_provider_MistralProvider___new_tearOff$closure", 0, null, ["call$2$apiKey$headers", "call$0"], ["MistralProvider___new_tearOff", function() {
       return B.MistralProvider___new_tearOff(null, A.Map_empty1);
-    }], 354, 0);
+    }], 358, 0);
     _static(B, "ollama_provider_OllamaProvider___new_tearOff$closure", 0, null, ["call$6$apiKey$apiKeyName$baseUrl$displayName$headers$name", "call$0"], ["OllamaProvider___new_tearOff", function() {
       return B.OllamaProvider___new_tearOff(null, null, null, "Ollama", A.Map_empty1, "ollama");
-    }], 355, 0);
+    }], 359, 0);
     _static(B, "openai_provider_OpenAIProvider___new_tearOff$closure", 0, null, ["call$8$aliases$apiKey$apiKeyName$baseUrl$defaultModelNames$displayName$headers$name", "call$0"], ["OpenAIProvider___new_tearOff", function() {
       return B.OpenAIProvider___new_tearOff(A.List_empty3, null, "OPENAI_API_KEY", null, A.Map_jHFMB, "OpenAI", A.Map_empty1, "openai");
-    }], 356, 0);
+    }], 360, 0);
     _static(B, "openai_responses_provider_OpenAIResponsesProvider___new_tearOff$closure", 0, null, ["call$4$aliases$apiKey$baseUrl$headers", "call$0"], ["OpenAIResponsesProvider___new_tearOff", function() {
       return B.OpenAIResponsesProvider___new_tearOff(A.List_empty3, null, null, A.Map_empty1);
-    }], 357, 0);
+    }], 361, 0);
     _static(B, "xai_provider_XAIProvider___new_tearOff$closure", 0, null, ["call$2$apiKey$headers", "call$0"], ["XAIProvider___new_tearOff", function() {
       return B.XAIProvider___new_tearOff(null, A.Map_empty1);
-    }], 358, 0);
+    }], 362, 0);
     _static(B, "xai_responses_provider_XAIResponsesProvider___new_tearOff$closure", 0, null, ["call$3$apiKey$baseUrl$headers", "call$0"], ["XAIResponsesProvider___new_tearOff", function() {
       return B.XAIResponsesProvider___new_tearOff(null, null, A.Map_empty1);
-    }], 359, 0);
+    }], 363, 0);
     _instance_0_u(B.GoogleAIClient.prototype, "get$_googleai_client$_ensureNotClosed", "_googleai_client$_ensureNotClosed$0", 0);
-    _static_1(B, "case_insensitive_map_CaseInsensitiveMap__canonicalizer$closure", "CaseInsensitiveMap__canonicalizer", 2);
+    _static_1(B, "case_insensitive_map_CaseInsensitiveMap__canonicalizer$closure", "CaseInsensitiveMap__canonicalizer", 1);
     _instance_1_u(_ = B.Client.prototype, "get$_handleResponse", "_handleResponse$1", 4);
     _instance_1_u(_, "get$_handleSingleResponse", "_handleSingleResponse$1", 4);
     _instance_0_u(B.Peer.prototype, "get$close", "close$0", 24);
-    _instance_1_u(_ = B.Server.prototype, "get$_handleRequest", "_handleRequest$1", 55);
-    _instance_1_u(_, "get$_handleSingleRequest", "_handleSingleRequest$1", 55);
-    _instance_1_u(_, "get$_tryFallbacks", "_tryFallbacks$1", 174);
-    _instance_1_u(B.ListSyntax.prototype, "get$_removeLeadingEmptyLine", "_removeLeadingEmptyLine$1", 182);
+    _instance_1_u(_ = B.Server.prototype, "get$_handleRequest", "_handleRequest$1", 54);
+    _instance_1_u(_, "get$_handleSingleRequest", "_handleSingleRequest$1", 54);
+    _instance_1_u(_, "get$_tryFallbacks", "_tryFallbacks$1", 176);
+    _instance_1_u(B.ListSyntax.prototype, "get$_removeLeadingEmptyLine", "_removeLeadingEmptyLine$1", 184);
     _static(B, "line_Line___new_tearOff$closure", 1, function() {
       return {tabRemaining: null};
     }, ["call$2$tabRemaining", "call$1"], ["Line___new_tearOff", function($content) {
       return B.Line___new_tearOff($content, null);
-    }], 360, 0);
-    _static_1(B, "util__decodeHtmlCharacterFromMatch$closure", "decodeHtmlCharacterFromMatch", 11);
+    }], 364, 0);
+    _static_1(B, "util__decodeHtmlCharacterFromMatch$closure", "decodeHtmlCharacterFromMatch", 12);
     _instance_0_u(B.MistralClient.prototype, "get$_mistral_client$_ensureNotClosed", "_mistral_client$_ensureNotClosed$0", 0);
     _static_1(B, "equality_helpers0___valueDeepHashCode$closure", "_valueDeepHashCode0", 19);
-    _instance_1_u(B.InterceptorChain1.prototype, "get$_executeTransport", "_executeTransport$1", 63);
+    _instance_1_u(B.InterceptorChain1.prototype, "get$_executeTransport", "_executeTransport$1", 62);
     _instance_0_u(B.OpenAIClient.prototype, "get$_openai_client$_ensureNotClosed", "_openai_client$_ensureNotClosed$0", 0);
-    _static_1(B, "equality_helpers1__mapDeepHashCode$closure", "mapDeepHashCode1", 361);
+    _static_1(B, "equality_helpers1__mapDeepHashCode$closure", "mapDeepHashCode1", 365);
     _static_1(B, "equality_helpers1___valueDeepHashCode$closure", "_valueDeepHashCode1", 19);
-    _static_1(B, "include_Include___fromJson_tearOff$closure", "Include___fromJson_tearOff", 362);
-    _instance_1_u(B.PdfType1Font.prototype, "get$glyphMetrics", "glyphMetrics$1", 293);
+    _static_1(B, "include_Include___fromJson_tearOff$closure", "Include___fromJson_tearOff", 366);
+    _instance_1_u(B.PdfType1Font.prototype, "get$glyphMetrics", "glyphMetrics$1", 295);
     _static_1(B, "frame_Frame___parseVM_tearOff$closure", "Frame___parseVM_tearOff", 28);
     _static_1(B, "frame_Frame___parseV8_tearOff$closure", "Frame___parseV8_tearOff", 28);
     _static_1(B, "frame_Frame___parseFirefox_tearOff$closure", "Frame___parseFirefox_tearOff", 28);
@@ -75255,11 +75998,11 @@
     _static_1(B, "trace_Trace___parseFriendly_tearOff$closure", "Trace___parseFriendly_tearOff", 82);
     _instance_1_u(_ = B.AgentUI.prototype, "get$_onToggleLogClick", "_onToggleLogClick$1", 22);
     _instance_1_u(_, "get$_onExportPdfClick", "_onExportPdfClick$1", 22);
-    _instance_0_u(_, "get$createToken", "createToken$0", 318);
+    _instance_0_u(_, "get$createToken", "createToken$0", 322);
     _instance_1_u(B.HtmlOutputController.prototype, "get$_onScroll", "_onScroll$1", 22);
     _instance_1_i(B.HtmlSink.prototype, "get$add", "add$1", 4);
     _instance_1_i(B.HtmlNestedSink.prototype, "get$add", "add$1", 4);
-    _static_0(B, "client_Client___new_tearOff$closure", "Client___new_tearOff", 243);
+    _static_0(B, "client_Client___new_tearOff$closure", "Client___new_tearOff", 245);
   })();
   (function inheritance() {
     var _mixin = hunkHelpers.mixin,
@@ -75267,7 +76010,7 @@
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(B.Object, null);
-    _inheritMany(B.Object, [B.JS_CONST, J.Interceptor, B.SafeToStringHook, J.ArrayIterator, B.Stream, B.CastStreamSubscription, B.Iterable, B.CastIterator, B.Closure, B.MapBase, B.Error, B.ListBase, B.SentinelValue, B.ListIterator, B.MappedIterator, B.WhereIterator, B.ExpandIterator, B.TakeIterator, B.SkipIterator, B.SkipWhileIterator, B.EmptyIterator, B.WhereTypeIterator, B.NonNullsIterator, B.IndexedIterator, B.FixedLengthListMixin, B.UnmodifiableListMixin, B.Symbol, B._Record, B.MapView, B.ConstantMap, B._KeysOrValuesOrElementsIterator, B.SetBase, B.JSInvocationMirror, B.TypeErrorDecoder, B.NullThrownFromJavaScriptException, B.ExceptionAndStackTrace, B._StackTrace, B.LinkedHashMapCell, B.LinkedHashMapKeyIterator, B.LinkedHashMapValueIterator, B.LinkedHashMapEntryIterator, B.JSSyntaxRegExp, B._MatchImplementation, B._AllMatchesIterator, B.StringMatch, B._StringAllMatchesIterator, B._Cell, B._InitializedCell, B._UnmodifiableNativeByteBufferView, B.Rti, B._FunctionParameters, B._Type, B._TimerImpl, B._AsyncAwaitCompleter, B._AsyncStarStreamController, B._IterationMarker, B._SyncStarIterator, B.AsyncError, B._BufferingStreamSubscription, B._BroadcastStreamController, B.TimeoutException, B._Completer, B._FutureListener, B._Future, B._AsyncCallbackEntry, B.StreamTransformerBase, B._StreamController, B._SyncStreamControllerDispatch, B._AsyncStreamControllerDispatch, B._StreamSinkWrapper, B._AddStreamState, B._DelayedEvent, B._DelayedDone, B._PendingEvents, B._DoneStreamSubscription, B._StreamIterator, B._EventSinkWrapper, B._Zone, B._HashMapKeyIterator, B._LinkedHashSetCell, B._LinkedHashSetIterator, B._MapBaseValueIterator, B._UnmodifiableMapMixin, B._ListQueueIterator, B.StringConversionSink, B.Codec, B.Converter, B.ByteConversionSink, B._Base64Encoder, B._Base64Decoder, B.ChunkedConversionSink, B._ConverterStreamEventSink, B.HtmlEscapeMode, B._JsonStringifier, B._JsonPrettyPrintMixin, B._LineSplitIterator, B._ClosableStringSink, B._StringConversionSinkAsStringSinkAdapter, B._Utf8Encoder, B._Utf8Decoder, B.DateTime, B.Duration, B._Enum, B.OutOfMemoryError, B.StackOverflowError, B._Exception, B.FormatException, B.MapEntry, B.Null, B._StringStackTrace, B.RuneIterator, B.StringBuffer, B._Uri, B.UriData, B._SimpleUri, B.NullRejectionException, B._JSRandom, B._JSSecureRandom, B.Endian, B.AgentResponseAccumulator0, B.Agent0, B.AgentConfiguration, B._HttpChannel_Object_StreamChannelMixin, B._DbgClient_Object_BaseClient, B.Command, B.CommandRegistry, B.ConversationManager, B.PersistentFileSystem, B.MemoryFileSystem, B.Secrets, B.ToolSetBase, B.LogSink0, B.AccessControlList, B.Log, B.UniqueIdGenerator, B.AuthCredentials, B.ApiKeyProvider, B.AnthropicClient, B.RetryPolicy0, B.AnthropicConfig, B.InterceptorChain, B.RequestBuilder, B.RetryWrapper0, B.AnthropicException, B.AuthInterceptor, B.ErrorInterceptor, B.LoggingInterceptor, B.Container, B.ContentBlock, B.WebSearchResult, B.WebSearchResultItem, B.Citation, B.InputContentBlock, B.ToolResultContent, B.MessageContent, B.InputMessage, B.Message, B.SystemPrompt, B.MessageCreateRequest, B.Metadata, B.CacheCreation, B.CacheRead, B.ServerToolUsage, B.IterationUsage, B.Usage, B.ImageSource, B.ContentBlockDelta, B.MessageDelta, B.MessageDeltaUsage, B.MessageStreamEvent, B.BuiltInTool, B.InputSchema, B.Tool, B.ToolCaller, B.ToolChoice, B.ToolDefinition, B.ResourceBase, B.FilesResource, B.StreamingResource, B.SseParser, B.ZLibEncoderBase, B.Deflate, B._DeflaterConfig, B._HuffmanTree, B._StaticTree, B.ZLibEncoder, B.InputStream, B.OutputStream, B.DelegatingStreamSink, B.HandlerTransformer, B._HandlerSink, B.Computation, B.Results, B.BetterOutcome, B.BidiString, B._CanonicalClass, B.Paragraph, B._CharData, B.Normalization, B._Stack, B.CancelationToken, B.CanceledException, B.CanonicalizedMap, B.DefaultEquality, B.IterableEquality, B.ListEquality, B._UnorderedEquality, B._MapEntry, B.MapEquality, B.DeepCollectionEquality, B.Digest, B.DigestSink, B.HashSink, B.MCPClient, B.MCPBase, B.Agent, B.AgentResponseAccumulator, B.MessageAccumulator, B.ModelStringParser, B.DefaultStreamingOrchestrator, B.StreamingIterationResult, B.StreamingState, B.ToolExecutionResult, B.ToolExecutor, B.ChatModel, B._AnthropicStreamingClient, B.ChatModelOptions, B.AnthropicEventMappingState, B.ToolIdCoordinator, B._ToolCallMetadata, B.StreamingToolCall, B.FallbackEventHandler, B.FunctionCallEventHandler, B.OutputItemEventHandler, B.ReasoningEventHandler, B.TerminalEventHandler, B.TextEventHandler, B.ToolEventHandler, B.AttachmentCollector, B.ContainerFileData, B.OpenAIResponsesEventMapper, B.EventMappingState, B.StreamingFunctionCall, B.OpenAIResponsesInvocation, B.OpenAIRequestParameters, B.OpenAIServerSideToolContext, B.OpenAIResponsesInvocationBuilder, B.OpenAIResponsesMessageBuilder, B.OpenAIResponsesHistorySegment, B._SessionMetadata, B.OpenAIResponsesPartMapper, B.OpenAIResponsesToolEventRecorder, B.XAIResponsesEventMapper, B.AnthropicFilesClient, B._AnthropicFileMetadata, B.AnthropicRemoteFile, B.DownloadedAnthropicFile, B.AnthropicToolDeliverableTracker, B.ToolDeliverableEmission, B._FileRef, B._InlineImage, B.Provider, B._RequestInfo, B.BaseClient, B.LanguageModelResult, B.LanguageModelUsage, B.ToolDefinition1, B.ChatMessage, B.Part, B.AuthCredentials0, B.ApiKeyProvider1, B.GoogleAIConfig, B.GoogleAIClient, B.InterceptorChain2, B.RequestBuilder2, B.RetryWrapper1, B.GoogleAIException, B.LoggingInterceptor2, B.GoogleSearch, B.GroundingChunkCustomMetadata, B.GroundingChunkStringList, B.Image, B.ModelStatus, B.Blob, B.Candidate, B.CitationSource, B.CitationMetadata, B.Content, B.FileData, B.LogprobsResult, B.TopCandidates, B.LogprobCandidate, B.MediaResolution, B.Part0, B.VideoMetadata, B.AttributionSourceId, B.GenerateContentRequest, B.GenerateContentResponse, B.GenerationConfig, B.GroundingAttribution, B.GroundingPassageId, B.PromptFeedback, B.Schema, B.SemanticRetrieverChunk, B.GroundingChunk, B.GroundingMetadata, B.GroundingSupport, B.Maps, B.PlaceAnswerSources, B.RetrievalMetadata, B.RetrievedContext, B.ReviewSnippet, B.SearchEntryPoint, B.Segment, B.UsageMetadata, B.Web, B.SafetyRating, B.CodeExecution, B.CodeExecutionResult, B.ExecutableCode, B.FunctionCall0, B.FunctionDeclaration, B.FunctionResponseBlob, B.FunctionResponseInlinePart, B.FunctionResponse, B.Tool1, B.ToolCall1, B.ToolResponse, B.UrlContext, B.ResourceBase0, B.StreamingResource0, B.Redactor, B.ClientException, B.BaseRequest, B.BaseResponse, B.MediaType, B.ChannelIterator, B.Client, B._Request, B.RpcException, B.Parameters, B.Peer, B.Server, B._RespondToFormatExceptionsTransformer, B.Level, B.LogRecord, B.Logger, B.Element, B.Text, B.UnparsedContent, B.BlockParser, B.BlockSyntax, B._FenceMatch, B.ListItem, B.Document, B.LinkReference, B.ExtensionSet, B.HtmlRenderer, B.InlineParser, B.InlineSyntax, B.DelimiterTag, B.SimpleDelimiter, B.DelimiterRun, B.LinkContext, B.InlineLink, B.Line, B.TextParser, B.DedentedText, B.MagicNumber, B.MimeTypeResolver, B.AuthCredentials1, B.ApiKeyProvider2, B.MistralConfig, B.InterceptorChain3, B.MistralClient, B.RequestBuilder3, B.RetryWrapper2, B.MistralException, B.AuthInterceptor1, B.ErrorInterceptor0, B.LoggingInterceptor1, B.ChatChoiceDelta, B.DeltaContent, B.ChatCompletionRequest, B.ChatCompletionStreamResponse, B.ChatMessage1, B.ContentPart, B.UsageInfo, B.FunctionCall1, B.FunctionDefinition0, B.Tool2, B.ToolCall2, B.ResourceBase1, B.AudioResource, B.BatchResource, B.FineTuningResource, B.StreamingResource1, B.OllamaConfig, B.InterceptorChain0, B.OllamaClient, B.RequestBuilder0, B.RetryWrapper3, B.ErrorInterceptor1, B.LoggingInterceptor0, B.ChatMessage0, B.ChatRequest, B.ChatResponseMessage, B.ChatResponse, B.TokenLogprob, B.Logprob, B.ModelOptions, B.ToolCallFunction, B.ToolCall, B.ToolFunction, B.ToolDefinition0, B.ResourceBase2, B.StreamingResource2, B.ApiKeyProvider0, B.RetryPolicy, B.OpenAIConfig, B.InterceptorChain1, B.OpenAIClient, B.RequestBuilder1, B.RetryWrapper, B.OpenAIException, B.AuthInterceptor0, B.ErrorInterceptor2, B.RequestContext, B.ChatCompletionCreateRequest, B.StreamOptions, B.ChatMessage2, B.ContentPart0, B.ReasoningDetail, B.ToolCall0, B.FunctionCall, B.UserMessageContent, B._UnsetCopyWithSentinel, B.Logprobs, B.TokenLogprob0, B.TopLogprob, B.Usage0, B.PromptTokensDetails, B.CompletionTokensDetails, B.ReasoningConfig, B.TextConfig, B.Annotation, B.InputContent, B.LogProb, B.TopLogProb, B.OutputContent, B.CreateResponseRequest, B.IncompleteDetails, B.Item, B.FunctionCallOutput, B.OutputItem, B.ReasoningSummaryContent, B.CodeInterpreterOutput, B.LocalShellExecAction, B.ShellCallAction, B.ShellEnvironment, B.ShellCallOutputContent, B.ShellCallOutcome, B.Response0, B.ResponseError, B.ResponseInput, B.ResponseUsage, B.InputTokensDetails, B.OutputTokensDetails, B.ResponseStreamEvent, B.CodeInterpreterContainer, B.ContainerNetworkPolicy, B.ComputerAction, B.ResponseTool, B.ApproximateLocation, B.FileSearchFilter, B.FileSearchRankingOptions, B.UnknownNamespaceTool, B.ChatStreamEvent, B.ChatStreamChoice, B.ChatDelta, B.ToolCallDelta, B.FunctionCallDelta, B.Tool0, B.FunctionDefinition, B.ResourceBase3, B.StreamingResource3, B.SseParser0, B.Context, B.Style, B.ParsedPath, B.PathException, B.PdfColor, B.PdfDocument, B.PdfFontMetrics, B.PdfDataType, B.PdfDiagnostic, B.PdfSettings, B._PdfObjectBase_Object_PdfDiagnostic, B.PdfStream, B._PdfGraphicsContext, B.PdfGraphics, B.PdfAnnotBase, B.PdfGraphicStream, B.PdfPageFormat, B.PdfPoint, B.PdfRasterBase, B.PdfRect, B.AnnotationBuilder, B.Widget, B.Radius, B.BorderRadiusGeometry, B.BorderStyle, B.BoxBorder, B.BorderSide, B.BoxDecoration, B.Document0, B.WidgetContext, B.Font, B.BoxConstraints, B.EdgeInsetsGeometry, B.AlignmentGeometry, B.ImageProvider, B.SpanningWidget, B._MultiPageWidget, B._MultiPageInstance, B.Page, B.PageTheme, B._Span, B._TextDecoration, B.InlineSpan, B._Line0, B.TextDecoration, B.TextStyle, B.Inherited, B.Context0, B._WhereNotNullStreamSink, B.SourceFile, B.SourceLocationMixin, B.SourceSpanMixin, B.Highlighter, B._Highlight, B._Line, B.SourceLocation, B.SourceSpanException, B.Chain, B.Frame, B.LazyChain, B.Trace, B.UnparsedFrame, B.StreamChannelMixin, B._JsonDocument, B.StringScanner, B.RNG, B.Uuid, B.Matrix4, B.Vector3, B.Vector4, B.WebAgentConfig, B.AgentUI, B.HtmlOutputController, B.HtmlSink, B.HtmlStreamingSink, B.HtmlNestedSink, B.IDialogField, B.DialogConfig, B.IDialogComplexItem]);
+    _inheritMany(B.Object, [B.JS_CONST, J.Interceptor, B.SafeToStringHook, J.ArrayIterator, B.Stream, B.CastStreamSubscription, B.Iterable, B.CastIterator, B.Closure, B.MapBase, B.Error, B.ListBase, B.SentinelValue, B.ListIterator, B.MappedIterator, B.WhereIterator, B.ExpandIterator, B.TakeIterator, B.SkipIterator, B.SkipWhileIterator, B.EmptyIterator, B.WhereTypeIterator, B.NonNullsIterator, B.IndexedIterator, B.FixedLengthListMixin, B.UnmodifiableListMixin, B.Symbol, B._Record, B.MapView, B.ConstantMap, B._KeysOrValuesOrElementsIterator, B.SetBase, B.JSInvocationMirror, B.TypeErrorDecoder, B.NullThrownFromJavaScriptException, B.ExceptionAndStackTrace, B._StackTrace, B.LinkedHashMapCell, B.LinkedHashMapKeyIterator, B.LinkedHashMapValueIterator, B.LinkedHashMapEntryIterator, B.JSSyntaxRegExp, B._MatchImplementation, B._AllMatchesIterator, B.StringMatch, B._StringAllMatchesIterator, B._Cell, B._InitializedCell, B._UnmodifiableNativeByteBufferView, B.Rti, B._FunctionParameters, B._Type, B._TimerImpl, B._AsyncAwaitCompleter, B._AsyncStarStreamController, B._IterationMarker, B._SyncStarIterator, B.AsyncError, B._BufferingStreamSubscription, B._BroadcastStreamController, B.TimeoutException, B._Completer, B._FutureListener, B._Future, B._AsyncCallbackEntry, B.StreamTransformerBase, B._StreamController, B._SyncStreamControllerDispatch, B._AsyncStreamControllerDispatch, B._StreamSinkWrapper, B._AddStreamState, B._DelayedEvent, B._DelayedDone, B._PendingEvents, B._DoneStreamSubscription, B._StreamIterator, B._EventSinkWrapper, B._Zone, B._HashMapKeyIterator, B._LinkedHashSetCell, B._LinkedHashSetIterator, B._MapBaseValueIterator, B._UnmodifiableMapMixin, B._ListQueueIterator, B.StringConversionSink, B.Codec, B.Converter, B.ByteConversionSink, B._Base64Encoder, B._Base64Decoder, B.ChunkedConversionSink, B._ConverterStreamEventSink, B.HtmlEscapeMode, B._JsonStringifier, B._JsonPrettyPrintMixin, B._LineSplitIterator, B._ClosableStringSink, B._StringConversionSinkAsStringSinkAdapter, B._Utf8Encoder, B._Utf8Decoder, B.DateTime, B.Duration, B._Enum, B.OutOfMemoryError, B.StackOverflowError, B._Exception, B.FormatException, B.MapEntry, B.Null, B._StringStackTrace, B.RuneIterator, B.StringBuffer, B._Uri, B.UriData, B._SimpleUri, B.NullRejectionException, B._JSRandom, B._JSSecureRandom, B.Endian, B.AgentResponseAccumulator0, B.Agent0, B.AgentConfiguration, B.CanceledException, B._HttpChannel_Object_StreamChannelMixin, B._DbgClient_Object_BaseClient, B.Command, B.CommandRegistry, B.ConversationManager, B.PersistentFileSystem, B.MemoryFileSystem, B.Secrets, B.ToolSetBase, B.LogSink0, B.AccessControlList, B.Log, B.UniqueIdGenerator, B.AuthCredentials, B.ApiKeyProvider, B.AnthropicClient, B.RetryPolicy0, B.AnthropicConfig, B.InterceptorChain, B.RequestBuilder, B.RetryWrapper0, B.AnthropicException, B.AuthInterceptor, B.ErrorInterceptor, B.LoggingInterceptor, B.Container, B.ContentBlock, B.WebSearchResult, B.WebSearchResultItem, B.Citation, B.InputContentBlock, B.ToolResultContent, B.MessageContent, B.InputMessage, B.Message, B.SystemPrompt, B.MessageCreateRequest, B.Metadata, B.RefusalStopDetails, B.CacheCreation, B.CacheRead, B.ServerToolUsage, B.IterationUsage, B.Usage, B.ImageSource, B.ContentBlockDelta, B.MessageDelta, B.MessageDeltaUsage, B.MessageStreamEvent, B.BuiltInTool, B.InputSchema, B.Tool, B.ToolCaller, B.ToolChoice, B.ToolDefinition, B.ResourceBase, B.FilesResource, B.StreamingResource, B.SseParser, B.ZLibEncoderBase, B.Deflate, B._DeflaterConfig, B._HuffmanTree, B._StaticTree, B.ZLibEncoder, B.InputStream, B.OutputStream, B.DelegatingStreamSink, B.HandlerTransformer, B._HandlerSink, B.Computation, B.Results, B.BetterOutcome, B.BidiString, B._CanonicalClass, B.Paragraph, B._CharData, B.Normalization, B._Stack, B.CancelationToken, B.CanonicalizedMap, B.DefaultEquality, B.IterableEquality, B.ListEquality, B._UnorderedEquality, B._MapEntry, B.MapEquality, B.DeepCollectionEquality, B.Digest, B.DigestSink, B.HashSink, B.MCPClient, B.MCPBase, B.Agent, B.AgentResponseAccumulator, B.MessageAccumulator, B.ModelStringParser, B.DefaultStreamingOrchestrator, B.StreamingIterationResult, B.StreamingState, B.ToolExecutionResult, B.ToolExecutor, B.ChatModel, B._AnthropicStreamingClient, B.ChatModelOptions, B.AnthropicEventMappingState, B.ToolIdCoordinator, B._ToolCallMetadata, B.StreamingToolCall, B.FallbackEventHandler, B.FunctionCallEventHandler, B.OutputItemEventHandler, B.ReasoningEventHandler, B.TerminalEventHandler, B.TextEventHandler, B.ToolEventHandler, B.AttachmentCollector, B.ContainerFileData, B.OpenAIResponsesEventMapper, B.EventMappingState, B.StreamingFunctionCall, B.OpenAIResponsesInvocation, B.OpenAIRequestParameters, B.OpenAIServerSideToolContext, B.OpenAIResponsesInvocationBuilder, B.OpenAIResponsesMessageBuilder, B.OpenAIResponsesHistorySegment, B._SessionMetadata, B.OpenAIResponsesPartMapper, B.OpenAIResponsesToolEventRecorder, B.XAIResponsesEventMapper, B.AnthropicFilesClient, B._AnthropicFileMetadata, B.AnthropicRemoteFile, B.DownloadedAnthropicFile, B.AnthropicToolDeliverableTracker, B.ToolDeliverableEmission, B._FileRef, B._InlineImage, B.Provider, B._RequestInfo, B.BaseClient, B.LanguageModelResult, B.LanguageModelUsage, B.ToolDefinition1, B.ChatMessage, B.Part, B.AuthCredentials0, B.ApiKeyProvider1, B.GoogleAIConfig, B.GoogleAIClient, B.InterceptorChain2, B.RequestBuilder2, B.RetryWrapper1, B.GoogleAIException, B.LoggingInterceptor2, B.GoogleSearch, B.GroundingChunkCustomMetadata, B.GroundingChunkStringList, B.Image, B.ModelStatus, B.Blob, B.Candidate, B.CitationSource, B.CitationMetadata, B.Content, B.FileData, B.LogprobsResult, B.TopCandidates, B.LogprobCandidate, B.MediaResolution, B.Part0, B.VideoMetadata, B.AttributionSourceId, B.GenerateContentRequest, B.GenerateContentResponse, B.GenerationConfig, B.GroundingAttribution, B.GroundingPassageId, B.PromptFeedback, B.Schema, B.SemanticRetrieverChunk, B.GroundingChunk, B.GroundingMetadata, B.GroundingSupport, B.Maps, B.PlaceAnswerSources, B.RetrievalMetadata, B.RetrievedContext, B.ReviewSnippet, B.SearchEntryPoint, B.Segment, B.UsageMetadata, B.Web, B.SafetyRating, B.CodeExecution, B.CodeExecutionResult, B.ExecutableCode, B.FunctionCall0, B.FunctionDeclaration, B.FunctionResponseBlob, B.FunctionResponseInlinePart, B.FunctionResponse, B.Tool1, B.ToolCall1, B.ToolResponse, B.UrlContext, B.ResourceBase0, B.StreamingResource0, B.Redactor, B.ClientException, B.BaseRequest, B.BaseResponse, B.MediaType, B.ChannelIterator, B.Client, B._Request, B.RpcException, B.Parameters, B.Peer, B.Server, B._RespondToFormatExceptionsTransformer, B.Level, B.LogRecord, B.Logger, B.Element, B.Text, B.UnparsedContent, B.BlockParser, B.BlockSyntax, B._FenceMatch, B.ListItem, B.Document, B.LinkReference, B.ExtensionSet, B.HtmlRenderer, B.InlineParser, B.InlineSyntax, B.DelimiterTag, B.SimpleDelimiter, B.DelimiterRun, B.LinkContext, B.InlineLink, B.Line, B.TextParser, B.DedentedText, B.MagicNumber, B.MimeTypeResolver, B.AuthCredentials1, B.ApiKeyProvider2, B.MistralConfig, B.InterceptorChain3, B.MistralClient, B.RequestBuilder3, B.RetryWrapper2, B.MistralException, B.AuthInterceptor1, B.ErrorInterceptor0, B.LoggingInterceptor1, B.ChatChoiceDelta, B.DeltaContent, B.ChatCompletionRequest, B.ChatCompletionStreamResponse, B.ChatMessage1, B.ContentPart, B.UsageInfo, B.FunctionCall1, B.FunctionDefinition0, B.Tool2, B.ToolCall2, B.ResourceBase1, B.AudioResource, B.BatchResource, B.FineTuningResource, B.StreamingResource1, B.OllamaConfig, B.InterceptorChain0, B.OllamaClient, B.RequestBuilder0, B.RetryWrapper3, B.ErrorInterceptor1, B.LoggingInterceptor0, B.ChatMessage0, B.ChatRequest, B.ChatResponseMessage, B.ChatResponse, B.TokenLogprob, B.Logprob, B.ModelOptions, B.ToolCallFunction, B.ToolCall, B.ToolFunction, B.ToolDefinition0, B.ResourceBase2, B.StreamingResource2, B.ApiKeyProvider0, B.RetryPolicy, B.OpenAIConfig, B.InterceptorChain1, B.OpenAIClient, B.RequestBuilder1, B.RetryWrapper, B.OpenAIException, B.AuthInterceptor0, B.ErrorInterceptor2, B.RequestContext, B.ChatCompletionCreateRequest, B.StreamOptions, B.ChatMessage2, B.ContentPart0, B.ReasoningDetail, B.ToolCall0, B.FunctionCall, B.UserMessageContent, B._UnsetCopyWithSentinel, B.Logprobs, B.TokenLogprob0, B.TopLogprob, B.Usage0, B.PromptTokensDetails, B.CompletionTokensDetails, B.ReasoningConfig, B.TextConfig, B.Annotation, B.InputContent, B.LogProb, B.TopLogProb, B.OutputContent, B.CreateResponseRequest, B.IncompleteDetails, B.Item, B.FunctionCallOutput, B.OutputItem, B.ReasoningSummaryContent, B.CodeInterpreterOutput, B.LocalShellExecAction, B.ShellCallAction, B.ShellEnvironment, B.ShellCallOutputContent, B.ShellCallOutcome, B.Response0, B.ResponseError, B.ResponseInput, B.ResponseUsage, B.InputTokensDetails, B.OutputTokensDetails, B.ResponseStreamEvent, B.CodeInterpreterContainer, B.ContainerNetworkPolicy, B.ComputerAction, B.ResponseTool, B.ApproximateLocation, B.FileSearchFilter, B.FileSearchRankingOptions, B.UnknownNamespaceTool, B.ChatStreamEvent, B.ChatStreamChoice, B.ChatDelta, B.ToolCallDelta, B.FunctionCallDelta, B.Tool0, B.FunctionDefinition, B.ResourceBase3, B.StreamingResource3, B.SseParser0, B.Context, B.Style, B.ParsedPath, B.PathException, B.PdfColor, B.PdfDocument, B.PdfFontMetrics, B.PdfDataType, B.PdfDiagnostic, B.PdfSettings, B._PdfObjectBase_Object_PdfDiagnostic, B.PdfStream, B._PdfGraphicsContext, B.PdfGraphics, B.PdfAnnotBase, B.PdfGraphicStream, B.PdfPageFormat, B.PdfPoint, B.PdfRasterBase, B.PdfRect, B.AnnotationBuilder, B.Widget, B.Radius, B.BorderRadiusGeometry, B.BorderStyle, B.BoxBorder, B.BorderSide, B.BoxDecoration, B.Document0, B.WidgetContext, B.Font, B.BoxConstraints, B.EdgeInsetsGeometry, B.AlignmentGeometry, B.ImageProvider, B.SpanningWidget, B._MultiPageWidget, B._MultiPageInstance, B.Page, B.PageTheme, B.TableRow, B.ColumnLayout, B.TableColumnWidth, B._Span, B._TextDecoration, B.InlineSpan, B._Line0, B.TextDecoration, B.TextStyle, B.Inherited, B.Context0, B._WhereNotNullStreamSink, B.SourceFile, B.SourceLocationMixin, B.SourceSpanMixin, B.Highlighter, B._Highlight, B._Line, B.SourceLocation, B.SourceSpanException, B.Chain, B.Frame, B.LazyChain, B.Trace, B.UnparsedFrame, B.StreamChannelMixin, B._JsonDocument, B.StringScanner, B.RNG, B.Uuid, B.Matrix4, B.Vector3, B.Vector4, B.WebAgentConfig, B.AgentUI, B.HtmlOutputController, B.HtmlSink, B.HtmlStreamingSink, B.HtmlNestedSink, B.PromptHistory, B.IDialogField, B.DialogConfig, B.IDialogComplexItem]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, B.NativeByteBuffer, B.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
@@ -75279,14 +76022,14 @@
     _inheritMany(B._CastIterableBase, [B.CastIterable, B.__CastListBase__CastIterableBase_ListMixin, B.CastSet, B.CastQueue]);
     _inherit(B._EfficientLengthCastIterable, B.CastIterable);
     _inherit(B._CastListBase, B.__CastListBase__CastIterableBase_ListMixin);
-    _inheritMany(B.Closure, [B.Closure2Args, B.CastMap_entries_closure, B.Closure0Args, B.Instantiation, B.TearOffClosure, B.initHooks_closure, B.initHooks_closure1, B._AsyncRun__initializeScheduleImmediate_internalCallback, B._AsyncRun__initializeScheduleImmediate_closure, B._awaitOnObject_closure, B._asyncStarHelper_closure0, B._SyncBroadcastStreamController__sendData_closure, B._SyncBroadcastStreamController__sendError_closure, B._SyncBroadcastStreamController__sendDone_closure, B.Future_wait_closure, B.Future_any_onValue, B._Future__propagateToListeners_handleWhenCompleteCallback_closure, B._Future_timeout_closure0, B.Stream_Stream$fromIterable_closure, B.Stream_fold_closure0, B.Stream_fold__closure0, B.Stream_forEach_closure0, B.Stream_forEach__closure0, B.Stream_length_closure, B._HashMap_values_closure, B._CustomHashMap_closure, B._LinkedCustomHashMap_closure, B.MapBase_entries_closure, B._convertJsonToDart_walk, B._JsonMap_values_closure, B.Converter_bind_closure, B.Encoding_decodeStream_closure0, B.LineSplitter_bind_closure, B.DateTime_parse_parseIntOrZero, B.DateTime_parse_parseMilliAndMicroseconds, B._Uri__makePath_closure, B.jsify__convert, B.promiseToFuture_closure, B.promiseToFuture_closure0, B.AgentResponseAccumulator_add_closure0, B.Agent_toolNames_closure, B.Agent_messages_closure, B.Agent_invokeStream_closure3, B.InteractiveAgent_interactWithUser_$parseCommand, B.HttpChannel__client_closure, B.HttpChannel__eventStream_closure, B.DbgClient__traceRequest_closure, B.DbgClient__traceResponse_closure, B.HelpCommand_handle_closure0, B.HistoryCommand_handle_closure, B.SummarizeCommand_handle_closure, B.ChatMessageExt_compact_closure, B.PersistentConversationManager__save_closure, B.FileSystem_normalizePath_closure, B.McpToolSet_initialize_closure, B.McpToolSet__getHandlerFor_closure, B.ToolSet_ToolSet$combined_closure, B.ToolSet_names_closure, B.ToolSet_getTool_closure, B.CombinedToolSet_tools_closure, B.CombinedToolSet_names_closure, B.LogSink_add_closure, B.trace_closure, B.AccessControlList_check_closure, B.AccessControlList_check_closure0, B.ChatMessageDbgExt_dump_closure, B.Log_append_closure, B.Log_append_closure0, B.Log_append_closure1, B.mapHash_closure, B.mapDeepHashCode_closure, B.TextBlock_TextBlock$fromJson_closure, B.TextBlock_toJson_closure, B.WebSearchResultSuccess_WebSearchResultSuccess$fromJson_closure, B.WebSearchResultSuccess_toJson_closure, B.ToolResultInputBlock_toJson_closure, B.BlocksMessageContent_toJson_closure, B.Message_Message$fromJson_closure, B.Message_toJson_closure, B.MessageCreateRequest_toJson_closure, B.MessageCreateRequest_toJson_closure0, B.Usage_Usage$fromJson_closure, B.Usage_toJson_closure, B.MessageDeltaUsage_MessageDeltaUsage$fromJson_closure, B.MessageDeltaUsage_toJson_closure, B._SafeCloseSink_close_closure, B.Computation_compute_$complete, B.Computation_compute_$completeError, B.SettledResults_get_closure, B.futureCast_closure, B.Results__done_closure, B.BetterFuture_settle_closure, B.BetterFuture_settle__closure, B.BetterFuture__waiter_closure, B.BetterFuture__waiter_closure0, B.BetterFuture__waiter_closure1, B.BetterFuture__settler_closure, B.BetterFuture__settler_closure_$complete, B.BetterFuture__settler_closure_$completeError, B.CanonicalizedMap_entries_closure, B.CanonicalizedMap_keys_closure, B.CanonicalizedMap_values_closure, B.ProtocolVersion_tryParse_closure, B.MCPClient_connectServer_closure, B.MCPBase_registerRequestHandler_closure, B.MCPBase_registerNotificationHandler_closure, B.AgentResponseAccumulator_add_closure, B.MessageAccumulator_accumulate_closure, B.MessageAccumulator_consolidate_closure, B.MessageAccumulator_consolidate_closure0, B.MessageAccumulator_consolidate_closure1, B.ModelStringParser_ModelStringParser$parse_doThrow, B.DefaultStreamingOrchestrator_executeToolCalls_closure, B.DefaultStreamingOrchestrator_extractToolCalls_closure, B.DefaultStreamingOrchestrator_hasRecentToolExecution_closure, B.DefaultStreamingOrchestrator_hasRecentToolExecution__closure, B._extractText_closure, B._extractThinking_closure, B.MessageListMapper__mapModelMessage_closure, B.MessageStreamEventTransformer_bind_closure, B._mapMessageContent_closure, B.ToolSpecListMapper_get__mapTool_closure, B.GoogleChatModel_sendStream_closure, B.GoogleChatModel__buildRequest_closure, B.GoogleChatModel__extractSystemInstruction_closure, B.GoogleChatModel__extractSystemInstruction_closure0, B.MessageListMapper_toContentList_closure, B.MessageListMapper_toContentList_closure0, B.MessageListMapper_toContentList_closure1, B.GenerateContentResponseMapper_toChatResult_closure, B.GenerateContentResponseMapper_toChatResult_closure0, B.GenerateContentResponseMapper_toChatResult_closure1, B.GenerateContentResponseMapper_toChatResult_closure2, B.ChatToolListMapper_toToolList_closure, B.MistralChatModel_sendStream_closure, B.ToolListMapper_toMistralTools_closure, B.MessageListMapper__mapMessage_closure0, B.MessageListMapper__mapMessage_closure1, B.CreateChatCompletionStreamResponseMapper_toChatResult_closure, B.OllamaToolListMapper_toOllamaTools_closure, B.MessageListMapper_toMessages_closure, B.MessageListMapper_get__mapMessage_closure, B.MessageListMapper__mapMessage_closure, B.MessageListMapper__mapUserMessage_closure, B.MessageListMapper__mapUserMessage_closure0, B.MessageListMapper__mapModelMessage_closure0, B.MessageListToOpenAI__mapModelMessage_closure, B.createChatCompletionRequest_closure, B.OpenAIResponsesChatModel__buildFunctionTools_closure, B.OpenAIResponsesMessageBuilder_createStreamingResult_closure, B.OpenAIResponsesMessageMapper_mapHistory_closure, B.XAIResponsesChatModel__buildFunctionTools_closure, B.XAIResponsesChatModel__toOpenAIOptionsStatic_closure, B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure, B.OpenAIUtils_prepareSchemaForOpenAI_closure, B.PartHelpers_extensionFromMimeType_closure, B.MessagePartHelpers_get_text_closure, B.MessagePartHelpers_get_toolCalls_closure, B.MessagePartHelpers_get_toolResults_closure, B.Tool_closure, B.Parts_toJson_closure, B.Parts_text_closure, B.Parts_toolCalls_closure, B.Parts_toolResults_closure, B.DataPart_extensionFromMimeType_closure, B.GroundingChunkStringList_GroundingChunkStringList$fromJson_closure, B.Candidate_Candidate$fromJson_closure, B.Candidate_Candidate$fromJson_closure0, B.Candidate_toJson_closure, B.Candidate_toJson_closure0, B.CitationMetadata_CitationMetadata$fromJson_closure, B.CitationMetadata_toJson_closure, B.Content_Content$fromJson_closure, B.Content_toJson_closure, B.LogprobsResult_LogprobsResult$fromJson_closure, B.LogprobsResult_LogprobsResult$fromJson_closure0, B.LogprobsResult_toJson_closure, B.LogprobsResult_toJson_closure0, B.TopCandidates_TopCandidates$fromJson_closure, B.TopCandidates_toJson_closure, B.GenerateContentRequest_toJson_closure, B.GenerateContentRequest_toJson_closure0, B.GenerateContentResponse_GenerateContentResponse$fromJson_closure, B.GenerateContentResponse_toJson_closure, B.PromptFeedback_PromptFeedback$fromJson_closure, B.PromptFeedback_toJson_closure, B.GroundingMetadata_GroundingMetadata$fromJson_closure, B.GroundingMetadata_GroundingMetadata$fromJson_closure0, B.GroundingMetadata_GroundingMetadata$fromJson_closure1, B.GroundingMetadata_GroundingMetadata$fromJson_closure2, B.GroundingMetadata_toJson_closure, B.GroundingMetadata_toJson_closure0, B.GroundingSupport_GroundingSupport$fromJson_closure, B.GroundingSupport_GroundingSupport$fromJson_closure0, B.GroundingSupport_GroundingSupport$fromJson_closure1, B.PlaceAnswerSources_PlaceAnswerSources$fromJson_closure, B.PlaceAnswerSources_toJson_closure, B.RetrievedContext_RetrievedContext$fromJson_closure, B.RetrievedContext_toJson_closure, B.FunctionResponse_FunctionResponse$fromJson_closure, B.FunctionResponse_toJson_closure, B.Tool_toJson_closure, B.Redactor_redactString_closure, B.Redactor_redactString_closure0, B.Redactor_redactString_closure1, B.BaseRequest_closure0, B.BrowserClient_send_closure0, B._bodyToStream_closure, B.ByteStream_toBytes_closure, B.MediaType_toString__closure, B.expectQuotedString_closure, B.Client$withoutJson_closure0, B.Parameter__path_quoteKey, B.Parameter__path_computePath, B.Parameter_asList_closure, B.Parameter_asMap_closure, B.Peer_listen_closure, B.Server__handleRequest_closure, B._RespondToFormatExceptionsTransformer_bind_closure, B._RespondToFormatExceptionsTransformer_bind__closure, B._RespondToFormatExceptionsTransformer_bind__closure0, B.Element_textContent_closure, B.BlockSyntax_isAtBlockEnd_closure, B.BlockquoteSyntax_parseChildLines_closure, B.CodeBlockSyntax_parse_closure, B.FencedCodeBlockSyntax_parse_closure, B.FootnoteDefSyntax_parseChildLines__closure, B.FootnoteDefSyntax__isBlock_closure, B.HtmlBlockSyntax_parse_closure, B.LinkReferenceDefinitionSyntax__parseLinkReferenceDefinition_closure, B.ListSyntax_parse_parseTaskListItem, B.ListSyntax_parse_parseTaskListItem_closure, B.ListSyntax_parse_tryMatch, B.SetextHeaderSyntax_parse_closure, B.HtmlRenderer_visitText_closure, B.InlineParser_parse_closure, B.InlineParser__linkOrImage_closure, B.InlineParser__linkOrImage_closure0, B.InlineParser__linkOrImage_closure1, B.InlineParser__processDelimiterRun_closure0, B.InlineParser__processDelimiterRun_closure1, B.FootnoteRefSyntax_tryCreateFootnoteLink_closure, B.ImageSyntax_createNode_closure, B.LinkSyntax_closure, B.normalizeLinkDestination_closure, B.normalizeLinkDestination_closure0, B.DeltaContent_DeltaContent$fromJson_closure, B.DeltaContent_toJson_closure, B.ChatCompletionRequest_toJson_closure, B.ChatCompletionRequest_toJson_closure0, B.ChatCompletionStreamResponse_ChatCompletionStreamResponse$fromJson_closure, B.ChatCompletionStreamResponse_toJson_closure, B.UserMessage_toJson_closure, B.AssistantMessage_toJson_closure0, B.mapHash_closure1, B.ChatMessage_toJson_closure, B.ChatRequest_toJson_closure, B.ChatRequest_toJson_closure0, B.ChatResponseMessage_ChatResponseMessage$fromJson_closure, B.ChatResponseMessage_toJson_closure, B.ChatResponse_ChatResponse$fromJson_closure, B.ChatResponse_toJson_closure, B.mapDeepHashCode_closure0, B.Logprob_Logprob$fromJson_closure, B.Logprob_toJson_closure, B.OpenAIConfig_hashCode_closure, B.InterceptorChain__buildChain_closure, B.ChatCompletionCreateRequest_toJson_closure, B.ChatCompletionCreateRequest_toJson_closure0, B.AssistantMessage_toJson_closure, B.UserPartsContent_toJson_closure, B.Logprobs_Logprobs$fromJson_closure, B.Logprobs_Logprobs$fromJson_closure0, B.Logprobs_toJson_closure, B.Logprobs_toJson_closure0, B.TokenLogprob_TokenLogprob$fromJson_closure, B.TokenLogprob_toJson_closure, B.mapHash_closure0, B.mapDeepHashCode_closure1, B.ClickButton_ClickButton$fromJson_closure, B.FunctionCallOutputStatus_FunctionCallOutputStatus$fromJson_closure, B.Include_Include$fromJson_closure, B.ItemStatus_ItemStatus$fromJson_closure, B.MessagePhase_MessagePhase$fromJson_closure, B.MessageRole_MessageRole$fromJson_closure, B.PromptCacheRetention_PromptCacheRetention$fromJson_closure, B.ResponseStatus_ResponseStatus$fromJson_closure, B.SearchContentType_SearchContentType$fromJson_closure, B.ServiceTier_ServiceTier$fromJson_closure, B.ToolSearchExecutionType_ToolSearchExecutionType$fromJson_closure, B.LogProb_LogProb$fromJson_closure, B.LogProb_toJson_closure, B.OutputTextContent_OutputTextContent$fromJson_closure, B.OutputTextContent_OutputTextContent$fromJson_closure0, B.OutputTextContent_toJson_closure, B.OutputTextContent_toJson_closure0, B.CreateResponseRequest_toJson_closure, B.CreateResponseRequest_toJson_closure0, B.CreateResponseRequest_toJson_closure1, B.MessageItem_toJson_closure, B.MessageOutputItem_MessageOutputItem$fromJson_closure, B.MessageOutputItem_toJson_closure, B.ReasoningItem_ReasoningItem$fromJson_closure, B.ReasoningItem_ReasoningItem$fromJson_closure0, B.ReasoningItem_toJson_closure, B.FileSearchCallOutputItem_FileSearchCallOutputItem$fromJson_closure, B.CodeInterpreterCallOutputItem_CodeInterpreterCallOutputItem$fromJson_closure, B.CodeInterpreterCallOutputItem_toJson_closure, B.ShellCallOutputResultItem_ShellCallOutputResultItem$fromJson_closure, B.ShellCallOutputResultItem_toJson_closure, B.ToolSearchOutputItem_ToolSearchOutputItem$fromJson_closure, B.ToolSearchOutputItem_toJson_closure, B.ComputerCallOutputItem_ComputerCallOutputItem$fromJson_closure, B.ComputerCallOutputItem_ComputerCallOutputItem$fromJson_closure0, B.ComputerCallOutputItem_toJson_closure, B.Response_Response$fromJson_closure, B.Response_toJson_closure, B.ResponseInputItems_toJson_closure, B.OutputTextDeltaEvent_OutputTextDeltaEvent$fromJson_closure, B.OutputTextDeltaEvent_toJson_closure, B.OutputTextDoneEvent_OutputTextDoneEvent$fromJson_closure, B.OutputTextDoneEvent_toJson_closure, B.DragAction_DragAction$fromJson_closure, B.WebSearchTool_WebSearchTool$fromJson_closure, B.WebSearchTool_toJson_closure, B.CompoundFilter_CompoundFilter$fromJson_closure, B.CompoundFilter_toJson_closure, B.NamespaceTool_NamespaceTool$fromJson_closure, B.NamespaceTool_toJson_closure, B.ChatStreamEvent_ChatStreamEvent$fromJson_closure, B.ChatStreamEvent_toJson_closure, B.ChatDelta_ChatDelta$fromJson_closure, B.ChatDelta_ChatDelta$fromJson_closure0, B.ChatDelta_toJson_closure, B.ChatDelta_toJson_closure0, B.ChatCompletionsResource_createStream_closure, B.Context_joinAll_closure, B.Context_split_closure, B._validateArgList_closure, B.WindowsStyle_absolutePathToUri_closure, B.PdfDocument__write_closure, B.PdfArray_fromObjects_closure, B.PdfArray_fromNum_closure, B.PdfString__encodeUtf16be_add, B.PdfAnnotBase_flagValue_closure, B.PdfPage_prepare_closure, B.PdfType1Font$create_closure, B.Font_buildFont_closure, B.MultiPage_closure, B.RichText__preProcessSpans_closure, B.WhereNotNullStreamTransformer_bind_closure, B.Highlighter$__closure, B.Highlighter$___closure, B.Highlighter$__closure0, B.Highlighter__collateLines_closure, B.Highlighter__collateLines_closure1, B.Highlighter__collateLines__closure, B.Highlighter_highlight_closure, B.Chain_Chain$parse_closure, B.Chain_toTrace_closure, B.Chain_toString_closure0, B.Chain_toString__closure0, B.Chain_toString_closure, B.Chain_toString__closure, B.Trace__parseVM_closure, B.Trace$parseV8_closure, B.Trace$parseJSCore_closure, B.Trace$parseFirefox_closure, B.Trace$parseFriendly_closure, B.Trace_toString_closure0, B.Trace_toString_closure, B.AgentUI_closure, B.AgentUI_reconfigureAgent_closure, B.AgentUI_reconfigureAgent_closure0, B.AgentUI_reconfigureAgent_closure1, B.AgentUI_reconfigureAgent_closure2, B.AgentUI_bindUserInput__closure, B.AgentUI_bindUserInput__closure0, B.AgentUI__setCancelMode_closure, B.exportConversationToPdf_closure0, B.exportConversationToPdf_closure, B.exportConversationToPdf__closure, B.exportConversationToPdf__closure0, B._renderNodes_flushInlines_closure, B._convertNode_closure, B._convertNode_closure0, B._convertNode_closure1, B._convertNode_closure2, B._convertNode_closure3, B._convertInline_closure, B._convertInline_closure0, B._convertInline_closure1, B.initializeToolSets_closure1, B.initializeToolSets_closure3, B.initializeToolSets_closure4, B.initializeToolSets_closure5, B.AgentConfigData_get_authMcpServers_closure, B.JsonExt_apply_closure, B.ModalDialog_show_close, B.ModalDialog_show_closure, B.ModalDialog_show_closure0, B.DialogComplexField_render_$addRow_closure, B.DialogComplexField_render_closure, B._wrapPasswordField_closure, B.main_closure, B.main__closure0]);
-    _inheritMany(B.Closure2Args, [B._CastListBase_sort_closure, B.CastMap_forEach_closure, B.ConstantMap_map_closure, B.JsLinkedHashMap_addAll_closure, B.initHooks_closure0, B._awaitOnObject_closure0, B._wrapJsFunctionForAsync_closure, B.Future_wait_handleError, B.Future_any_onError, B._Future__propagateToListeners_handleWhenCompleteCallback_closure0, B._Future_timeout_closure1, B.Stream_handleError_closure, B._AddStreamState_makeErrorHandler_closure, B._BufferingStreamSubscription_asFuture_closure0, B._cancelAndErrorClosure_closure, B._HashMap_addAll_closure, B.LinkedHashMap_LinkedHashMap$from_closure, B.MapBase_mapToString_closure, B.Encoding_decodeStream_closure, B._JsonStringifier_writeMap_closure, B._JsonPrettyPrintMixin_writeMap_closure, B.NoSuchMethodError_toString_closure, B._Uri__makeQueryFromParameters_closure, B.Uri_splitQueryString_closure, B.Uri_parseIPv6Address_error, B._Uri__makeQueryFromParametersDefault_writeParameter, B._Uri__makeQueryFromParametersDefault_closure, B.Agent_invokeStream_closure2, B.Agent_invokeStream_closure4, B.HelpCommand_handle_closure, B.Results__done_closure0, B.CanonicalizedMap_addAll_closure, B.CanonicalizedMap_forEach_closure, B.CanonicalizedMap_map_closure, B.MessageStreamEventTransformer__buildServerToolMetadataChunk_closure, B.GenerateContentResponseMapper_toChatResult_closure3, B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure0, B.Schema_Schema$fromJson_closure, B.Schema_toJson_closure, B.BaseRequest_closure, B.MultipartRequest_contentLength_closure, B.MediaType_toString_closure, B.Client_listen_closure0, B.Peer_listen_closure0, B.Server_listen_closure0, B.Document__filterFootnotes_closure, B.DelimiterRun_tryParse_closure, B.PdfDocument_closure, B.PdfDict_fromObjectMap_closure, B.PdfDict_output_closure, B.PdfDict_output_closure0, B.PdfXref__compressedRef_setVal, B.PdfXrefTable__outputLegacy_closure, B.PdfXrefTable__outputCompressed_closure, B.PdfXrefTable__outputCompressed_closure0, B.PdfAnnotBase_flagValue_closure0, B._Line_height_closure, B.Highlighter__collateLines_closure0, B.Frame_Frame$parseV8_closure_parseJsLocation, B._JsonDocument_bind_closure, B.AgentUI_initializeAgent_closure, B.AgentUI_reconfigureAgent_closure3, B.AgentUI_bindUserCommandHandler_closure, B.main_closure0]);
+    _inheritMany(B.Closure, [B.Closure2Args, B.CastMap_entries_closure, B.Closure0Args, B.Instantiation, B.TearOffClosure, B.initHooks_closure, B.initHooks_closure1, B._AsyncRun__initializeScheduleImmediate_internalCallback, B._AsyncRun__initializeScheduleImmediate_closure, B._awaitOnObject_closure, B._asyncStarHelper_closure0, B._SyncBroadcastStreamController__sendData_closure, B._SyncBroadcastStreamController__sendError_closure, B._SyncBroadcastStreamController__sendDone_closure, B.Future_wait_closure, B.Future_any_onValue, B._Future__propagateToListeners_handleWhenCompleteCallback_closure, B._Future_timeout_closure0, B.Stream_Stream$fromIterable_closure, B.Stream_fold_closure0, B.Stream_fold__closure0, B.Stream_forEach_closure0, B.Stream_forEach__closure0, B.Stream_length_closure, B._HashMap_values_closure, B._CustomHashMap_closure, B._LinkedCustomHashMap_closure, B.MapBase_entries_closure, B._convertJsonToDart_walk, B._JsonMap_values_closure, B.Converter_bind_closure, B.Encoding_decodeStream_closure0, B.LineSplitter_bind_closure, B.DateTime_parse_parseIntOrZero, B.DateTime_parse_parseMilliAndMicroseconds, B._Uri__makePath_closure, B.jsify__convert, B.promiseToFuture_closure, B.promiseToFuture_closure0, B.AgentResponseAccumulator_add_closure0, B.Agent_toolNames_closure, B.Agent_messages_closure, B.Agent_invokeStream_closure3, B.InteractiveAgent_interactWithUser_$parseCommand, B.HttpChannel__client_closure, B.HttpChannel__eventStream_closure, B.DbgClient__traceRequest_closure, B.DbgClient__traceResponse_closure, B.HelpCommand_handle_closure0, B.HistoryCommand_handle_closure, B.SummarizeCommand_handle_closure, B.ChatMessageExt_compact_closure, B.PersistentConversationManager__save_closure, B.FileSystem_normalizePath_closure, B.JsonToMarkdownConverter_convert_closure, B.JsonToMarkdownConverter_convert_closure0, B.McpToolSet_initialize_closure, B.McpToolSet__getHandlerFor_closure, B.ToolSet_ToolSet$combined_closure, B.ToolSet_names_closure, B.ToolSet_getTool_closure, B.CombinedToolSet_tools_closure, B.CombinedToolSet_names_closure, B.LogSink_add_closure, B.trace_closure, B.AccessControlList_check_closure, B.ChatMessageDbgExt_dump_closure, B.Log_append_closure, B.Log_append_closure0, B.Log_append_closure1, B.z__removeEmptyEnums_closure, B.z__removeEmptyEnums_closure0, B.mapHash_closure, B.mapDeepHashCode_closure, B.TextBlock_TextBlock$fromJson_closure, B.TextBlock_toJson_closure, B.WebSearchResultSuccess_WebSearchResultSuccess$fromJson_closure, B.WebSearchResultSuccess_toJson_closure, B.ToolResultInputBlock_toJson_closure, B.BlocksMessageContent_toJson_closure, B.Message_Message$fromJson_closure, B.Message_toJson_closure, B.MessageCreateRequest_toJson_closure, B.MessageCreateRequest_toJson_closure0, B.RefusalCategory_RefusalCategory$fromJson_closure, B.Usage_Usage$fromJson_closure, B.Usage_toJson_closure, B.MessageDeltaUsage_MessageDeltaUsage$fromJson_closure, B.MessageDeltaUsage_toJson_closure, B._SafeCloseSink_close_closure, B.Computation_compute_$complete, B.Computation_compute_$completeError, B.SettledResults_get_closure, B.futureCast_closure, B.Results__done_closure, B.BetterFuture_settle_closure, B.BetterFuture_settle__closure, B.BetterFuture__waiter_closure, B.BetterFuture__waiter_closure0, B.BetterFuture__waiter_closure1, B.BetterFuture__settler_closure, B.BetterFuture__settler_closure_$complete, B.BetterFuture__settler_closure_$completeError, B.CanonicalizedMap_entries_closure, B.CanonicalizedMap_keys_closure, B.CanonicalizedMap_values_closure, B.ProtocolVersion_tryParse_closure, B.MCPClient_connectServer_closure, B.MCPBase_registerRequestHandler_closure, B.MCPBase_registerNotificationHandler_closure, B.AgentResponseAccumulator_add_closure, B.MessageAccumulator_accumulate_closure, B.MessageAccumulator_consolidate_closure, B.MessageAccumulator_consolidate_closure0, B.MessageAccumulator_consolidate_closure1, B.ModelStringParser_ModelStringParser$parse_doThrow, B.DefaultStreamingOrchestrator_executeToolCalls_closure, B.DefaultStreamingOrchestrator_extractToolCalls_closure, B.DefaultStreamingOrchestrator_hasRecentToolExecution_closure, B.DefaultStreamingOrchestrator_hasRecentToolExecution__closure, B._extractText_closure, B._extractThinking_closure, B.MessageListMapper__mapModelMessage_closure, B.MessageStreamEventTransformer_bind_closure, B._mapMessageContent_closure, B.ToolSpecListMapper_get__mapTool_closure, B.GoogleChatModel_sendStream_closure, B.GoogleChatModel__buildRequest_closure, B.GoogleChatModel__extractSystemInstruction_closure, B.GoogleChatModel__extractSystemInstruction_closure0, B.MessageListMapper_toContentList_closure, B.MessageListMapper_toContentList_closure0, B.MessageListMapper_toContentList_closure1, B.GenerateContentResponseMapper_toChatResult_closure, B.GenerateContentResponseMapper_toChatResult_closure0, B.GenerateContentResponseMapper_toChatResult_closure1, B.GenerateContentResponseMapper_toChatResult_closure2, B.ChatToolListMapper_toToolList_closure, B.MistralChatModel_sendStream_closure, B.ToolListMapper_toMistralTools_closure, B.MessageListMapper__mapMessage_closure0, B.MessageListMapper__mapMessage_closure1, B.CreateChatCompletionStreamResponseMapper_toChatResult_closure, B.OllamaToolListMapper_toOllamaTools_closure, B.MessageListMapper_toMessages_closure, B.MessageListMapper_get__mapMessage_closure, B.MessageListMapper__mapMessage_closure, B.MessageListMapper__mapUserMessage_closure, B.MessageListMapper__mapUserMessage_closure0, B.MessageListMapper__mapModelMessage_closure0, B.MessageListToOpenAI__mapModelMessage_closure, B.createChatCompletionRequest_closure, B.OpenAIResponsesChatModel__buildFunctionTools_closure, B.OpenAIResponsesMessageBuilder_createStreamingResult_closure, B.OpenAIResponsesMessageMapper_mapHistory_closure, B.XAIResponsesChatModel__buildFunctionTools_closure, B.XAIResponsesChatModel__toOpenAIOptionsStatic_closure, B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure, B.OpenAIUtils_prepareSchemaForOpenAI_closure, B.PartHelpers_extensionFromMimeType_closure, B.MessagePartHelpers_get_text_closure, B.MessagePartHelpers_get_toolCalls_closure, B.MessagePartHelpers_get_toolResults_closure, B.Tool_closure, B.Parts_toJson_closure, B.Parts_text_closure, B.Parts_toolCalls_closure, B.Parts_toolResults_closure, B.DataPart_extensionFromMimeType_closure, B.GroundingChunkStringList_GroundingChunkStringList$fromJson_closure, B.Candidate_Candidate$fromJson_closure, B.Candidate_Candidate$fromJson_closure0, B.Candidate_toJson_closure, B.Candidate_toJson_closure0, B.CitationMetadata_CitationMetadata$fromJson_closure, B.CitationMetadata_toJson_closure, B.Content_Content$fromJson_closure, B.Content_toJson_closure, B.LogprobsResult_LogprobsResult$fromJson_closure, B.LogprobsResult_LogprobsResult$fromJson_closure0, B.LogprobsResult_toJson_closure, B.LogprobsResult_toJson_closure0, B.TopCandidates_TopCandidates$fromJson_closure, B.TopCandidates_toJson_closure, B.GenerateContentRequest_toJson_closure, B.GenerateContentRequest_toJson_closure0, B.GenerateContentResponse_GenerateContentResponse$fromJson_closure, B.GenerateContentResponse_toJson_closure, B.PromptFeedback_PromptFeedback$fromJson_closure, B.PromptFeedback_toJson_closure, B.GroundingMetadata_GroundingMetadata$fromJson_closure, B.GroundingMetadata_GroundingMetadata$fromJson_closure0, B.GroundingMetadata_GroundingMetadata$fromJson_closure1, B.GroundingMetadata_GroundingMetadata$fromJson_closure2, B.GroundingMetadata_toJson_closure, B.GroundingMetadata_toJson_closure0, B.GroundingSupport_GroundingSupport$fromJson_closure, B.GroundingSupport_GroundingSupport$fromJson_closure0, B.GroundingSupport_GroundingSupport$fromJson_closure1, B.PlaceAnswerSources_PlaceAnswerSources$fromJson_closure, B.PlaceAnswerSources_toJson_closure, B.RetrievedContext_RetrievedContext$fromJson_closure, B.RetrievedContext_toJson_closure, B.FunctionResponse_FunctionResponse$fromJson_closure, B.FunctionResponse_toJson_closure, B.Tool_toJson_closure, B.Redactor_redactString_closure, B.Redactor_redactString_closure0, B.Redactor_redactString_closure1, B.BaseRequest_closure0, B.BrowserClient_send_closure0, B._bodyToStream_closure, B.ByteStream_toBytes_closure, B.MediaType_toString__closure, B.expectQuotedString_closure, B.Client$withoutJson_closure0, B.Parameter__path_quoteKey, B.Parameter__path_computePath, B.Parameter_asList_closure, B.Parameter_asMap_closure, B.Peer_listen_closure, B.Server__handleRequest_closure, B._RespondToFormatExceptionsTransformer_bind_closure, B._RespondToFormatExceptionsTransformer_bind__closure, B._RespondToFormatExceptionsTransformer_bind__closure0, B.Element_textContent_closure, B.BlockSyntax_isAtBlockEnd_closure, B.BlockquoteSyntax_parseChildLines_closure, B.CodeBlockSyntax_parse_closure, B.FencedCodeBlockSyntax_parse_closure, B.FootnoteDefSyntax_parseChildLines__closure, B.FootnoteDefSyntax__isBlock_closure, B.HtmlBlockSyntax_parse_closure, B.LinkReferenceDefinitionSyntax__parseLinkReferenceDefinition_closure, B.ListSyntax_parse_parseTaskListItem, B.ListSyntax_parse_parseTaskListItem_closure, B.ListSyntax_parse_tryMatch, B.SetextHeaderSyntax_parse_closure, B.HtmlRenderer_visitText_closure, B.InlineParser_parse_closure, B.InlineParser__linkOrImage_closure, B.InlineParser__linkOrImage_closure0, B.InlineParser__linkOrImage_closure1, B.InlineParser__processDelimiterRun_closure0, B.InlineParser__processDelimiterRun_closure1, B.FootnoteRefSyntax_tryCreateFootnoteLink_closure, B.ImageSyntax_createNode_closure, B.LinkSyntax_closure, B.normalizeLinkDestination_closure, B.normalizeLinkDestination_closure0, B.DeltaContent_DeltaContent$fromJson_closure, B.DeltaContent_toJson_closure, B.ChatCompletionRequest_toJson_closure, B.ChatCompletionRequest_toJson_closure0, B.ChatCompletionStreamResponse_ChatCompletionStreamResponse$fromJson_closure, B.ChatCompletionStreamResponse_toJson_closure, B.UserMessage_toJson_closure, B.AssistantMessage_toJson_closure0, B.mapHash_closure1, B.ChatMessage_toJson_closure, B.ChatRequest_toJson_closure, B.ChatRequest_toJson_closure0, B.ChatResponseMessage_ChatResponseMessage$fromJson_closure, B.ChatResponseMessage_toJson_closure, B.ChatResponse_ChatResponse$fromJson_closure, B.ChatResponse_toJson_closure, B.mapDeepHashCode_closure0, B.Logprob_Logprob$fromJson_closure, B.Logprob_toJson_closure, B.OpenAIConfig_hashCode_closure, B.InterceptorChain__buildChain_closure, B.ChatCompletionCreateRequest_toJson_closure, B.ChatCompletionCreateRequest_toJson_closure0, B.AssistantMessage_toJson_closure, B.UserPartsContent_toJson_closure, B.Logprobs_Logprobs$fromJson_closure, B.Logprobs_Logprobs$fromJson_closure0, B.Logprobs_toJson_closure, B.Logprobs_toJson_closure0, B.TokenLogprob_TokenLogprob$fromJson_closure, B.TokenLogprob_toJson_closure, B.mapHash_closure0, B.mapDeepHashCode_closure1, B.ClickButton_ClickButton$fromJson_closure, B.FunctionCallOutputStatus_FunctionCallOutputStatus$fromJson_closure, B.Include_Include$fromJson_closure, B.ItemStatus_ItemStatus$fromJson_closure, B.MessagePhase_MessagePhase$fromJson_closure, B.MessageRole_MessageRole$fromJson_closure, B.PromptCacheRetention_PromptCacheRetention$fromJson_closure, B.ResponseStatus_ResponseStatus$fromJson_closure, B.SearchContentType_SearchContentType$fromJson_closure, B.ServiceTier_ServiceTier$fromJson_closure, B.ToolSearchExecutionType_ToolSearchExecutionType$fromJson_closure, B.LogProb_LogProb$fromJson_closure, B.LogProb_toJson_closure, B.OutputTextContent_OutputTextContent$fromJson_closure, B.OutputTextContent_OutputTextContent$fromJson_closure0, B.OutputTextContent_toJson_closure, B.OutputTextContent_toJson_closure0, B.CreateResponseRequest_toJson_closure, B.CreateResponseRequest_toJson_closure0, B.CreateResponseRequest_toJson_closure1, B.MessageItem_toJson_closure, B.MessageOutputItem_MessageOutputItem$fromJson_closure, B.MessageOutputItem_toJson_closure, B.ReasoningItem_ReasoningItem$fromJson_closure, B.ReasoningItem_ReasoningItem$fromJson_closure0, B.ReasoningItem_toJson_closure, B.FileSearchCallOutputItem_FileSearchCallOutputItem$fromJson_closure, B.CodeInterpreterCallOutputItem_CodeInterpreterCallOutputItem$fromJson_closure, B.CodeInterpreterCallOutputItem_toJson_closure, B.ShellCallOutputResultItem_ShellCallOutputResultItem$fromJson_closure, B.ShellCallOutputResultItem_toJson_closure, B.ToolSearchOutputItem_ToolSearchOutputItem$fromJson_closure, B.ToolSearchOutputItem_toJson_closure, B.ComputerCallOutputItem_ComputerCallOutputItem$fromJson_closure, B.ComputerCallOutputItem_ComputerCallOutputItem$fromJson_closure0, B.ComputerCallOutputItem_toJson_closure, B.Response_Response$fromJson_closure, B.Response_toJson_closure, B.ResponseInputItems_toJson_closure, B.OutputTextDeltaEvent_OutputTextDeltaEvent$fromJson_closure, B.OutputTextDeltaEvent_toJson_closure, B.OutputTextDoneEvent_OutputTextDoneEvent$fromJson_closure, B.OutputTextDoneEvent_toJson_closure, B.DragAction_DragAction$fromJson_closure, B.WebSearchTool_WebSearchTool$fromJson_closure, B.WebSearchTool_toJson_closure, B.CompoundFilter_CompoundFilter$fromJson_closure, B.CompoundFilter_toJson_closure, B.NamespaceTool_NamespaceTool$fromJson_closure, B.NamespaceTool_toJson_closure, B.ChatStreamEvent_ChatStreamEvent$fromJson_closure, B.ChatStreamEvent_toJson_closure, B.ChatDelta_ChatDelta$fromJson_closure, B.ChatDelta_ChatDelta$fromJson_closure0, B.ChatDelta_toJson_closure, B.ChatDelta_toJson_closure0, B.ChatCompletionsResource_createStream_closure, B.Context_joinAll_closure, B.Context_split_closure, B._validateArgList_closure, B.WindowsStyle_absolutePathToUri_closure, B.PdfDocument__write_closure, B.PdfArray_fromObjects_closure, B.PdfArray_fromNum_closure, B.PdfString__encodeUtf16be_add, B.PdfAnnotBase_flagValue_closure, B.PdfPage_prepare_closure, B.PdfType1Font$create_closure, B.Font_buildFont_closure, B.MultiPage_closure, B.RichText__preProcessSpans_closure, B.WhereNotNullStreamTransformer_bind_closure, B.Highlighter$__closure, B.Highlighter$___closure, B.Highlighter$__closure0, B.Highlighter__collateLines_closure, B.Highlighter__collateLines_closure1, B.Highlighter__collateLines__closure, B.Highlighter_highlight_closure, B.Chain_Chain$parse_closure, B.Chain_toTrace_closure, B.Chain_toString_closure0, B.Chain_toString__closure0, B.Chain_toString_closure, B.Chain_toString__closure, B.Trace__parseVM_closure, B.Trace$parseV8_closure, B.Trace$parseJSCore_closure, B.Trace$parseFirefox_closure, B.Trace$parseFriendly_closure, B.Trace_toString_closure0, B.Trace_toString_closure, B.AgentUI_closure, B.AgentUI_reconfigureAgent_closure, B.AgentUI_reconfigureAgent_closure0, B.AgentUI_reconfigureAgent_closure1, B.AgentUI_reconfigureAgent_closure2, B.AgentUI_bindUserInput__closure, B.AgentUI_bindUserInput__closure0, B.AgentUI__setCancelMode_closure, B.exportConversationToPdf_closure0, B.exportConversationToPdf_closure, B.exportConversationToPdf__closure, B.exportConversationToPdf__closure0, B._renderNodes_flushInlines_closure, B._convertNode_closure, B._convertNode_closure0, B._convertNode_closure1, B._convertNode_closure2, B._convertNode_closure3, B._convertInline_closure, B._convertInline_closure0, B._convertInline_closure1, B.PromptHistory_closure, B.initializeToolSets_closure1, B.initializeToolSets_closure3, B.initializeToolSets_closure4, B.initializeToolSets_closure5, B.AgentConfigData_get_authMcpServers_closure, B.JsonExt_apply_closure, B.ModalDialog_show_close, B.ModalDialog_show_closure, B.ModalDialog_show_closure0, B.DialogComplexField_render_$addRow_closure, B.DialogComplexField_render_closure, B._wrapPasswordField_closure, B.main_closure, B.main__closure0]);
+    _inheritMany(B.Closure2Args, [B._CastListBase_sort_closure, B.CastMap_forEach_closure, B.ConstantMap_map_closure, B.JsLinkedHashMap_addAll_closure, B.initHooks_closure0, B._awaitOnObject_closure0, B._wrapJsFunctionForAsync_closure, B.Future_wait_handleError, B.Future_any_onError, B._Future__propagateToListeners_handleWhenCompleteCallback_closure0, B._Future_timeout_closure1, B.Stream_handleError_closure, B._AddStreamState_makeErrorHandler_closure, B._BufferingStreamSubscription_asFuture_closure0, B._cancelAndErrorClosure_closure, B._HashMap_addAll_closure, B.LinkedHashMap_LinkedHashMap$from_closure, B.MapBase_mapToString_closure, B.Encoding_decodeStream_closure, B._JsonStringifier_writeMap_closure, B._JsonPrettyPrintMixin_writeMap_closure, B.NoSuchMethodError_toString_closure, B._Uri__makeQueryFromParameters_closure, B.Uri_splitQueryString_closure, B.Uri_parseIPv6Address_error, B._Uri__makeQueryFromParametersDefault_writeParameter, B._Uri__makeQueryFromParametersDefault_closure, B.Agent_invokeStream_closure2, B.HelpCommand_handle_closure, B.Results__done_closure0, B.CanonicalizedMap_addAll_closure, B.CanonicalizedMap_forEach_closure, B.CanonicalizedMap_map_closure, B.MessageStreamEventTransformer__buildServerToolMetadataChunk_closure, B.GenerateContentResponseMapper_toChatResult_closure3, B.AnthropicToolDeliverableTracker__collectNewRemoteFiles_closure0, B.Schema_Schema$fromJson_closure, B.Schema_toJson_closure, B.BaseRequest_closure, B.MultipartRequest_contentLength_closure, B.MediaType_toString_closure, B.Client_listen_closure0, B.Peer_listen_closure0, B.Server_listen_closure0, B.Document__filterFootnotes_closure, B.DelimiterRun_tryParse_closure, B.PdfDocument_closure, B.PdfDict_fromObjectMap_closure, B.PdfDict_output_closure, B.PdfDict_output_closure0, B.PdfXref__compressedRef_setVal, B.PdfXrefTable__outputLegacy_closure, B.PdfXrefTable__outputCompressed_closure, B.PdfXrefTable__outputCompressed_closure0, B.PdfAnnotBase_flagValue_closure0, B.Table_layout_closure, B.Table_layout_closure0, B.Table_layout_closure1, B._Line_height_closure, B.Highlighter__collateLines_closure0, B.Frame_Frame$parseV8_closure_parseJsLocation, B._JsonDocument_bind_closure, B.AgentUI_initializeAgent_closure, B.AgentUI_reconfigureAgent_closure3, B.AgentUI_bindUserCommandHandler_closure, B.main_closure0]);
     _inherit(B.CastList, B._CastListBase);
     _inheritMany(B.MapBase, [B.CastMap, B.JsLinkedHashMap, B._HashMap, B._JsonMap]);
     _inheritMany(B.Error, [B.LateError, B.TypeError, B.JsNoSuchMethodError, B.UnknownJsTypeError, B.RuntimeError, B._Error, B.JsonUnsupportedObjectError, B.AssertionError, B.ArgumentError, B.NoSuchMethodError, B.UnsupportedError, B.UnimplementedError, B.StateError, B.ConcurrentModificationError]);
     _inheritMany(B.ListBase, [B.UnmodifiableListBase, B.Parts]);
     _inherit(B.CodeUnits, B.UnmodifiableListBase);
-    _inheritMany(B.Closure0Args, [B.nullFuture_closure, B._AsyncRun__scheduleImmediateJsOverride_internalCallback, B._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, B._TimerImpl_internalCallback, B._asyncStarHelper_closure, B._AsyncStarStreamController__resumeBody, B._AsyncStarStreamController__resumeBody_closure, B._AsyncStarStreamController_closure0, B._AsyncStarStreamController_closure1, B._AsyncStarStreamController_closure, B._AsyncStarStreamController__closure, B.Future_Future$delayed_closure, B._Future__addListener_closure, B._Future__prependListeners_closure, B._Future__chainCoreFuture_closure, B._Future__asyncCompleteWithValue_closure, B._Future__asyncCompleteErrorObject_closure, B._Future__propagateToListeners_handleWhenCompleteCallback, B._Future__propagateToListeners_handleValueCallback, B._Future__propagateToListeners_handleError, B._Future_timeout_closure, B.Stream_Stream$fromIterable_closure_next, B.Stream_Stream$fromIterable__closure, B.Stream_fold_closure, B.Stream_fold__closure, B.Stream_forEach_closure, B.Stream_forEach__closure, B.Stream_length_closure0, B._StreamController__subscribe_closure, B._StreamController__recordCancel_complete, B._AddStreamState_cancel_closure, B._BufferingStreamSubscription_asFuture_closure, B._BufferingStreamSubscription_asFuture__closure, B._BufferingStreamSubscription__sendError_sendError, B._BufferingStreamSubscription__sendDone_sendDone, B._PendingEvents_schedule_closure, B._DoneStreamSubscription_asFuture_closure, B._MultiStream_listen_closure, B._cancelAndError_closure, B._RootZone_bindCallbackGuarded_closure, B._rootHandleError_closure, B._Utf8Decoder__decoder_closure, B._Utf8Decoder__decoderNonfatal_closure, B.DateTime$_internal_closure, B.Agent_invokeStream_closure, B.Agent_invokeStream_closure0, B.Agent_invokeStream_closure1, B.AgentConfiguration__setupCustomProvider_closure, B.AgentConfiguration__setupCustomProvider_closure0, B.AgentConfiguration__setupCustomProvider_closure1, B.AgentConfiguration__setupCustomProvider_closure2, B.AgentConfiguration__setupCustomProvider_closure3, B.InteractiveAgent_interactWithUser_$handleUserInput, B.HttpChannel__eventStream_closure0, B.MessageListMapper_toMessages_flushToolMessages, B.MessageStreamEventTransformer__extractWebFetchDataParts_closure, B.EventMappingState_recordToolEvent_closure, B.OpenAIResponsesMessageMapper__mapMessageParts_flushContent, B.AnthropicToolDeliverableTracker__recordToolEvent_closure, B.AnthropicProvider_createChatModel_closure, B.PartHelpers_extensionFromMimeType_closure0, B.DataPart_extensionFromMimeType_closure0, B.BrowserClient_send_closure, B._readStreamBody_closure, B._readStreamBody_closure0, B.MediaType_MediaType$parse_closure, B.Client$withoutJson_closure, B.Client_listen_closure, B._createIncrementingIdGenerator_closure, B.Server_listen_closure, B.Server__tryFallbacks_tryNext, B.Logger_Logger_closure, B.FootnoteDefSyntax_parseChildLines_closure, B.LinkReferenceDefinitionSyntax__parseLinkReferenceDefinition_closure0, B.ListSyntax_parse_endItem, B.InlineParser__linkOrImage_closure2, B.InlineParser__processDelimiterRun_closure, B.InlineParser__processDelimiterRun_closure2, B.FootnoteRefSyntax_tryCreateFootnoteLink_closure0, B.InterceptorChain__executeTransport_createRequest, B.InterceptorChain__executeTransport_executeTransport, B.InterceptorChain__executeTransport_executeTransport_sendRequest, B.InterceptorChain__executeTransport_executeTransport_closure, B.ClickButton_ClickButton$fromJson_closure0, B.FunctionCallOutputStatus_FunctionCallOutputStatus$fromJson_closure0, B.Include_Include$fromJson_closure0, B.ItemStatus_ItemStatus$fromJson_closure0, B.MessagePhase_MessagePhase$fromJson_closure0, B.MessageRole_MessageRole$fromJson_closure0, B.PromptCacheRetention_PromptCacheRetention$fromJson_closure0, B.ResponseStatus_ResponseStatus$fromJson_closure0, B.SearchContentType_SearchContentType$fromJson_closure0, B.ServiceTier_ServiceTier$fromJson_closure0, B.ToolSearchExecutionType_ToolSearchExecutionType$fromJson_closure0, B.PdfDocument_save_closure, B.Font_buildFont_closure0, B.RichText_layout__buildLines, B.Highlighter_closure, B.Highlighter__writeFileStart_closure, B.Highlighter__writeMultilineHighlights_closure, B.Highlighter__writeMultilineHighlights_closure0, B.Highlighter__writeMultilineHighlights_closure1, B.Highlighter__writeMultilineHighlights_closure2, B.Highlighter__writeMultilineHighlights__closure, B.Highlighter__writeMultilineHighlights__closure0, B.Highlighter__writeHighlightedText_closure, B.Highlighter__writeIndicator_closure, B.Highlighter__writeIndicator_closure0, B.Highlighter__writeIndicator_closure1, B.Highlighter__writeSidebar_closure, B._Highlight_closure, B.Chain_Chain$current_closure, B.Chain_Chain$forTrace_closure, B.Frame_Frame$parseVM_closure, B.Frame_Frame$parseV8_closure, B.Frame_Frame$_parseFirefoxEval_closure, B.Frame_Frame$parseFirefox_closure, B.Frame_Frame$parseFriendly_closure, B.AgentUI_closure0, B.AgentUI_closure1, B.AgentUI_closure2, B.AgentUI__onExportPdfClick_closure, B.AgentUI_bindUserInput_closure, B.AgentUI_bindUserInput_closure_submit, B.AgentUI_bindUserCommandHandler__closure, B._renderNodes_flushInlines, B._wrap_closure, B.initializeToolSets_closure, B.initializeToolSets_closure0, B.initializeToolSets_closure2, B.DialogComplexField_render_$addRow, B.main__closure]);
+    _inheritMany(B.Closure0Args, [B.nullFuture_closure, B._AsyncRun__scheduleImmediateJsOverride_internalCallback, B._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, B._TimerImpl_internalCallback, B._asyncStarHelper_closure, B._AsyncStarStreamController__resumeBody, B._AsyncStarStreamController__resumeBody_closure, B._AsyncStarStreamController_closure0, B._AsyncStarStreamController_closure1, B._AsyncStarStreamController_closure, B._AsyncStarStreamController__closure, B.Future_Future$delayed_closure, B._Future__addListener_closure, B._Future__prependListeners_closure, B._Future__chainCoreFuture_closure, B._Future__asyncCompleteWithValue_closure, B._Future__asyncCompleteErrorObject_closure, B._Future__propagateToListeners_handleWhenCompleteCallback, B._Future__propagateToListeners_handleValueCallback, B._Future__propagateToListeners_handleError, B._Future_timeout_closure, B.Stream_Stream$fromIterable_closure_next, B.Stream_Stream$fromIterable__closure, B.Stream_fold_closure, B.Stream_fold__closure, B.Stream_forEach_closure, B.Stream_forEach__closure, B.Stream_length_closure0, B._StreamController__subscribe_closure, B._StreamController__recordCancel_complete, B._AddStreamState_cancel_closure, B._BufferingStreamSubscription_asFuture_closure, B._BufferingStreamSubscription_asFuture__closure, B._BufferingStreamSubscription__sendError_sendError, B._BufferingStreamSubscription__sendDone_sendDone, B._PendingEvents_schedule_closure, B._DoneStreamSubscription_asFuture_closure, B._MultiStream_listen_closure, B._cancelAndError_closure, B._RootZone_bindCallbackGuarded_closure, B._rootHandleError_closure, B._Utf8Decoder__decoder_closure, B._Utf8Decoder__decoderNonfatal_closure, B.DateTime$_internal_closure, B.Agent_invokeStream_closure, B.Agent_invokeStream_closure0, B.Agent_invokeStream_closure1, B.AgentConfiguration__setupCustomProvider_closure, B.AgentConfiguration__setupCustomProvider_closure0, B.AgentConfiguration__setupCustomProvider_closure1, B.AgentConfiguration__setupCustomProvider_closure2, B.AgentConfiguration__setupCustomProvider_closure3, B.InteractiveAgent_interactWithUser_$handleUserInput, B.HttpChannel__eventStream_closure0, B.RefusalCategory_RefusalCategory$fromJson_closure0, B.MessageListMapper_toMessages_flushToolMessages, B.MessageStreamEventTransformer__extractWebFetchDataParts_closure, B.EventMappingState_recordToolEvent_closure, B.OpenAIResponsesMessageMapper__mapMessageParts_flushContent, B.AnthropicToolDeliverableTracker__recordToolEvent_closure, B.AnthropicProvider_createChatModel_closure, B.PartHelpers_extensionFromMimeType_closure0, B.DataPart_extensionFromMimeType_closure0, B.BrowserClient_send_closure, B._readStreamBody_closure, B._readStreamBody_closure0, B.MediaType_MediaType$parse_closure, B.Client$withoutJson_closure, B.Client_listen_closure, B._createIncrementingIdGenerator_closure, B.Server_listen_closure, B.Server__tryFallbacks_tryNext, B.Logger_Logger_closure, B.FootnoteDefSyntax_parseChildLines_closure, B.LinkReferenceDefinitionSyntax__parseLinkReferenceDefinition_closure0, B.ListSyntax_parse_endItem, B.InlineParser__linkOrImage_closure2, B.InlineParser__processDelimiterRun_closure, B.InlineParser__processDelimiterRun_closure2, B.FootnoteRefSyntax_tryCreateFootnoteLink_closure0, B.InterceptorChain__executeTransport_createRequest, B.InterceptorChain__executeTransport_executeTransport, B.InterceptorChain__executeTransport_executeTransport_sendRequest, B.InterceptorChain__executeTransport_executeTransport_closure, B.ClickButton_ClickButton$fromJson_closure0, B.FunctionCallOutputStatus_FunctionCallOutputStatus$fromJson_closure0, B.Include_Include$fromJson_closure0, B.ItemStatus_ItemStatus$fromJson_closure0, B.MessagePhase_MessagePhase$fromJson_closure0, B.MessageRole_MessageRole$fromJson_closure0, B.PromptCacheRetention_PromptCacheRetention$fromJson_closure0, B.ResponseStatus_ResponseStatus$fromJson_closure0, B.SearchContentType_SearchContentType$fromJson_closure0, B.ServiceTier_ServiceTier$fromJson_closure0, B.ToolSearchExecutionType_ToolSearchExecutionType$fromJson_closure0, B.PdfDocument_save_closure, B.Font_buildFont_closure0, B.RichText_layout__buildLines, B.Highlighter_closure, B.Highlighter__writeFileStart_closure, B.Highlighter__writeMultilineHighlights_closure, B.Highlighter__writeMultilineHighlights_closure0, B.Highlighter__writeMultilineHighlights_closure1, B.Highlighter__writeMultilineHighlights_closure2, B.Highlighter__writeMultilineHighlights__closure, B.Highlighter__writeMultilineHighlights__closure0, B.Highlighter__writeHighlightedText_closure, B.Highlighter__writeIndicator_closure, B.Highlighter__writeIndicator_closure0, B.Highlighter__writeIndicator_closure1, B.Highlighter__writeSidebar_closure, B._Highlight_closure, B.Chain_Chain$current_closure, B.Chain_Chain$forTrace_closure, B.Frame_Frame$parseVM_closure, B.Frame_Frame$parseV8_closure, B.Frame_Frame$_parseFirefoxEval_closure, B.Frame_Frame$parseFirefox_closure, B.Frame_Frame$parseFriendly_closure, B.AgentUI_closure0, B.AgentUI_closure1, B.AgentUI_closure2, B.AgentUI__onExportPdfClick_closure, B.AgentUI_bindUserInput_closure, B.AgentUI_bindUserInput_closure_submit, B.AgentUI_bindUserCommandHandler__closure, B._renderNodes_flushInlines, B._wrap_closure, B.initializeToolSets_closure, B.initializeToolSets_closure0, B.initializeToolSets_closure2, B.DialogComplexField_render_$addRow, B.main__closure]);
     _inheritMany(B.EfficientLengthIterable, [B.ListIterable, B.EmptyIterable, B.LinkedHashMapKeysIterable, B.LinkedHashMapValuesIterable, B.LinkedHashMapEntriesIterable, B._HashMapKeyIterable, B._MapBaseValueIterable]);
     _inheritMany(B.ListIterable, [B.SubListIterable, B.MappedListIterable, B.ReversedListIterable, B.ListQueue, B._JsonMapKeyIterable, B._GeneratorIterable]);
     _inherit(B.EfficientLengthMappedIterable, B.MappedIterable);
@@ -75352,6 +76095,7 @@
     _inheritMany(B.ArgumentError, [B.RangeError, B.IndexError]);
     _inherit(B._DataUri, B._Uri);
     _inherit(B.InteractiveAgent, B.Agent0);
+    _inherit(B.UserCancellationException, B.CanceledException);
     _inherit(B.HttpChannel, B._HttpChannel_Object_StreamChannelMixin);
     _inherit(B.DbgClient, B._DbgClient_Object_BaseClient);
     _inheritMany(B.Command, [B.HelpCommand, B.HistoryCommand, B.QuitCommand, B.SummarizeCommand, B.SystemPromptCommand, B.ToolsCommand, B.HelpCommand0, B.NewConversationCommand, B.CompactCommand]);
@@ -75370,7 +76114,7 @@
     _inherit(B.ToolResultTextContent, B.ToolResultContent);
     _inheritMany(B.MessageContent, [B.TextMessageContent, B.BlocksMessageContent]);
     _inherit(B.TextSystemPrompt, B.SystemPrompt);
-    _inheritMany(B._Enum, [B.MessageRole, B.Speed, B.StopReason, B.ServiceTier, B.ImageMediaType, B._DeflateFlushMode, B.ByteOrder, B.CharacterCategory, B.CharacterType, B.DecompositionType, B.DirectionOverride, B.LetterForm, B.ShapeJoiningType, B.ProtocolVersion, B.GoogleServerSideTool, B.OpenAIReasoningEffort, B.OpenAIReasoningSummary, B.ImageGenerationQuality, B.ImageGenerationSize, B.OpenAIServerSideTool, B.WebSearchContextSize, B.XAIReasoningEffort, B.XAIReasoningSummary, B.XAIImageDetail, B.XAIServerSideTool, B.FinishReason, B.ModelKind, B.ChatMessageRole, B.ToolPartKind, B.AuthPlacement, B.ApiVersion, B.ApiMode, B.ModelStage, B.MediaResolutionLevel, B.SchemaType, B.FinishReason0, B.HarmCategory, B.HarmProbability, B.Outcome, B.Language, B.FunctionResponseScheduling, B.ToolType, B.TaskListItemState, B.FinishReason1, B.MessageRole0, B.DoneReason, B.ToolType0, B.ImageDetail, B.FinishReason2, B.ClickButton, B.FunctionCallOutputStatus, B.Include, B.ItemStatus, B.MessagePhase, B.MessageRole1, B.PromptCacheRetention, B.ReasoningEffort, B.ReasoningSummary, B.ResponseStatus, B.SearchContentType, B.ServiceTier0, B.ToolSearchExecutionType, B.PdfPageMode, B.PdfVersion, B.PdfStringFormat, B.PdfCrossRefEntryType, B.PdfTextRenderingMode, B.PdfAnnotFlags, B.PdfOutlineStyle, B.PdfPageRotation, B.DecorationPosition, B.BoxShape, B.PaintPhase, B.FlexFit, B.Axis, B.MainAxisSize, B.MainAxisAlignment, B.CrossAxisAlignment, B.VerticalDirection, B.Type1Fonts, B.PageOrientation, B.TextAlign, B.TextDirection, B.TextOverflow, B.FontWeight, B.FontStyle, B.TextDecorationStyle, B.DialogFieldType]);
+    _inheritMany(B._Enum, [B.MessageRole, B.Speed, B.StopReason, B.RefusalCategory, B.ServiceTier, B.ImageMediaType, B._DeflateFlushMode, B.ByteOrder, B.CharacterCategory, B.CharacterType, B.DecompositionType, B.DirectionOverride, B.LetterForm, B.ShapeJoiningType, B.ProtocolVersion, B.GoogleServerSideTool, B.OpenAIReasoningEffort, B.OpenAIReasoningSummary, B.ImageGenerationQuality, B.ImageGenerationSize, B.OpenAIServerSideTool, B.WebSearchContextSize, B.XAIReasoningEffort, B.XAIReasoningSummary, B.XAIImageDetail, B.XAIServerSideTool, B.FinishReason, B.ModelKind, B.ChatMessageRole, B.ToolPartKind, B.AuthPlacement, B.ApiVersion, B.ApiMode, B.ModelStage, B.MediaResolutionLevel, B.SchemaType, B.FinishReason0, B.HarmCategory, B.HarmProbability, B.Outcome, B.Language, B.FunctionResponseScheduling, B.ToolType, B.TaskListItemState, B.FinishReason1, B.MessageRole0, B.DoneReason, B.ToolType0, B.ImageDetail, B.FinishReason2, B.ClickButton, B.FunctionCallOutputStatus, B.Include, B.ItemStatus, B.MessagePhase, B.MessageRole1, B.PromptCacheRetention, B.ReasoningEffort, B.ReasoningSummary, B.ResponseStatus, B.SearchContentType, B.ServiceTier0, B.ToolSearchExecutionType, B.PdfPageMode, B.PdfVersion, B.PdfStringFormat, B.PdfCrossRefEntryType, B.PdfTextRenderingMode, B.PdfAnnotFlags, B.PdfOutlineStyle, B.PdfPageRotation, B.DecorationPosition, B.BoxShape, B.PaintPhase, B.FlexFit, B.Axis, B.MainAxisSize, B.MainAxisAlignment, B.CrossAxisAlignment, B.VerticalDirection, B.Type1Fonts, B.PageOrientation, B.TableCellVerticalAlignment, B.TableWidth, B.TextAlign, B.TextDirection, B.TextOverflow, B.FontWeight, B.FontStyle, B.TextDecorationStyle, B.DialogFieldType]);
     _inherit(B.Base64ImageSource, B.ImageSource);
     _inheritMany(B.ContentBlockDelta, [B.TextDelta, B.InputJsonDelta, B.ThinkingDelta, B.CompactionDelta, B.SignatureDelta, B.CitationsDelta]);
     _inheritMany(B.MessageStreamEvent, [B.MessageStartEvent, B.MessageDeltaEvent, B.MessageStopEvent, B.ContentBlockStartEvent, B.ContentBlockDeltaEvent, B.ContentBlockStopEvent, B.PingEvent, B.ErrorEvent]);
@@ -75378,7 +76122,7 @@
     _inheritMany(B.ToolCaller, [B.DirectToolCaller, B.ServerToolCaller]);
     _inherit(B.ToolChoiceAuto, B.ToolChoice);
     _inheritMany(B.ToolDefinition, [B.CustomToolDefinition, B.BuiltInToolDefinition]);
-    _inheritMany(B.ResourceBase, [B.MessageBatchesResource, B._MessagesResource_ResourceBase_StreamingResource, B.ModelsResource, B.SkillsResource]);
+    _inheritMany(B.ResourceBase, [B.AgentsResource, B.MessageBatchesResource, B._MessagesResource_ResourceBase_StreamingResource, B.ModelsResource, B.SessionsResource, B.SkillsResource, B.VaultsResource]);
     _inherit(B.MessagesResource, B._MessagesResource_ResourceBase_StreamingResource);
     _inherit(B._ZLibEncoder, B.ZLibEncoderBase);
     _inherit(B.InputMemoryStream, B.InputStream);
@@ -75435,7 +76179,7 @@
     _inheritMany(B.ContentPart, [B.TextContentPart0, B.ImageUrlContentPart]);
     _inherit(B.FunctionTool0, B.Tool2);
     _inheritMany(B.ResourceBase1, [B._AgentsResource_ResourceBase_StreamingResource, B._TranscriptionsResource_ResourceBase_StreamingResource, B.BatchJobsResource, B._ChatResource_ResourceBase_StreamingResource, B.ClassificationsResource, B.ConversationsResource, B.EmbeddingsResource0, B.FilesResource1, B._FimResource_ResourceBase_StreamingResource, B.FineTuningJobsResource, B.FineTuningModelsResource, B.LibrariesResource, B.ModelsResource2, B.ModerationsResource, B.OcrResource]);
-    _inherit(B.AgentsResource, B._AgentsResource_ResourceBase_StreamingResource);
+    _inherit(B.AgentsResource0, B._AgentsResource_ResourceBase_StreamingResource);
     _inherit(B.TranscriptionsResource, B._TranscriptionsResource_ResourceBase_StreamingResource);
     _inherit(B.ChatResource1, B._ChatResource_ResourceBase_StreamingResource);
     _inherit(B.FimResource, B._FimResource_ResourceBase_StreamingResource);
@@ -75482,14 +76226,14 @@
     _inherit(B.PdfPage, B._PdfPage_PdfObject_PdfGraphicStream);
     _inherit(B.PdfType1Font, B.PdfFont);
     _inherit(B.AnnotationLink, B.AnnotationBuilder);
-    _inheritMany(B.Widget, [B._SingleChildWidget_Widget_SpanningWidget, B._StatelessWidget_Widget_SpanningWidget, B.MultiChildWidget, B.Placeholder, B._RichText_Widget_SpanningWidget]);
+    _inheritMany(B.Widget, [B._SingleChildWidget_Widget_SpanningWidget, B._StatelessWidget_Widget_SpanningWidget, B.MultiChildWidget, B.Placeholder, B._Table_Widget_SpanningWidget, B._RichText_Widget_SpanningWidget]);
     _inherit(B.SingleChildWidget, B._SingleChildWidget_Widget_SpanningWidget);
     _inheritMany(B.SingleChildWidget, [B.Padding, B.Align, B.ConstrainedBox, B.DecoratedBox, B.Flexible]);
     _inherit(B.StatelessWidget, B._StatelessWidget_Widget_SpanningWidget);
     _inheritMany(B.StatelessWidget, [B.SizedBox, B.Container0, B.Header]);
     _inherit(B.BorderRadius, B.BorderRadiusGeometry);
     _inherit(B.Border, B.BoxBorder);
-    _inheritMany(B.WidgetContext, [B.FlexContext, B.RichTextContext]);
+    _inheritMany(B.WidgetContext, [B.FlexContext, B.TableContext, B.RichTextContext]);
     _inherit(B._Flex_MultiChildWidget_SpanningWidget, B.MultiChildWidget);
     _inherit(B.Flex, B._Flex_MultiChildWidget_SpanningWidget);
     _inheritMany(B.Flex, [B.Row, B.Column]);
@@ -75498,6 +76242,8 @@
     _inherit(B.Alignment, B.AlignmentGeometry);
     _inherit(B.MemoryImage, B.ImageProvider);
     _inherit(B.MultiPage, B.Page);
+    _inheritMany(B.TableColumnWidth, [B.IntrinsicColumnWidth, B.FlexColumnWidth]);
+    _inherit(B.Table, B._Table_Widget_SpanningWidget);
     _inheritMany(B._Span, [B._Word, B._WidgetSpan]);
     _inheritMany(B.InlineSpan, [B.WidgetSpan, B.TextSpan]);
     _inherit(B.RichText, B._RichText_Widget_SpanningWidget);
@@ -75544,6 +76290,7 @@
     _mixin(B._PdfXrefTable_PdfDataType_PdfDiagnostic, B.PdfDiagnostic);
     _mixinHard(B._PdfPage_PdfObject_PdfGraphicStream, B.PdfGraphicStream);
     _mixin(B._Flex_MultiChildWidget_SpanningWidget, B.SpanningWidget);
+    _mixin(B._Table_Widget_SpanningWidget, B.SpanningWidget);
     _mixin(B._RichText_Widget_SpanningWidget, B.SpanningWidget);
     _mixin(B._SingleChildWidget_Widget_SpanningWidget, B.SpanningWidget);
     _mixin(B._StatelessWidget_Widget_SpanningWidget, B.SpanningWidget);
@@ -75553,7 +76300,7 @@
     typeUniverse: {eC: new Map(), tR: {}, eT: {}, tPV: {}, sEA: []},
     mangledGlobalNames: {int: "int", double: "double", num: "num", String: "String", bool: "bool", Null: "Null", List: "List", Object: "Object", Map: "Map", JSObject: "JSObject"},
     mangledNames: {},
-    types: ["~()", "Null()", "String(String)", "bool(String)", "~(Object?)", "~(@)", "~(Object,StackTrace)", "String()", "InlineSpan(Node)", "bool(StandardPart)", "bool(ToolPart)", "String(Match)", "Null(Object,StackTrace)", "bool(@)", "Null(JSObject)", "Null(@)", "bool(ChatMessage)", "Null(@,@)", "String(TextPart)", "int(@)", "String(Line)", "Frame()", "~(JSObject)", "Future<~>()", "Future<@>()", "String(@)", "int(String)", "bool(BlockSyntax)", "Frame(String)", "Map<String,@>(@)", "List<Map<String,Object?>>()", "~(~())", "@(BetterResults)", "bool(Object?,Object?)", "int(Object?)", "Map<String,@>(LogProb)", "@(@)", "bool(_Highlight)", "bool(Object?)", "int()", "~(Object?,Object?)", "~(Object[StackTrace?])", "LogProb(@)", "String(Map<String,Object?>)", "Future<McpToolSet?>()", "Map<String,@>(LogprobCandidate)", "MapEntry<String,String>()", "SafetyRating(@)", "Map<String,@>(SafetyRating)", "LogprobCandidate(@)", "0&()", "String(Tool3<Object>)", "@(String)", "~(String,String)", "String(ThinkingPart)", "Future<@>(Object?)", "Map<String,@>(IterationUsage)", "IterationUsage(@)", "~(String,@)", "bool(Delimiter)", "List<Node>()", "Map<String,@>(ToolCall2)", "Map<String,@>(ToolCall)", "Future<Response>(RequestContext)", "Future<Response>()", "TokenLogprob0(@)", "Map<String,@>(TokenLogprob0)", "Future<ContainerFileData>(String,String)", "~(Log)", "Map<String,@>(ResponseTool)", "String(MapEntry<String,String>)", "bool(PdfObject<PdfDataType>)", "int(PdfXref,PdfXref)", "int(int,int)", "bool(InlineSyntax)", "Chain()", "int(Frame)", "String(Frame)", "bool(Map<String,Object?>)", "Iterable<String>(ToolSet)", "bool(Pattern)", "FunctionTool(Tool3<Object>)", "Trace(String)", "int(String?)", "int(@,@)", "bool(MapEntry<String,String>)", "0^(0^,0^)<num>", "~(ChatResult<String>)", "@()", "Tool0(Tool3<Object>)", "~(Parameters?)", "int(int)", "_Future<@>?()", "0&(String)", "ToolPart(ToolExecutionResult)", "Set<0^>()<Object?>", "InputContentBlock(ToolPart)", "ChatResult<ChatMessage>?(MessageStreamEvent)", "bool(String,Object?)", "TextPart(TextBlock)", "ToolDefinition(Tool3<Object>)", "ChatResult<ChatMessage>(GenerateContentResponse)", "bool(Content)", "Map<String,String>(SafetyRating)", "Map<String,Object?>(CitationSource)", "Map<String,@>(ExecutableCode)", "Map<String,@>(CodeExecutionResult)", "bool(String,@)", "FunctionDeclaration(Tool3<Object>)", "ChatResult<ChatMessage>(ChatCompletionStreamResponse)", "Tool2(Tool3<Object>)", "ToolCall2(ToolPart)", "ToolPart(ToolCall2)", "ToolDefinition0(Tool3<Object>)", "List<ChatMessage0>(List<ChatMessage0>)", "List<ChatMessage0>(ChatMessage)", "ChatMessage0(ToolPart)", "String(DataPart)", "ChatMessage0?(StandardPart)", "ToolCall(ToolPart)", "ToolCall0(ToolPart)", "~(@,@)", "Null(~())", "@(@,String)", "_ConverterStreamEventSink<@,@>(EventSink<@>)", "Type(StandardPart)", "bool(XAIServerSideTool)", "bool(AnthropicRemoteFile)", "int(AnthropicRemoteFile,AnthropicRemoteFile)", "AnthropicChatOptions()", "Null(CanceledException)", "CohereProvider()", "Map<String,Object?>(Part)", "GoogleProvider()", "GroundingAttribution(@)", "MistralProvider()", "Map<String,@>(GroundingAttribution)", "CitationSource(@)", "Map<String,@>(CitationSource)", "Part0(@)", "Map<String,@>(Part0)", "TopCandidates(@)", "OpenAIProvider()", "Map<String,@>(TopCandidates)", "OpenAIResponsesProvider()", "Map<String,@>(Content)", "Map<String,@>(Tool1)", "Candidate(@)", "Map<String,@>(Candidate)", "MapEntry<String,Schema>(String,@)", "MapEntry<String,Map<String,@>>(String,Schema)", "GroundingChunk(@)", "GroundingSupport(@)", "Map<String,@>(GroundingChunk)", "Map<String,@>(GroundingSupport)", "+(Command?,List<String>)(String)", "double(@)", "ReviewSnippet(@)", "Map<String,@>(ReviewSnippet)", "GroundingChunkCustomMetadata(@)", "Map<String,@>(GroundingChunkCustomMetadata)", "FunctionResponseInlinePart(@)", "Map<String,@>(FunctionResponseInlinePart)", "Map<String,@>(FunctionDeclaration)", "~(String)", "bool(String,String)", "Null(String,String[Object?])", "~(MultiStreamController<List<int>>)", "~(List<int>)", "StringBuffer(StringBuffer,String)", "MediaType()", "String(StringBuffer)", "String(Parameter)", "int(Command,Command)", "Future<@>(Parameters)", "Stream<Object?>(Stream<Object?>)", "Logger()", "String(Node)", "~(ChatMessage?)", "Map<String,Object?>(ChatMessage)", "Iterable<BlockSyntax>()", "LinkReference()", "~(ListItem)", "bool(RegExp)", "int(Element,Element)", "~(Uint8List,int,int)", "Future<Map<String,Object?>>(Map<String,Object?>)", "bool(Node)", "_LineSplitterEventSink(EventSink<String>)", "List<int>()", "bool(DelimiterTag)", "int(DelimiterTag,DelimiterTag)", "String?(Node)", "Null(String[String?])", "ToolCall2(@)", "bool(Tool3<Object>)", "Map<String,@>(ChatMessage1)", "Map<String,@>(Tool2)", "ChatChoiceDelta(@)", "Map<String,@>(ChatChoiceDelta)", "Map<String,@>(ContentPart)", "List<Tool3<Object>>(ToolSet)", "Map<String,@>(ChatMessage0)", "Map<String,@>(ToolDefinition0)", "ToolCall(@)", "Logprob(@)", "Map<String,@>(Logprob)", "TokenLogprob(@)", "Map<String,@>(TokenLogprob)", "int(MapEntry<String,String>)", "~(Symbol0,@)", "BaseRequest()", "String(StandardPart)", "Map<String,@>(ChatMessage2)", "Map<String,@>(Tool0)", "Map<String,@>(ToolCall0)", "Map<String,@>(ContentPart0)", "Null(@,StackTrace)", "Null(~)", "TopLogprob(@)", "Map<String,@>(TopLogprob)", "bool(ClickButton)", "ClickButton()", "bool(FunctionCallOutputStatus)", "FunctionCallOutputStatus()", "bool(Include)", "Include()", "bool(ItemStatus)", "ItemStatus()", "bool(MessagePhase)", "MessagePhase()", "bool(MessageRole1)", "MessageRole1()", "bool(PromptCacheRetention)", "PromptCacheRetention()", "bool(ResponseStatus)", "ResponseStatus()", "bool(SearchContentType)", "SearchContentType()", "bool(ServiceTier0)", "ServiceTier0()", "bool(ToolSearchExecutionType)", "ToolSearchExecutionType()", "Client0()", "Map<String,@>(TopLogProb)", "Annotation(@)", "Citation(@)", "Map<String,@>(Annotation)", "Map<String,@>(Citation)", "WebSearchResultItem(@)", "String(Include)", "Map<String,@>(InputContent)", "OutputContent(@)", "Map<String,@>(OutputContent)", "Map<String,@>(WebSearchResultItem)", "ReasoningSummaryContent(@)", "Map<String,@>(ReasoningSummaryContent)", "CodeInterpreterOutput(@)", "Map<String,@>(CodeInterpreterOutput)", "ShellCallOutputContent(@)", "Map<String,@>(ShellCallOutputContent)", "ResponseTool(@)", "ComputerAction(@)", "Map<String,@>(ComputerAction)", "OutputItem(@)", "Map<String,@>(OutputItem)", "Map<String,@>(Item)", "SearchContentType(@)", "String(SearchContentType)", "FileSearchFilter(@)", "Map<String,@>(FileSearchFilter)", "NamespaceAllowedTool(@)", "Map<String,@>(NamespaceAllowedTool)", "ChatStreamChoice(@)", "Map<String,@>(ChatStreamChoice)", "ToolCallDelta(+(int,@))", "ReasoningDetail(@)", "Map<String,@>(ToolCallDelta)", "Map<String,@>(ReasoningDetail)", "ChatStreamEvent(Map<String,@>)", "String(String?)", "Uint8List(Uint8List,PdfObjectBase<PdfDataType>)", "Map<String,@>(ToolResultContent)", "Future<Uint8List>()", "PdfIndirect(PdfObjectBase<PdfDataType>)", "PdfNum(num)", "MapEntry<String,PdfIndirect>(String,PdfObjectBase<PdfDataType>)", "int(int,String)", "~(int)", "~(int,int)", "Map<String,@>(InputContentBlock)", "ContentBlock(@)", "int(PdfAnnotFlags)", "PdfFontMetrics(int)", "int(double)", "bool(PdfFont)", "PdfFont()", "SizedBox(Context0)", "_Span(_Span,_Span)", "bool(InlineSpan,TextStyle?,AnnotationBuilder?)", "String?()", "int(_Line)", "Map<String,@>(ContentBlock)", "Object(_Line)", "Object(_Highlight)", "int(_Highlight,_Highlight)", "List<_Line>(MapEntry<Object,List<_Highlight>>)", "SourceSpanWithContext()", "Map<String,@>(InputMessage)", "List<Frame>(Trace)", "int(Trace)", "Map<String,@>(ToolDefinition)", "String(Trace)", "~(int,@)", "Map<String,String>(Map<String,String>,String)", "Frame(String,String)", "~(Object,EventSink<String>)", "List<int>(List<int>{level:int?,windowBits:int})", "CancelationToken()", "~(Computation)", "bool(Computation)", "Uri?(Map<String,Object?>)", "Future<String>()", "Command?(String,List<String>)", "Container0(Context0)", "List<Widget>(Context0)", "Container0(ChatMessage)", "MapEntry<String,Object?>(String,Computation)", "Widget(int)", "0&(String,int?)", "Future<Object>(@)", "bool(MapEntry<String,BetterOutcome<ToolSet?>>)", "String(MapEntry<String,BetterOutcome<ToolSet?>>)", "ToolSet?(BetterSuccess<ToolSet?>)", "bool(MapEntry<String,@>)", "~(Map<String,Object?>?)", "Future<~>(WebAgentConfig?)", "Future<String>(Object[StackTrace?])", "~(@,StackTrace)", "~(String,String?)", "@(String{reviver:Object?(Object?,Object?)?})", "StringBuffer([Object])", "Map<0^,1^>(Map<@,@>)<Object?,Object?>", "bool(ProtocolVersion)", "Object?(Object?)", "Future<0^>(Future<@>)<Object?>", "Provider<ChatModelOptions,EmbeddingsModelOptions,MediaGenerationModelOptions>()", "ToolDefinition(AnthropicServerToolConfig)", "bool(GenerateContentResponse)", "OpenAIServerSideTool(XAIServerSideTool)", "AnthropicRemoteFile(Map<String,Object?>)", "AnthropicProvider({apiKey:String?,headers:Map<String,String>})", "CohereProvider({apiKey:String?,headers:Map<String,String>})", "GoogleProvider({apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "MistralProvider({apiKey:String?,headers:Map<String,String>})", "OllamaProvider({apiKey:String?,apiKeyName:String?,baseUrl:Uri?,displayName:String,headers:Map<String,String>,name:String})", "OpenAIProvider({aliases:List<String>,apiKey:String?,apiKeyName:String?,baseUrl:Uri?,defaultModelNames:Map<ModelKind,String>,displayName:String,headers:Map<String,String>,name:String})", "OpenAIResponsesProvider({aliases:List<String>,apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "XAIProvider({apiKey:String?,headers:Map<String,String>})", "XAIResponsesProvider({apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "Line(String{tabRemaining:int?})", "int(Map<String,@>?)", "Include(String)", "Map<String,Object?>([Map<String,Object?>?])", "~(Map<String,Object?>)", "TopLogProb(@)"],
+    types: ["~()", "String(String)", "Null()", "bool(String)", "~(Object?)", "~(@)", "~(Object,StackTrace)", "bool(@)", "String()", "InlineSpan(Node)", "bool(StandardPart)", "bool(ToolPart)", "String(Match)", "Null(Object,StackTrace)", "Null(JSObject)", "Null(@)", "bool(ChatMessage)", "String(@)", "String(TextPart)", "int(@)", "String(Line)", "Frame()", "~(JSObject)", "Future<~>()", "Future<@>()", "Null(@,@)", "int(String)", "bool(BlockSyntax)", "Frame(String)", "Map<String,@>(@)", "bool(_Highlight)", "~(~())", "@(BetterResults)", "bool(Object?,Object?)", "int(Object?)", "@(@)", "List<Map<String,Object?>>()", "bool(Object?)", "int()", "~(Object?,Object?)", "~(Object[StackTrace?])", "LogProb(@)", "Map<String,@>(LogProb)", "String(Map<String,Object?>)", "Future<McpToolSet?>()", "String(Tool3<Object>)", "SafetyRating(@)", "Map<String,@>(SafetyRating)", "LogprobCandidate(@)", "Map<String,@>(LogprobCandidate)", "int(String?)", "@(String)", "~(String,String)", "String(ThinkingPart)", "Future<@>(Object?)", "~(ChatResult<String>)", "Map<String,@>(IterationUsage)", "bool(InlineSyntax)", "~(String,@)", "List<Node>()", "Map<String,@>(ToolCall2)", "Map<String,@>(ToolCall)", "Future<Response>(RequestContext)", "Future<Response>()", "TokenLogprob0(@)", "Map<String,@>(TokenLogprob0)", "Future<ContainerFileData>(String,String)", "FunctionTool(Tool3<Object>)", "~(Log)", "String(MapEntry<String,String>)", "bool(PdfObject<PdfDataType>)", "int(PdfXref,PdfXref)", "int(int,int)", "double(double,double)", "bool(Delimiter)", "Chain()", "int(Frame)", "String(Frame)", "bool(Map<String,Object?>)", "Iterable<String>(ToolSet)", "0&()", "IterationUsage(@)", "Trace(String)", "@()", "int(@,@)", "MapEntry<String,String>()", "0^(0^,0^)<num>", "Map<String,@>(ResponseTool)", "bool(MapEntry<String,String>)", "Tool0(Tool3<Object>)", "Map<String,Object?>([Map<String,Object?>?])", "~(Map<String,Object?>)", "~(Parameters?)", "Object?(Object?)", "int(int)", "0&(String)", "ToolPart(ToolExecutionResult)", "_Future<@>?()", "InputContentBlock(ToolPart)", "ChatResult<ChatMessage>?(MessageStreamEvent)", "bool(String,Object?)", "TextPart(TextBlock)", "ToolDefinition(Tool3<Object>)", "ChatResult<ChatMessage>(GenerateContentResponse)", "bool(Content)", "Map<String,String>(SafetyRating)", "Map<String,Object?>(CitationSource)", "Map<String,@>(ExecutableCode)", "Map<String,@>(CodeExecutionResult)", "bool(String,@)", "FunctionDeclaration(Tool3<Object>)", "ChatResult<ChatMessage>(ChatCompletionStreamResponse)", "Tool2(Tool3<Object>)", "ToolCall2(ToolPart)", "ToolPart(ToolCall2)", "ToolDefinition0(Tool3<Object>)", "List<ChatMessage0>(List<ChatMessage0>)", "List<ChatMessage0>(ChatMessage)", "ChatMessage0(ToolPart)", "String(DataPart)", "ChatMessage0?(StandardPart)", "ToolCall(ToolPart)", "ToolCall0(ToolPart)", "Set<0^>()<Object?>", "~(@,@)", "Null(~())", "@(@,String)", "Type(StandardPart)", "bool(XAIServerSideTool)", "bool(AnthropicRemoteFile)", "int(AnthropicRemoteFile,AnthropicRemoteFile)", "AnthropicChatOptions()", "_ConverterStreamEventSink<@,@>(EventSink<@>)", "Future<~>(CanceledException)", "Map<String,Object?>(Part)", "CohereProvider()", "GroundingAttribution(@)", "GoogleProvider()", "Map<String,@>(GroundingAttribution)", "CitationSource(@)", "Map<String,@>(CitationSource)", "Part0(@)", "Map<String,@>(Part0)", "TopCandidates(@)", "MistralProvider()", "Map<String,@>(TopCandidates)", "OpenAIProvider()", "Map<String,@>(Content)", "Map<String,@>(Tool1)", "Candidate(@)", "Map<String,@>(Candidate)", "MapEntry<String,Schema>(String,@)", "MapEntry<String,Map<String,@>>(String,Schema)", "GroundingChunk(@)", "GroundingSupport(@)", "Map<String,@>(GroundingChunk)", "Map<String,@>(GroundingSupport)", "OpenAIResponsesProvider()", "double(@)", "ReviewSnippet(@)", "Map<String,@>(ReviewSnippet)", "GroundingChunkCustomMetadata(@)", "Map<String,@>(GroundingChunkCustomMetadata)", "FunctionResponseInlinePart(@)", "Map<String,@>(FunctionResponseInlinePart)", "Map<String,@>(FunctionDeclaration)", "+(Command?,List<String>)(String)", "bool(String,String)", "Null(String,String[Object?])", "~(MultiStreamController<List<int>>)", "~(List<int>)", "~(String)", "MediaType()", "StringBuffer(StringBuffer,String)", "String(Parameter)", "String(StringBuffer)", "Future<@>(Parameters)", "Stream<Object?>(Stream<Object?>)", "Logger()", "String(Node)", "int(Command,Command)", "~(ChatMessage?)", "Iterable<BlockSyntax>()", "LinkReference()", "~(ListItem)", "bool(RegExp)", "int(Element,Element)", "Map<String,Object?>(ChatMessage)", "~(Uint8List,int,int)", "bool(Node)", "Future<Map<String,Object?>>(Map<String,Object?>)", "List<int>()", "bool(DelimiterTag)", "int(DelimiterTag,DelimiterTag)", "String?(Node)", "Null(String[String?])", "ToolCall2(@)", "_LineSplitterEventSink(EventSink<String>)", "Map<String,@>(ChatMessage1)", "Map<String,@>(Tool2)", "ChatChoiceDelta(@)", "Map<String,@>(ChatChoiceDelta)", "Map<String,@>(ContentPart)", "bool(Tool3<Object>)", "Map<String,@>(ChatMessage0)", "Map<String,@>(ToolDefinition0)", "ToolCall(@)", "Logprob(@)", "Map<String,@>(Logprob)", "TokenLogprob(@)", "Map<String,@>(TokenLogprob)", "int(MapEntry<String,String>)", "List<Tool3<Object>>(ToolSet)", "BaseRequest()", "bool(Pattern)", "Map<String,@>(ChatMessage2)", "Map<String,@>(Tool0)", "Map<String,@>(ToolCall0)", "Map<String,@>(ContentPart0)", "String(StandardPart)", "~(Symbol0,@)", "TopLogprob(@)", "Map<String,@>(TopLogprob)", "bool(ClickButton)", "ClickButton()", "bool(FunctionCallOutputStatus)", "FunctionCallOutputStatus()", "bool(Include)", "Include()", "bool(ItemStatus)", "ItemStatus()", "bool(MessagePhase)", "MessagePhase()", "bool(MessageRole1)", "MessageRole1()", "bool(PromptCacheRetention)", "PromptCacheRetention()", "bool(ResponseStatus)", "ResponseStatus()", "bool(SearchContentType)", "SearchContentType()", "bool(ServiceTier0)", "ServiceTier0()", "bool(ToolSearchExecutionType)", "ToolSearchExecutionType()", "Client0()", "Map<String,@>(TopLogProb)", "Annotation(@)", "Null(@,StackTrace)", "Map<String,@>(Annotation)", "Null(~)", "Citation(@)", "String(Include)", "Map<String,@>(InputContent)", "OutputContent(@)", "Map<String,@>(OutputContent)", "Map<String,@>(Citation)", "ReasoningSummaryContent(@)", "Map<String,@>(ReasoningSummaryContent)", "CodeInterpreterOutput(@)", "Map<String,@>(CodeInterpreterOutput)", "ShellCallOutputContent(@)", "Map<String,@>(ShellCallOutputContent)", "ResponseTool(@)", "ComputerAction(@)", "Map<String,@>(ComputerAction)", "OutputItem(@)", "Map<String,@>(OutputItem)", "Map<String,@>(Item)", "SearchContentType(@)", "String(SearchContentType)", "FileSearchFilter(@)", "Map<String,@>(FileSearchFilter)", "NamespaceAllowedTool(@)", "Map<String,@>(NamespaceAllowedTool)", "ChatStreamChoice(@)", "Map<String,@>(ChatStreamChoice)", "ToolCallDelta(+(int,@))", "ReasoningDetail(@)", "Map<String,@>(ToolCallDelta)", "Map<String,@>(ReasoningDetail)", "ChatStreamEvent(Map<String,@>)", "String(String?)", "Uint8List(Uint8List,PdfObjectBase<PdfDataType>)", "WebSearchResultItem(@)", "Future<Uint8List>()", "PdfIndirect(PdfObjectBase<PdfDataType>)", "PdfNum(num)", "MapEntry<String,PdfIndirect>(String,PdfObjectBase<PdfDataType>)", "int(int,String)", "~(int)", "~(int,int)", "Map<String,@>(WebSearchResultItem)", "Map<String,@>(ToolResultContent)", "int(PdfAnnotFlags)", "PdfFontMetrics(int)", "int(double)", "bool(PdfFont)", "PdfFont()", "SizedBox(Context0)", "Map<String,@>(InputContentBlock)", "double(double?,double?)", "_Span(_Span,_Span)", "bool(InlineSpan,TextStyle?,AnnotationBuilder?)", "String?()", "int(_Line)", "ContentBlock(@)", "Object(_Line)", "Object(_Highlight)", "int(_Highlight,_Highlight)", "List<_Line>(MapEntry<Object,List<_Highlight>>)", "SourceSpanWithContext()", "Map<String,@>(ContentBlock)", "List<Frame>(Trace)", "int(Trace)", "Map<String,@>(InputMessage)", "String(Trace)", "Map<String,@>(ToolDefinition)", "bool(RefusalCategory)", "Frame(String,String)", "~(Object,EventSink<String>)", "RefusalCategory()", "CancelationToken()", "~(int,@)", "Map<String,String>(Map<String,String>,String)", "Uri?(Map<String,Object?>)", "Future<String>()", "Command?(String,List<String>)", "Container0(Context0)", "List<Widget>(Context0)", "Container0(ChatMessage)", "List<int>(List<int>{level:int?,windowBits:int})", "Widget(int)", "~(Computation)", "Future<Object>(@)", "bool(MapEntry<String,BetterOutcome<ToolSet?>>)", "String(MapEntry<String,BetterOutcome<ToolSet?>>)", "ToolSet?(BetterSuccess<ToolSet?>)", "bool(MapEntry<String,@>)", "~(Map<String,Object?>?)", "Future<~>(WebAgentConfig?)", "Future<String>(Object[StackTrace?])", "bool(Computation)", "MapEntry<String,Object?>(String,Computation)", "@(String{reviver:Object?(Object?,Object?)?})", "StringBuffer([Object])", "Map<0^,1^>(Map<@,@>)<Object?,Object?>", "0&(String,int?)", "~(@,StackTrace)", "Future<0^>(Future<@>)<Object?>", "Provider<ChatModelOptions,EmbeddingsModelOptions,MediaGenerationModelOptions>()", "ToolDefinition(AnthropicServerToolConfig)", "bool(GenerateContentResponse)", "OpenAIServerSideTool(XAIServerSideTool)", "AnthropicRemoteFile(Map<String,Object?>)", "AnthropicProvider({apiKey:String?,headers:Map<String,String>})", "CohereProvider({apiKey:String?,headers:Map<String,String>})", "GoogleProvider({apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "MistralProvider({apiKey:String?,headers:Map<String,String>})", "OllamaProvider({apiKey:String?,apiKeyName:String?,baseUrl:Uri?,displayName:String,headers:Map<String,String>,name:String})", "OpenAIProvider({aliases:List<String>,apiKey:String?,apiKeyName:String?,baseUrl:Uri?,defaultModelNames:Map<ModelKind,String>,displayName:String,headers:Map<String,String>,name:String})", "OpenAIResponsesProvider({aliases:List<String>,apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "XAIProvider({apiKey:String?,headers:Map<String,String>})", "XAIResponsesProvider({apiKey:String?,baseUrl:Uri?,headers:Map<String,String>})", "Line(String{tabRemaining:int?})", "int(Map<String,@>?)", "Include(String)", "~(String,String?)", "bool(ProtocolVersion)", "TopLogProb(@)"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: Symbol("$ti"),
@@ -75564,7 +76311,7 @@
       "3;containerId,fileId,fileName": (t1, t2, t3) => o => o instanceof B._Record_3_containerId_fileId_fileName && t1._is(o._0) && t2._is(o._1) && t3._is(o._2)
     }
   };
-  B._Universe_addRules(init.typeUniverse, JSON.parse('{"JavaScriptFunction":"LegacyJavaScriptObject","PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","NativeSharedArrayBuffer":"NativeByteBuffer","JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"Null":[],"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArray":{"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"],"JSIndexable":["1"]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"],"JSIndexable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"JSIndexable":["@"],"TrustedGetRuntimeType":[]},"CastStream":{"Stream":["2"],"Stream.T":"2"},"CastStreamSubscription":{"StreamSubscription":["2"]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"CastIterable":{"_CastIterableBase":["1","2"],"Iterable":["2"],"Iterable.E":"2"},"_EfficientLengthCastIterable":{"CastIterable":["1","2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"CastSet":{"Set":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"CastMap":{"MapBase":["3","4"],"Map":["3","4"],"MapBase.K":"3","MapBase.V":"4"},"CastQueue":{"Queue":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"LateError":{"Error":[]},"CodeUnits":{"ListBase":["int"],"UnmodifiableListMixin":["int"],"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"],"ListBase.E":"int","UnmodifiableListMixin.E":"int"},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"EfficientLengthMappedIterable":{"MappedIterable":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2","ListIterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"ExpandIterable":{"Iterable":["2"],"Iterable.E":"2"},"ExpandIterator":{"Iterator":["2"]},"TakeIterable":{"Iterable":["1"],"Iterable.E":"1"},"EfficientLengthTakeIterable":{"TakeIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"TakeIterator":{"Iterator":["1"]},"SkipIterable":{"Iterable":["1"],"Iterable.E":"1"},"EfficientLengthSkipIterable":{"SkipIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"SkipIterator":{"Iterator":["1"]},"SkipWhileIterable":{"Iterable":["1"],"Iterable.E":"1"},"SkipWhileIterator":{"Iterator":["1"]},"EmptyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"EmptyIterator":{"Iterator":["1"]},"WhereTypeIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereTypeIterator":{"Iterator":["1"]},"NonNullsIterable":{"Iterable":["1"],"Iterable.E":"1"},"NonNullsIterator":{"Iterator":["1"]},"IndexedIterable":{"Iterable":["+(int,1)"],"Iterable.E":"+(int,1)"},"EfficientLengthIndexedIterable":{"IndexedIterable":["1"],"EfficientLengthIterable":["+(int,1)"],"Iterable":["+(int,1)"],"Iterable.E":"+(int,1)"},"IndexedIterator":{"Iterator":["+(int,1)"]},"UnmodifiableListBase":{"ListBase":["1"],"UnmodifiableListMixin":["1"],"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"Symbol":{"Symbol0":[]},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_control_input":{"_Record2":[],"_Record":[]},"_Record_2_parts_toolCallNames":{"_Record2":[],"_Record":[]},"_Record_3_containerId_fileId_fileName":{"_Record3":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"GeneralConstantMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"GeneralConstantSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"Instantiation":{"Closure":[],"Function":[]},"Instantiation1":{"Closure":[],"Function":[]},"Instantiation2":{"Closure":[],"Function":[]},"JSInvocationMirror":{"Invocation":[]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"NullThrownFromJavaScriptException":{"Exception":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Closure":[],"Function":[]},"Closure2Args":{"Closure":[],"Function":[]},"TearOffClosure":{"Closure":[],"Function":[]},"StaticClosure":{"Closure":[],"Function":[]},"BoundClosure":{"Closure":[],"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"JsIdentityLinkedHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"JsConstantLinkedHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_Record2":{"_Record":[]},"_Record3":{"_Record":[]},"JSSyntaxRegExp":{"RegExp":[],"Pattern":[]},"_MatchImplementation":{"RegExpMatch":[],"Match":[]},"_AllMatchesIterable":{"Iterable":["RegExpMatch"],"Iterable.E":"RegExpMatch"},"_AllMatchesIterator":{"Iterator":["RegExpMatch"]},"StringMatch":{"Match":[]},"_StringAllMatchesIterable":{"Iterable":["Match"],"Iterable.E":"Match"},"_StringAllMatchesIterator":{"Iterator":["Match"]},"NativeArrayBuffer":{"NativeByteBuffer":[],"JSObject":[],"ByteBuffer":[],"TrustedGetRuntimeType":[]},"NativeByteBuffer":{"JSObject":[],"ByteBuffer":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"_UnmodifiableNativeByteBufferView":{"ByteBuffer":[]},"NativeByteData":{"ByteData":[],"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[],"JSIndexable":["1"]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"NativeTypedArrayOfDouble":[],"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeFloat64List":{"NativeTypedArrayOfDouble":[],"Float64List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeInt16List":{"NativeTypedArrayOfInt":[],"Int16List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt32List":{"NativeTypedArrayOfInt":[],"Int32List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt8List":{"NativeTypedArrayOfInt":[],"Int8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint16List":{"NativeTypedArrayOfInt":[],"Uint16List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint32List":{"NativeTypedArrayOfInt":[],"Uint32List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8ClampedList":{"NativeTypedArrayOfInt":[],"Uint8ClampedList":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8List":{"NativeTypedArrayOfInt":[],"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"_Type":{"Type":[]},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_Future":{"Future":["1"]},"EventSink":{"Sink":["1"]},"StreamSink":{"EventSink":["1"],"Sink":["1"]},"MultiStreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"StreamController":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_BufferingStreamSubscription":{"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_AsyncAwaitCompleter":{"Completer":["1"]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_BroadcastSubscription":{"_ControllerSubscription":["1"],"_BufferingStreamSubscription":["1"],"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_BroadcastStreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_SyncBroadcastStreamController":{"_BroadcastStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_AsyncBroadcastStreamController":{"_BroadcastStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_Completer":{"Completer":["1"]},"_AsyncCompleter":{"_Completer":["1"],"Completer":["1"]},"_SyncCompleter":{"_Completer":["1"],"Completer":["1"]},"StreamView":{"Stream":["1"]},"StreamTransformerBase":{"StreamTransformer":["1","2"]},"_StreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_AsyncStreamController":{"_AsyncStreamControllerDispatch":["1"],"_StreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_SyncStreamController":{"_SyncStreamControllerDispatch":["1"],"_StreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_ControllerStream":{"_StreamImpl":["1"],"Stream":["1"],"Stream.T":"1"},"_ControllerSubscription":{"_BufferingStreamSubscription":["1"],"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_StreamSinkWrapper":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_StreamControllerAddStreamState":{"_AddStreamState":["1"]},"_StreamImpl":{"Stream":["1"]},"_DelayedData":{"_DelayedEvent":["1"]},"_DelayedError":{"_DelayedEvent":["@"]},"_DelayedDone":{"_DelayedEvent":["@"]},"_DoneStreamSubscription":{"StreamSubscription":["1"]},"_EmptyStream":{"Stream":["1"],"Stream.T":"1"},"_MultiStream":{"Stream":["1"],"Stream.T":"1"},"_MultiStreamController":{"_AsyncStreamController":["1"],"_AsyncStreamControllerDispatch":["1"],"_StreamController":["1"],"MultiStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_ForwardingStream":{"Stream":["2"]},"_ForwardingStreamSubscription":{"_BufferingStreamSubscription":["2"],"StreamSubscription":["2"],"_EventSink":["2"],"_EventDispatch":["2"],"_BufferingStreamSubscription.T":"2"},"_WhereStream":{"_ForwardingStream":["1","1"],"Stream":["1"],"Stream.T":"1","_ForwardingStream.T":"1","_ForwardingStream.S":"1"},"_MapStream":{"_ForwardingStream":["1","2"],"Stream":["2"],"Stream.T":"2","_ForwardingStream.T":"2","_ForwardingStream.S":"1"},"_HandleErrorStream":{"_ForwardingStream":["1","1"],"Stream":["1"],"Stream.T":"1","_ForwardingStream.T":"1","_ForwardingStream.S":"1"},"_EventSinkWrapper":{"EventSink":["1"],"Sink":["1"]},"_SinkTransformerStreamSubscription":{"_BufferingStreamSubscription":["2"],"StreamSubscription":["2"],"_EventSink":["2"],"_EventDispatch":["2"],"_BufferingStreamSubscription.T":"2"},"_BoundSinkStream":{"Stream":["2"],"Stream.T":"2"},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_CustomHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedCustomHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_LinkedHashSet":{"_SetBase":["1"],"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"ListBase":{"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"MapBase":{"Map":["1","2"]},"_MapBaseValueIterable":{"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_MapBaseValueIterator":{"Iterator":["2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ListQueue":{"Queue":["1"],"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_ListQueueIterator":{"Iterator":["1"]},"SetBase":{"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_ConverterStreamEventSink":{"EventSink":["1"],"Sink":["1"]},"Encoding":{"Codec":["String","List<int>"]},"_LineSplitterEventSink":{"StringConversionSink":[],"EventSink":["String"],"Sink":["String"]},"_JsonMap":{"MapBase":["String","@"],"Map":["String","@"],"MapBase.K":"String","MapBase.V":"@"},"_JsonMapKeyIterable":{"ListIterable":["String"],"EfficientLengthIterable":["String"],"Iterable":["String"],"Iterable.E":"String","ListIterable.E":"String"},"_JsonDecoderSink":{"_StringSinkConversionSink":["StringBuffer"],"StringConversionSink":[],"Sink":["String"],"_StringSinkConversionSink.0":"StringBuffer"},"AsciiCodec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"_UnicodeSubsetEncoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"]},"AsciiEncoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_UnicodeSubsetEncoderSink":{"StringConversionSink":[],"Sink":["String"]},"_UnicodeSubsetDecoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"]},"AsciiDecoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_ErrorHandlingAsciiDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_SimpleAsciiDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Base64Codec":{"Codec":["List<int>","String"],"Codec.S":"List<int>"},"Base64Encoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_BufferCachingBase64Encoder":{"_Base64Encoder":[]},"_Base64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_AsciiBase64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Utf8Base64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Base64Decoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_Base64DecoderSink":{"StringConversionSink":[],"Sink":["String"]},"ByteConversionSink":{"Sink":["List<int>"]},"_ByteAdapterSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_ByteCallbackSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"ChunkedConversionSink":{"Sink":["1"]},"_FusedCodec":{"Codec":["1","3"],"Codec.S":"1"},"Converter":{"StreamTransformer":["1","2"]},"HtmlEscape":{"Converter":["String","String"],"StreamTransformer":["String","String"],"Converter.S":"String","Converter.T":"String"},"_HtmlEscapeSink":{"StringConversionSink":[],"Sink":["String"]},"JsonUnsupportedObjectError":{"Error":[]},"JsonCyclicError":{"Error":[]},"JsonCodec":{"Codec":["Object?","String"],"Codec.S":"Object?"},"JsonEncoder":{"Converter":["Object?","String"],"StreamTransformer":["Object?","String"],"Converter.S":"Object?","Converter.T":"String"},"_JsonEncoderSink":{"Sink":["Object?"]},"_JsonUtf8EncoderSink":{"Sink":["Object?"]},"JsonDecoder":{"Converter":["String","Object?"],"StreamTransformer":["String","Object?"],"Converter.S":"String","Converter.T":"Object?"},"Latin1Codec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"Latin1Encoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"Latin1Decoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_Latin1DecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Latin1AllowInvalidDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"LineSplitter":{"StreamTransformer":["String","String"]},"_LineSplitterSink":{"StringConversionSink":[],"Sink":["String"]},"_LineSplitIterable":{"Iterable":["String"],"Iterable.E":"String"},"_LineSplitIterator":{"Iterator":["String"]},"StringConversionSink":{"Sink":["String"]},"_ClosableStringSink":{"StringSink":[]},"_StringConversionSinkAsStringSinkAdapter":{"StringSink":[]},"_StringSinkConversionSink":{"StringConversionSink":[],"Sink":["String"]},"_StringAdapterSink":{"StringConversionSink":[],"Sink":["String"]},"_Utf8StringSinkAdapter":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Utf8ConversionSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Utf8Codec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"Utf8Encoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_Utf8EncoderSink":{"StringConversionSink":[],"Sink":["String"]},"Utf8Decoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"BigInt":{"Comparable":["BigInt"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"Duration":{"Comparable":["Duration"]},"int":{"num":[],"Comparable":["num"]},"List":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"num":{"Comparable":["num"]},"RegExp":{"Pattern":[]},"RegExpMatch":{"Match":[]},"Set":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"StringBuffer":{"StringSink":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"NoSuchMethodError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_Exception":{"Exception":[]},"FormatException":{"Exception":[]},"_GeneratorIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_StringStackTrace":{"StackTrace":[]},"Runes":{"Iterable":["int"],"Iterable.E":"int"},"RuneIterator":{"Iterator":["int"]},"_Uri":{"Uri":[]},"_SimpleUri":{"Uri":[]},"_DataUri":{"Uri":[]},"NullRejectionException":{"Exception":[]},"_JSRandom":{"Random":[]},"_JSSecureRandom":{"Random":[]},"Int8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"InteractiveAgent":{"Agent0":[]},"HttpChannel":{"StreamChannelMixin":["String"],"StreamChannel":["String"],"StreamChannelMixin.T":"String"},"DbgClient":{"Client0":[]},"HelpCommand":{"Command":[]},"HistoryCommand":{"Command":[]},"QuitCommand":{"Command":[]},"SummarizeCommand":{"Command":[]},"SystemPromptCommand":{"Command":[]},"ToolsCommand":{"Command":[]},"PersistentConversationManager":{"ConversationManager":[]},"PersistentFileSystem":{"FileSystem":[]},"MemoryFileSystem":{"FileSystem":[]},"InMemorySecrets":{"Secrets":[]},"McpToolSet":{"ToolSet":[],"ToolSetBase":[]},"ToolSet":{"ToolSetBase":[]},"EmptyToolSet":{"ToolSet":[],"ToolSetBase":[]},"CombinedToolSet":{"ToolSet":[],"ToolSetBase":[]},"LogSink0":{"Sink":["String"]},"LogSink":{"Sink":["String"]},"ApiKeyCredentials":{"AuthCredentials":[]},"ApiKeyProvider":{"AuthProvider":[]},"AnthropicException":{"Exception":[]},"ApiException":{"Exception":[]},"AuthenticationException":{"Exception":[]},"RateLimitException":{"Exception":[]},"AuthInterceptor":{"Interceptor0":[]},"ErrorInterceptor":{"Interceptor0":[]},"LoggingInterceptor":{"Interceptor0":[]},"TextBlock":{"ContentBlock":[]},"ThinkingBlock":{"ContentBlock":[]},"RedactedThinkingBlock":{"ContentBlock":[]},"ToolUseBlock":{"ContentBlock":[]},"ServerToolUseBlock":{"ContentBlock":[]},"WebSearchToolResultBlock":{"ContentBlock":[]},"WebFetchToolResultBlock":{"ContentBlock":[]},"CodeExecutionToolResultBlock":{"ContentBlock":[]},"BashCodeExecutionToolResultBlock":{"ContentBlock":[]},"TextEditorCodeExecutionToolResultBlock":{"ContentBlock":[]},"ToolSearchToolResultBlock":{"ContentBlock":[]},"ContainerUploadBlock":{"ContentBlock":[]},"CompactionBlock":{"ContentBlock":[]},"WebSearchResultSuccess":{"WebSearchResult":[]},"WebSearchResultError":{"WebSearchResult":[]},"CharLocationCitation":{"Citation":[]},"PageLocationCitation":{"Citation":[]},"ContentBlockLocationCitation":{"Citation":[]},"WebSearchResultLocationCitation":{"Citation":[]},"TextInputBlock":{"InputContentBlock":[]},"ImageInputBlock":{"InputContentBlock":[]},"ToolUseInputBlock":{"InputContentBlock":[]},"ToolResultTextContent":{"ToolResultContent":[]},"ToolResultInputBlock":{"InputContentBlock":[]},"TextMessageContent":{"MessageContent":[]},"BlocksMessageContent":{"MessageContent":[]},"TextSystemPrompt":{"SystemPrompt":[]},"Base64ImageSource":{"ImageSource":[]},"TextDelta":{"ContentBlockDelta":[]},"InputJsonDelta":{"ContentBlockDelta":[]},"ThinkingDelta":{"ContentBlockDelta":[]},"CompactionDelta":{"ContentBlockDelta":[]},"SignatureDelta":{"ContentBlockDelta":[]},"CitationsDelta":{"ContentBlockDelta":[]},"MessageStartEvent":{"MessageStreamEvent":[]},"MessageDeltaEvent":{"MessageStreamEvent":[]},"MessageStopEvent":{"MessageStreamEvent":[]},"ContentBlockStartEvent":{"MessageStreamEvent":[]},"ContentBlockDeltaEvent":{"MessageStreamEvent":[]},"ContentBlockStopEvent":{"MessageStreamEvent":[]},"PingEvent":{"MessageStreamEvent":[]},"ErrorEvent":{"MessageStreamEvent":[]},"WebSearchTool":{"BuiltInTool":[]},"DirectToolCaller":{"ToolCaller":[]},"ServerToolCaller":{"ToolCaller":[]},"ToolChoiceAuto":{"ToolChoice":[]},"CustomToolDefinition":{"ToolDefinition":[]},"BuiltInToolDefinition":{"ToolDefinition":[]},"InputMemoryStream":{"InputStream":[]},"OutputMemoryStream":{"OutputStream":[]},"DelegatingStreamSink":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"HandlerTransformer":{"StreamSinkTransformer":["1","2"]},"_HandlerSink":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_SafeCloseSink":{"DelegatingStreamSink":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"SettledResults":{"Results":[],"BetterResults":[]},"Results":{"BetterResults":[]},"BetterSuccess":{"BetterOutcome":["1"]},"BetterFailure":{"BetterOutcome":["1"]},"CanceledException":{"Exception":[]},"CancelableToken":{"CancelationToken":[]},"CanonicalizedMap":{"Map":["2","3"]},"DefaultEquality":{"Equality":["1"]},"IterableEquality":{"Equality":["Iterable<1>"]},"ListEquality":{"Equality":["List<1>"]},"_UnorderedEquality":{"Equality":["2"]},"SetEquality":{"_UnorderedEquality":["1","Set<1>"],"Equality":["Set<1>"],"_UnorderedEquality.E":"1","_UnorderedEquality.T":"Set<1>"},"MapEquality":{"Equality":["Map<1,2>"]},"DeepCollectionEquality":{"Equality":["@"]},"DigestSink":{"Sink":["Digest"]},"Hash":{"Converter":["List<int>","Digest"],"StreamTransformer":["List<int>","Digest"]},"HashSink":{"Sink":["List<int>"]},"_Sha256":{"Converter":["List<int>","Digest"],"StreamTransformer":["List<int>","Digest"],"Converter.S":"List<int>","Converter.T":"Digest"},"_Sha32BitSink":{"Sink":["List<int>"]},"_Sha256Sink":{"Sink":["List<int>"]},"AnthropicChatModel":{"ChatModel":["AnthropicChatOptions"],"ChatModel.0":"AnthropicChatOptions"},"AnthropicChatOptions":{"ChatModelOptions":[]},"_ServerTool":{"Tool":[]},"MessageStreamEventTransformer":{"StreamTransformer":["MessageStreamEvent","ChatResult<ChatMessage>"]},"GoogleChatModel":{"ChatModel":["GoogleChatModelOptions"],"ChatModel.0":"GoogleChatModelOptions"},"GoogleChatModelOptions":{"ChatModelOptions":[]},"MistralChatModel":{"ChatModel":["MistralChatModelOptions"],"ChatModel.0":"MistralChatModelOptions"},"MistralChatModelOptions":{"ChatModelOptions":[]},"OllamaChatModel":{"ChatModel":["OllamaChatOptions"],"ChatModel.0":"OllamaChatOptions"},"OllamaChatOptions":{"ChatModelOptions":[]},"OpenAIChatModel":{"ChatModel":["OpenAIChatOptions"],"ChatModel.0":"OpenAIChatOptions"},"OpenAIChatOptions":{"ChatModelOptions":[]},"FallbackEventHandler":{"OpenAIResponsesEventHandler":[]},"FunctionCallEventHandler":{"OpenAIResponsesEventHandler":[]},"OutputItemEventHandler":{"OpenAIResponsesEventHandler":[]},"ReasoningEventHandler":{"OpenAIResponsesEventHandler":[]},"TerminalEventHandler":{"OpenAIResponsesEventHandler":[]},"TextEventHandler":{"OpenAIResponsesEventHandler":[]},"ToolEventHandler":{"OpenAIResponsesEventHandler":[]},"OpenAIResponsesChatModel":{"ChatModel":["OpenAIResponsesChatModelOptions"],"ChatModel.0":"OpenAIResponsesChatModelOptions"},"OpenAIResponsesChatModelOptions":{"ChatModelOptions":[]},"XAIResponsesChatModel":{"ChatModel":["XAIResponsesChatModelOptions"],"ChatModel.0":"XAIResponsesChatModelOptions"},"XAIResponsesChatModelOptions":{"ChatModelOptions":[]},"AnthropicProvider":{"Provider":["AnthropicChatOptions","EmbeddingsModelOptions","AnthropicMediaGenerationModelOptions"],"ChatOrchestratorProvider":[]},"CohereProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"GoogleProvider":{"Provider":["GoogleChatModelOptions","GoogleEmbeddingsModelOptions","GoogleMediaGenerationModelOptions"],"ChatOrchestratorProvider":[]},"MistralProvider":{"Provider":["MistralChatModelOptions","MistralEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OllamaProvider":{"Provider":["OllamaChatOptions","OllamaEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OpenAIProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OpenAIProviderBase":{"Provider":["1","OpenAIEmbeddingsModelOptions","2"]},"OpenAIResponsesProvider":{"Provider":["OpenAIResponsesChatModelOptions","OpenAIEmbeddingsModelOptions","OpenAIResponsesMediaGenerationModelOptions"]},"XAIProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"XAIResponsesProvider":{"Provider":["XAIResponsesChatModelOptions","EmbeddingsModelOptions","XAIResponsesMediaGenerationModelOptions"]},"RetryHttpClient":{"Client0":[]},"ChatResult":{"LanguageModelResult":["1"]},"Parts":{"ListBase":["Part"],"List":["Part"],"EfficientLengthIterable":["Part"],"Iterable":["Part"],"ListBase.E":"Part"},"StandardPart":{"Part":[]},"TextPart":{"StandardPart":[],"Part":[]},"DataPart":{"StandardPart":[],"Part":[]},"LinkPart":{"StandardPart":[],"Part":[]},"ToolPart":{"StandardPart":[],"Part":[]},"ThinkingPart":{"StandardPart":[],"Part":[]},"ApiKeyCredentials0":{"AuthCredentials0":[]},"ApiKeyProvider1":{"AuthProvider0":[]},"GoogleAIException":{"Exception":[]},"ApiException1":{"Exception":[]},"AuthenticationException1":{"Exception":[]},"RateLimitException1":{"Exception":[]},"StreamException0":{"Exception":[]},"LoggingInterceptor2":{"Interceptor1":[]},"TextPart0":{"Part0":[]},"InlineDataPart":{"Part0":[]},"FileDataPart":{"Part0":[]},"FunctionCallPart":{"Part0":[]},"FunctionResponsePart":{"Part0":[]},"ExecutableCodePart":{"Part0":[]},"CodeExecutionResultPart":{"Part0":[]},"VideoMetadataPart":{"Part0":[]},"ThoughtPart":{"Part0":[]},"ThoughtSignaturePart":{"Part0":[]},"ToolCallPart":{"Part0":[]},"ToolResponsePart":{"Part0":[]},"PartMetadataPart":{"Part0":[]},"RequestAbortedException":{"Exception":[]},"BaseClient":{"Client0":[]},"BrowserClient":{"Client0":[]},"ByteStream":{"StreamView":["List<int>"],"Stream":["List<int>"],"Stream.T":"List<int>","StreamView.T":"List<int>"},"ClientException":{"Exception":[]},"MultipartRequest":{"BaseRequest":[]},"Request":{"BaseRequest":[]},"StreamedResponseV2":{"StreamedResponse":[]},"CaseInsensitiveMap":{"CanonicalizedMap":["String","String","1"],"Map":["String","1"],"CanonicalizedMap.K":"String","CanonicalizedMap.V":"1","CanonicalizedMap.C":"String"},"ChannelIterator":{"Iterator":["num"]},"ColorUint8":{"Color":[],"Iterable":["num"],"Iterable.E":"num"},"RpcException":{"Exception":[]},"Parameter":{"Parameters":[]},"_MissingParameter":{"Parameter":[],"Parameters":[]},"Peer":{"Client":[],"Server":[]},"_RespondToFormatExceptionsTransformer":{"StreamChannelTransformer":["Object?","Object?"]},"Level":{"Comparable":["Level"]},"Element":{"Node":[]},"Text":{"Node":[]},"UnparsedContent":{"Node":[]},"BlockquoteSyntax":{"BlockSyntax":[]},"CodeBlockSyntax":{"BlockSyntax":[]},"EmptyBlockSyntax":{"BlockSyntax":[]},"FencedCodeBlockSyntax":{"BlockSyntax":[]},"FootnoteDefSyntax":{"BlockSyntax":[]},"HeaderSyntax":{"BlockSyntax":[]},"HorizontalRuleSyntax":{"BlockSyntax":[]},"HtmlBlockSyntax":{"BlockSyntax":[]},"LinkReferenceDefinitionSyntax":{"BlockSyntax":[]},"ListSyntax":{"BlockSyntax":[]},"OrderedListSyntax":{"BlockSyntax":[]},"OrderedListWithCheckboxSyntax":{"BlockSyntax":[]},"ParagraphSyntax":{"BlockSyntax":[]},"SetextHeaderSyntax":{"BlockSyntax":[]},"TableSyntax":{"BlockSyntax":[]},"UnorderedListSyntax":{"BlockSyntax":[]},"UnorderedListWithCheckboxSyntax":{"BlockSyntax":[]},"HtmlRenderer":{"NodeVisitor":[]},"AutolinkExtensionSyntax":{"InlineSyntax":[]},"AutolinkSyntax":{"InlineSyntax":[]},"CodeSyntax":{"InlineSyntax":[]},"DecodeHtmlSyntax":{"InlineSyntax":[]},"DelimiterSyntax":{"InlineSyntax":[]},"SimpleDelimiter":{"Delimiter":[]},"DelimiterRun":{"Delimiter":[]},"EmailAutolinkSyntax":{"InlineSyntax":[]},"EmphasisSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"EscapeHtmlSyntax":{"InlineSyntax":[]},"EscapeSyntax":{"InlineSyntax":[]},"ImageSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"InlineHtmlSyntax":{"InlineSyntax":[]},"LineBreakSyntax":{"InlineSyntax":[]},"LinkSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"SoftLineBreakSyntax":{"InlineSyntax":[]},"StrikethroughSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"TextSyntax":{"InlineSyntax":[]},"BearerTokenCredentials":{"AuthCredentials1":[]},"ApiKeyProvider2":{"AuthProvider1":[]},"MistralException":{"Exception":[]},"ApiException2":{"Exception":[]},"AuthenticationException2":{"Exception":[]},"RateLimitException2":{"Exception":[]},"StreamException1":{"Exception":[]},"AuthInterceptor1":{"Interceptor2":[]},"ErrorInterceptor0":{"Interceptor2":[]},"LoggingInterceptor1":{"Interceptor2":[]},"SystemMessage0":{"ChatMessage1":[]},"UserMessage0":{"ChatMessage1":[]},"AssistantMessage0":{"ChatMessage1":[]},"ToolMessage0":{"ChatMessage1":[]},"TextContentPart0":{"ContentPart":[]},"ImageUrlContentPart":{"ContentPart":[]},"FunctionTool0":{"Tool2":[]},"ErrorInterceptor1":{"Interceptor3":[]},"LoggingInterceptor0":{"Interceptor3":[]},"ApiKeyProvider0":{"AuthProvider2":[]},"OpenAIException":{"Exception":[]},"ApiException0":{"Exception":[]},"AuthenticationException0":{"Exception":[]},"PermissionDeniedException":{"Exception":[]},"NotFoundException":{"Exception":[]},"ConflictException":{"Exception":[]},"UnprocessableEntityException":{"Exception":[]},"RateLimitException0":{"Exception":[]},"BadRequestException":{"Exception":[]},"InternalServerException":{"Exception":[]},"RequestTimeoutException":{"Exception":[]},"StreamException":{"Exception":[]},"AuthInterceptor0":{"Interceptor4":[]},"ErrorInterceptor2":{"Interceptor4":[]},"SystemMessage":{"ChatMessage2":[]},"UserMessage":{"ChatMessage2":[]},"AssistantMessage":{"ChatMessage2":[]},"ToolMessage":{"ChatMessage2":[]},"TextContentPart":{"ContentPart0":[]},"ImageContentPart":{"ContentPart0":[]},"UserTextContent":{"UserMessageContent":[]},"UserPartsContent":{"UserMessageContent":[]},"UrlCitation":{"Annotation":[]},"FileCitation":{"Annotation":[]},"ContainerFileCitation":{"Annotation":[]},"FilePathAnnotation":{"Annotation":[]},"InputTextContent":{"InputContent":[]},"AssistantTextContent":{"InputContent":[]},"InputImageContent":{"InputContent":[]},"InputFileContent":{"InputContent":[]},"OutputTextContent":{"OutputContent":[]},"ReasoningTextContent":{"OutputContent":[]},"SummaryTextContent":{"OutputContent":[]},"RefusalContent":{"OutputContent":[]},"InputTextOutputContent":{"OutputContent":[]},"MessageItem":{"Item":[]},"FunctionCallItem":{"Item":[]},"FunctionCallOutputString":{"FunctionCallOutput":[]},"FunctionCallOutputItem":{"Item":[]},"MessageOutputItem":{"OutputItem":[]},"FunctionCallOutputItemResponse":{"OutputItem":[]},"ReasoningItem":{"OutputItem":[]},"CompactionOutputItem":{"OutputItem":[]},"WebSearchCallOutputItem":{"OutputItem":[]},"FileSearchCallOutputItem":{"OutputItem":[]},"CodeInterpreterLogsOutput":{"CodeInterpreterOutput":[]},"CodeInterpreterImageOutput":{"CodeInterpreterOutput":[]},"CodeInterpreterCallOutputItem":{"OutputItem":[]},"ImageGenerationCallOutputItem":{"OutputItem":[]},"LocalShellCallOutputItem":{"OutputItem":[]},"ShellCallOutputItem":{"OutputItem":[]},"LocalShellEnvironment":{"ShellEnvironment":[]},"ContainerReferenceEnvironment":{"ShellEnvironment":[]},"ShellCallOutputResultItem":{"OutputItem":[]},"ShellCallExitOutcome":{"ShellCallOutcome":[]},"ShellCallTimeoutOutcome":{"ShellCallOutcome":[]},"LocalShellCallOutputResultItem":{"OutputItem":[]},"McpCallOutputItem":{"OutputItem":[]},"ToolSearchCallOutputItem":{"OutputItem":[]},"ToolSearchOutputItem":{"OutputItem":[]},"ComputerCallOutputItem":{"OutputItem":[]},"ResponseInputText":{"ResponseInput":[]},"ResponseInputItems":{"ResponseInput":[]},"ResponseCreatedEvent":{"ResponseStreamEvent":[]},"ResponseQueuedEvent":{"ResponseStreamEvent":[]},"ResponseInProgressEvent":{"ResponseStreamEvent":[]},"ResponseCompletedEvent":{"ResponseStreamEvent":[]},"ResponseFailedEvent":{"ResponseStreamEvent":[]},"ResponseIncompleteEvent":{"ResponseStreamEvent":[]},"OutputItemAddedEvent":{"ResponseStreamEvent":[]},"OutputItemDoneEvent":{"ResponseStreamEvent":[]},"ContentPartAddedEvent":{"ResponseStreamEvent":[]},"ContentPartDoneEvent":{"ResponseStreamEvent":[]},"OutputTextDeltaEvent":{"ResponseStreamEvent":[]},"OutputTextDoneEvent":{"ResponseStreamEvent":[]},"OutputTextAnnotationAddedEvent":{"ResponseStreamEvent":[]},"RefusalDeltaEvent":{"ResponseStreamEvent":[]},"RefusalDoneEvent":{"ResponseStreamEvent":[]},"FunctionCallArgumentsDeltaEvent":{"ResponseStreamEvent":[]},"FunctionCallArgumentsDoneEvent":{"ResponseStreamEvent":[]},"ReasoningTextDeltaEvent":{"ResponseStreamEvent":[]},"ReasoningTextDoneEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryPartAddedEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryPartDoneEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryTextDeltaEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryTextDoneEvent":{"ResponseStreamEvent":[]},"ResponseAudioDeltaEvent":{"ResponseStreamEvent":[]},"ResponseAudioDoneEvent":{"ResponseStreamEvent":[]},"ResponseAudioTranscriptDeltaEvent":{"ResponseStreamEvent":[]},"ResponseAudioTranscriptDoneEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallSearchingEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallSearchingEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallInterpretingEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCodeDeltaEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCodeDoneEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallGeneratingEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallPartialImageEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallFailedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallArgumentsDeltaEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallArgumentsDoneEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsInProgressEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsFailedEvent":{"ResponseStreamEvent":[]},"ResponseCustomToolCallInputDeltaEvent":{"ResponseStreamEvent":[]},"ResponseCustomToolCallInputDoneEvent":{"ResponseStreamEvent":[]},"ErrorEvent0":{"ResponseStreamEvent":[]},"UnknownEvent":{"ResponseStreamEvent":[]},"CodeInterpreterContainerId":{"CodeInterpreterContainer":[]},"CodeInterpreterContainerAuto":{"CodeInterpreterContainer":[]},"ContainerNetworkPolicyDisabled":{"ContainerNetworkPolicy":[]},"ContainerNetworkPolicyAllowlist":{"ContainerNetworkPolicy":[]},"ClickAction":{"ComputerAction":[]},"DoubleClickAction":{"ComputerAction":[]},"DragAction":{"ComputerAction":[]},"KeyPressAction":{"ComputerAction":[]},"MoveAction":{"ComputerAction":[]},"ScreenshotAction":{"ComputerAction":[]},"ScrollAction":{"ComputerAction":[]},"TypeAction":{"ComputerAction":[]},"WaitAction":{"ComputerAction":[]},"FunctionTool":{"ResponseTool":[],"NamespaceAllowedTool":[]},"WebSearchTool0":{"ResponseTool":[]},"ComparisonFilter":{"FileSearchFilter":[]},"CompoundFilter":{"FileSearchFilter":[]},"FileSearchTool":{"ResponseTool":[]},"CodeInterpreterTool":{"ResponseTool":[]},"ComputerUseTool":{"ResponseTool":[]},"ImageGenerationTool":{"ResponseTool":[]},"McpTool":{"ResponseTool":[]},"ShellTool":{"ResponseTool":[]},"ComputerTool":{"ResponseTool":[]},"NamespaceTool":{"ResponseTool":[]},"ToolSearchTool":{"ResponseTool":[]},"LocalShellTool":{"ResponseTool":[]},"CustomTool":{"ResponseTool":[],"NamespaceAllowedTool":[]},"UnknownNamespaceTool":{"NamespaceAllowedTool":[]},"PathException":{"Exception":[]},"PosixStyle":{"InternalStyle":[]},"UrlStyle":{"InternalStyle":[]},"WindowsStyle":{"InternalStyle":[]},"PdfArray":{"PdfDataType":[]},"Ascii85Encoder":{"Converter":["Uint8List","Uint8List"],"StreamTransformer":["Uint8List","Uint8List"],"Converter.S":"Uint8List","Converter.T":"Uint8List"},"PdfBool":{"PdfDataType":[]},"PdfDict":{"PdfDataType":[],"PdfDict.T":"1"},"PdfDictStream":{"PdfDict":["PdfDataType"],"PdfDataType":[],"PdfDict.T":"PdfDataType"},"PdfIndirect":{"PdfDataType":[]},"PdfName":{"PdfDataType":[]},"PdfNum":{"PdfDataType":[]},"PdfNumList":{"PdfDataType":[]},"PdfObjectBase":{"PdfObjectBase.T":"1"},"PdfString":{"PdfDataType":[]},"PdfXref":{"PdfIndirect":[],"PdfDataType":[]},"PdfXrefTable":{"PdfDataType":[]},"PdfGraphicStates":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfAnnot":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfAnnotNamedLink":{"PdfAnnotBase":[]},"PdfCatalog":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfFont":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"PdfImage":{"PdfXObject":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfInfo":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfObject":{"PdfObjectBase":["1"],"PdfObjectBase.T":"1"},"PdfObjectStream":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfOutline":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfPage":{"PdfGraphicStream":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfPageList":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfType1Font":{"PdfFont":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfXObject":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"AnnotationLink":{"AnnotationBuilder":[]},"SizedBox":{"SpanningWidget":[],"Widget":[]},"Padding":{"SpanningWidget":[],"Widget":[]},"Align":{"SpanningWidget":[],"Widget":[]},"ConstrainedBox":{"SpanningWidget":[],"Widget":[]},"BorderRadius":{"BorderRadiusGeometry":[]},"Border":{"BoxBorder":[]},"Container0":{"SpanningWidget":[],"Widget":[]},"DecoratedBox":{"SpanningWidget":[],"Widget":[]},"Header":{"SpanningWidget":[],"Widget":[]},"FlexContext":{"WidgetContext":[]},"Flex":{"SpanningWidget":[],"Widget":[]},"Row":{"SpanningWidget":[],"Widget":[]},"Column":{"SpanningWidget":[],"Widget":[]},"Flexible":{"SpanningWidget":[],"Widget":[]},"Expanded":{"SpanningWidget":[],"Widget":[]},"EdgeInsets":{"EdgeInsetsGeometry":[]},"Alignment":{"AlignmentGeometry":[]},"MultiPage":{"Page":[]},"Placeholder":{"Widget":[]},"_Word":{"_Span":[]},"_WidgetSpan":{"_Span":[]},"WidgetSpan":{"InlineSpan":[]},"TextSpan":{"InlineSpan":[]},"RichTextContext":{"WidgetContext":[]},"RichText":{"SpanningWidget":[],"Widget":[]},"Text0":{"RichText":[],"SpanningWidget":[],"Widget":[]},"InheritedDirectionality":{"Inherited":[]},"ThemeData":{"Inherited":[]},"StatelessWidget":{"SpanningWidget":[],"Widget":[]},"SingleChildWidget":{"SpanningWidget":[],"Widget":[]},"MultiChildWidget":{"Widget":[]},"_WhereNotNullStreamSink":{"EventSink":["1?"],"Sink":["1?"]},"WhereNotNullStreamTransformer":{"StreamTransformer":["1?","1"]},"FileLocation":{"SourceLocation":[],"Comparable":["SourceLocation"]},"_FileSpan":{"SourceSpanWithContext":[],"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceLocation":{"Comparable":["SourceLocation"]},"SourceLocationMixin":{"SourceLocation":[],"Comparable":["SourceLocation"]},"SourceSpan":{"Comparable":["SourceSpan"]},"SourceSpanBase":{"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceSpanException":{"Exception":[]},"SourceSpanFormatException":{"FormatException":[],"Exception":[]},"SourceSpanMixin":{"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceSpanWithContext":{"SourceSpan":[],"Comparable":["SourceSpan"]},"Chain":{"StackTrace":[]},"LazyChain":{"Chain":[],"StackTrace":[]},"Trace":{"StackTrace":[]},"UnparsedFrame":{"Frame":[]},"CloseGuaranteeChannel":{"StreamChannelMixin":["1"],"StreamChannel":["1"],"StreamChannelMixin.T":"1"},"_CloseGuaranteeStream":{"Stream":["1"],"Stream.T":"1"},"_CloseGuaranteeSink":{"DelegatingStreamSink":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_JsonDocument":{"StreamChannelTransformer":["Object?","String"]},"_StreamChannel":{"StreamChannelMixin":["1"],"StreamChannel":["1"],"StreamChannelMixin.T":"1"},"StreamChannelMixin":{"StreamChannel":["1"]},"StringScannerException":{"FormatException":[],"Exception":[]},"HtmlSink":{"Sink":["String"]},"HtmlStreamingSink":{"StreamingStringSink":[],"Sink":["String"]},"HtmlNestedSink":{"Sink":["String"]},"HelpCommand0":{"Command":[]},"NewConversationCommand":{"Command":[]},"CompactCommand":{"Command":[]},"HtmlHistoryCommand":{"Command":[]},"HtmlSummarizeCommand":{"Command":[]},"DialogComplexInputItem":{"IDialogComplexItem":[]},"DialogComplexDropdownItem":{"IDialogComplexItem":[]},"DialogComplexField":{"IDialogField":[]},"DialogField":{"IDialogField":[]},"GoogleEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"MistralEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"OllamaEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"OpenAIEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"AnthropicMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"GoogleMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"OpenAIResponsesMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"XAIResponsesMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"PdfPattern":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"PdfShading":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]}}'));
+  B._Universe_addRules(init.typeUniverse, JSON.parse('{"JavaScriptFunction":"LegacyJavaScriptObject","PlainJavaScriptObject":"LegacyJavaScriptObject","UnknownJavaScriptObject":"LegacyJavaScriptObject","NativeSharedArrayBuffer":"NativeByteBuffer","JSBool":{"bool":[],"TrustedGetRuntimeType":[]},"JSNull":{"Null":[],"TrustedGetRuntimeType":[]},"JavaScriptObject":{"JSObject":[]},"LegacyJavaScriptObject":{"JSObject":[]},"JSArray":{"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"],"JSIndexable":["1"]},"JSArraySafeToStringHook":{"SafeToStringHook":[]},"JSUnmodifiableArray":{"JSArray":["1"],"List":["1"],"EfficientLengthIterable":["1"],"JSObject":[],"Iterable":["1"],"JSIndexable":["1"]},"ArrayIterator":{"Iterator":["1"]},"JSNumber":{"double":[],"num":[],"Comparable":["num"]},"JSInt":{"double":[],"int":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSNumNotInt":{"double":[],"num":[],"Comparable":["num"],"TrustedGetRuntimeType":[]},"JSString":{"String":[],"Comparable":["String"],"Pattern":[],"JSIndexable":["@"],"TrustedGetRuntimeType":[]},"CastStream":{"Stream":["2"],"Stream.T":"2"},"CastStreamSubscription":{"StreamSubscription":["2"]},"_CastIterableBase":{"Iterable":["2"]},"CastIterator":{"Iterator":["2"]},"CastIterable":{"_CastIterableBase":["1","2"],"Iterable":["2"],"Iterable.E":"2"},"_EfficientLengthCastIterable":{"CastIterable":["1","2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_CastListBase":{"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"]},"CastList":{"_CastListBase":["1","2"],"ListBase":["2"],"List":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"ListBase.E":"2","Iterable.E":"2"},"CastSet":{"Set":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"CastMap":{"MapBase":["3","4"],"Map":["3","4"],"MapBase.K":"3","MapBase.V":"4"},"CastQueue":{"Queue":["2"],"_CastIterableBase":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"LateError":{"Error":[]},"CodeUnits":{"ListBase":["int"],"UnmodifiableListMixin":["int"],"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"],"ListBase.E":"int","UnmodifiableListMixin.E":"int"},"EfficientLengthIterable":{"Iterable":["1"]},"ListIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"SubListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"ListIterator":{"Iterator":["1"]},"MappedIterable":{"Iterable":["2"],"Iterable.E":"2"},"EfficientLengthMappedIterable":{"MappedIterable":["1","2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"MappedIterator":{"Iterator":["2"]},"MappedListIterable":{"ListIterable":["2"],"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2","ListIterable.E":"2"},"WhereIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereIterator":{"Iterator":["1"]},"ExpandIterable":{"Iterable":["2"],"Iterable.E":"2"},"ExpandIterator":{"Iterator":["2"]},"TakeIterable":{"Iterable":["1"],"Iterable.E":"1"},"EfficientLengthTakeIterable":{"TakeIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"TakeIterator":{"Iterator":["1"]},"SkipIterable":{"Iterable":["1"],"Iterable.E":"1"},"EfficientLengthSkipIterable":{"SkipIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"SkipIterator":{"Iterator":["1"]},"SkipWhileIterable":{"Iterable":["1"],"Iterable.E":"1"},"SkipWhileIterator":{"Iterator":["1"]},"EmptyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"EmptyIterator":{"Iterator":["1"]},"WhereTypeIterable":{"Iterable":["1"],"Iterable.E":"1"},"WhereTypeIterator":{"Iterator":["1"]},"NonNullsIterable":{"Iterable":["1"],"Iterable.E":"1"},"NonNullsIterator":{"Iterator":["1"]},"IndexedIterable":{"Iterable":["+(int,1)"],"Iterable.E":"+(int,1)"},"EfficientLengthIndexedIterable":{"IndexedIterable":["1"],"EfficientLengthIterable":["+(int,1)"],"Iterable":["+(int,1)"],"Iterable.E":"+(int,1)"},"IndexedIterator":{"Iterator":["+(int,1)"]},"UnmodifiableListBase":{"ListBase":["1"],"UnmodifiableListMixin":["1"],"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ReversedListIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"Symbol":{"Symbol0":[]},"_Record_2":{"_Record2":[],"_Record":[]},"_Record_2_control_input":{"_Record2":[],"_Record":[]},"_Record_2_parts_toolCallNames":{"_Record2":[],"_Record":[]},"_Record_3_containerId_fileId_fileName":{"_Record3":[],"_Record":[]},"ConstantMapView":{"UnmodifiableMapView":["1","2"],"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ConstantMap":{"Map":["1","2"]},"ConstantStringMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"_KeysOrValues":{"Iterable":["1"],"Iterable.E":"1"},"_KeysOrValuesOrElementsIterator":{"Iterator":["1"]},"GeneralConstantMap":{"ConstantMap":["1","2"],"Map":["1","2"]},"ConstantSet":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"ConstantStringSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"GeneralConstantSet":{"ConstantSet":["1"],"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"Instantiation":{"Closure":[],"Function":[]},"Instantiation1":{"Closure":[],"Function":[]},"Instantiation2":{"Closure":[],"Function":[]},"JSInvocationMirror":{"Invocation":[]},"NullError":{"TypeError":[],"Error":[]},"JsNoSuchMethodError":{"Error":[]},"UnknownJsTypeError":{"Error":[]},"NullThrownFromJavaScriptException":{"Exception":[]},"_StackTrace":{"StackTrace":[]},"Closure":{"Function":[]},"Closure0Args":{"Closure":[],"Function":[]},"Closure2Args":{"Closure":[],"Function":[]},"TearOffClosure":{"Closure":[],"Function":[]},"StaticClosure":{"Closure":[],"Function":[]},"BoundClosure":{"Closure":[],"Function":[]},"RuntimeError":{"Error":[]},"JsLinkedHashMap":{"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"LinkedHashMapKeysIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapKeyIterator":{"Iterator":["1"]},"LinkedHashMapValuesIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"LinkedHashMapValueIterator":{"Iterator":["1"]},"LinkedHashMapEntriesIterable":{"EfficientLengthIterable":["MapEntry<1,2>"],"Iterable":["MapEntry<1,2>"],"Iterable.E":"MapEntry<1,2>"},"LinkedHashMapEntryIterator":{"Iterator":["MapEntry<1,2>"]},"JsIdentityLinkedHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"JsConstantLinkedHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_Record2":{"_Record":[]},"_Record3":{"_Record":[]},"JSSyntaxRegExp":{"RegExp":[],"Pattern":[]},"_MatchImplementation":{"RegExpMatch":[],"Match":[]},"_AllMatchesIterable":{"Iterable":["RegExpMatch"],"Iterable.E":"RegExpMatch"},"_AllMatchesIterator":{"Iterator":["RegExpMatch"]},"StringMatch":{"Match":[]},"_StringAllMatchesIterable":{"Iterable":["Match"],"Iterable.E":"Match"},"_StringAllMatchesIterator":{"Iterator":["Match"]},"NativeArrayBuffer":{"NativeByteBuffer":[],"JSObject":[],"ByteBuffer":[],"TrustedGetRuntimeType":[]},"NativeByteBuffer":{"JSObject":[],"ByteBuffer":[],"TrustedGetRuntimeType":[]},"NativeTypedData":{"JSObject":[]},"_UnmodifiableNativeByteBufferView":{"ByteBuffer":[]},"NativeByteData":{"ByteData":[],"JSObject":[],"TrustedGetRuntimeType":[]},"NativeTypedArray":{"JavaScriptIndexingBehavior":["1"],"JSObject":[],"JSIndexable":["1"]},"NativeTypedArrayOfDouble":{"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"]},"NativeTypedArrayOfInt":{"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"]},"NativeFloat32List":{"NativeTypedArrayOfDouble":[],"Float32List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeFloat64List":{"NativeTypedArrayOfDouble":[],"Float64List":[],"ListBase":["double"],"NativeTypedArray":["double"],"List":["double"],"JavaScriptIndexingBehavior":["double"],"EfficientLengthIterable":["double"],"JSObject":[],"JSIndexable":["double"],"Iterable":["double"],"FixedLengthListMixin":["double"],"TrustedGetRuntimeType":[],"ListBase.E":"double","FixedLengthListMixin.E":"double"},"NativeInt16List":{"NativeTypedArrayOfInt":[],"Int16List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt32List":{"NativeTypedArrayOfInt":[],"Int32List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeInt8List":{"NativeTypedArrayOfInt":[],"Int8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint16List":{"NativeTypedArrayOfInt":[],"Uint16List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint32List":{"NativeTypedArrayOfInt":[],"Uint32List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8ClampedList":{"NativeTypedArrayOfInt":[],"Uint8ClampedList":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"NativeUint8List":{"NativeTypedArrayOfInt":[],"Uint8List":[],"ListBase":["int"],"NativeTypedArray":["int"],"List":["int"],"JavaScriptIndexingBehavior":["int"],"EfficientLengthIterable":["int"],"JSObject":[],"JSIndexable":["int"],"Iterable":["int"],"FixedLengthListMixin":["int"],"TrustedGetRuntimeType":[],"ListBase.E":"int","FixedLengthListMixin.E":"int"},"_Type":{"Type":[]},"_Error":{"Error":[]},"_TypeError":{"TypeError":[],"Error":[]},"_Future":{"Future":["1"]},"EventSink":{"Sink":["1"]},"StreamSink":{"EventSink":["1"],"Sink":["1"]},"MultiStreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"StreamController":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_BufferingStreamSubscription":{"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_AsyncAwaitCompleter":{"Completer":["1"]},"_SyncStarIterator":{"Iterator":["1"]},"_SyncStarIterable":{"Iterable":["1"],"Iterable.E":"1"},"AsyncError":{"Error":[]},"_BroadcastSubscription":{"_ControllerSubscription":["1"],"_BufferingStreamSubscription":["1"],"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_BroadcastStreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_SyncBroadcastStreamController":{"_BroadcastStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_AsyncBroadcastStreamController":{"_BroadcastStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_Completer":{"Completer":["1"]},"_AsyncCompleter":{"_Completer":["1"],"Completer":["1"]},"_SyncCompleter":{"_Completer":["1"],"Completer":["1"]},"StreamView":{"Stream":["1"]},"StreamTransformerBase":{"StreamTransformer":["1","2"]},"_StreamController":{"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_AsyncStreamController":{"_AsyncStreamControllerDispatch":["1"],"_StreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_SyncStreamController":{"_SyncStreamControllerDispatch":["1"],"_StreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_ControllerStream":{"_StreamImpl":["1"],"Stream":["1"],"Stream.T":"1"},"_ControllerSubscription":{"_BufferingStreamSubscription":["1"],"StreamSubscription":["1"],"_EventSink":["1"],"_EventDispatch":["1"],"_BufferingStreamSubscription.T":"1"},"_StreamSinkWrapper":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_StreamControllerAddStreamState":{"_AddStreamState":["1"]},"_StreamImpl":{"Stream":["1"]},"_DelayedData":{"_DelayedEvent":["1"]},"_DelayedError":{"_DelayedEvent":["@"]},"_DelayedDone":{"_DelayedEvent":["@"]},"_DoneStreamSubscription":{"StreamSubscription":["1"]},"_EmptyStream":{"Stream":["1"],"Stream.T":"1"},"_MultiStream":{"Stream":["1"],"Stream.T":"1"},"_MultiStreamController":{"_AsyncStreamController":["1"],"_AsyncStreamControllerDispatch":["1"],"_StreamController":["1"],"MultiStreamController":["1"],"StreamController":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"],"_StreamControllerLifecycle":["1"],"_EventSink":["1"],"_EventDispatch":["1"]},"_ForwardingStream":{"Stream":["2"]},"_ForwardingStreamSubscription":{"_BufferingStreamSubscription":["2"],"StreamSubscription":["2"],"_EventSink":["2"],"_EventDispatch":["2"],"_BufferingStreamSubscription.T":"2"},"_WhereStream":{"_ForwardingStream":["1","1"],"Stream":["1"],"Stream.T":"1","_ForwardingStream.T":"1","_ForwardingStream.S":"1"},"_MapStream":{"_ForwardingStream":["1","2"],"Stream":["2"],"Stream.T":"2","_ForwardingStream.T":"2","_ForwardingStream.S":"1"},"_HandleErrorStream":{"_ForwardingStream":["1","1"],"Stream":["1"],"Stream.T":"1","_ForwardingStream.T":"1","_ForwardingStream.S":"1"},"_EventSinkWrapper":{"EventSink":["1"],"Sink":["1"]},"_SinkTransformerStreamSubscription":{"_BufferingStreamSubscription":["2"],"StreamSubscription":["2"],"_EventSink":["2"],"_EventDispatch":["2"],"_BufferingStreamSubscription.T":"2"},"_BoundSinkStream":{"Stream":["2"],"Stream.T":"2"},"_Zone":{"Zone":[]},"_RootZone":{"_Zone":[],"Zone":[]},"_HashMap":{"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_IdentityHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_CustomHashMap":{"_HashMap":["1","2"],"MapBase":["1","2"],"HashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_HashMapKeyIterable":{"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1"},"_HashMapKeyIterator":{"Iterator":["1"]},"_LinkedCustomHashMap":{"JsLinkedHashMap":["1","2"],"MapBase":["1","2"],"LinkedHashMap":["1","2"],"Map":["1","2"],"MapBase.K":"1","MapBase.V":"2"},"_LinkedHashSet":{"_SetBase":["1"],"SetBase":["1"],"LinkedHashSet":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_LinkedHashSetIterator":{"Iterator":["1"]},"ListBase":{"List":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"MapBase":{"Map":["1","2"]},"_MapBaseValueIterable":{"EfficientLengthIterable":["2"],"Iterable":["2"],"Iterable.E":"2"},"_MapBaseValueIterator":{"Iterator":["2"]},"MapView":{"Map":["1","2"]},"UnmodifiableMapView":{"_UnmodifiableMapView_MapView__UnmodifiableMapMixin":["1","2"],"MapView":["1","2"],"_UnmodifiableMapMixin":["1","2"],"Map":["1","2"]},"ListQueue":{"Queue":["1"],"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_ListQueueIterator":{"Iterator":["1"]},"SetBase":{"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_SetBase":{"SetBase":["1"],"Set":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"]},"_ConverterStreamEventSink":{"EventSink":["1"],"Sink":["1"]},"Encoding":{"Codec":["String","List<int>"]},"_LineSplitterEventSink":{"StringConversionSink":[],"EventSink":["String"],"Sink":["String"]},"_JsonMap":{"MapBase":["String","@"],"Map":["String","@"],"MapBase.K":"String","MapBase.V":"@"},"_JsonMapKeyIterable":{"ListIterable":["String"],"EfficientLengthIterable":["String"],"Iterable":["String"],"Iterable.E":"String","ListIterable.E":"String"},"_JsonDecoderSink":{"_StringSinkConversionSink":["StringBuffer"],"StringConversionSink":[],"Sink":["String"],"_StringSinkConversionSink.0":"StringBuffer"},"AsciiCodec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"_UnicodeSubsetEncoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"]},"AsciiEncoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_UnicodeSubsetEncoderSink":{"StringConversionSink":[],"Sink":["String"]},"_UnicodeSubsetDecoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"]},"AsciiDecoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_ErrorHandlingAsciiDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_SimpleAsciiDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Base64Codec":{"Codec":["List<int>","String"],"Codec.S":"List<int>"},"Base64Encoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_BufferCachingBase64Encoder":{"_Base64Encoder":[]},"_Base64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_AsciiBase64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Utf8Base64EncoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Base64Decoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_Base64DecoderSink":{"StringConversionSink":[],"Sink":["String"]},"ByteConversionSink":{"Sink":["List<int>"]},"_ByteAdapterSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_ByteCallbackSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"ChunkedConversionSink":{"Sink":["1"]},"_FusedCodec":{"Codec":["1","3"],"Codec.S":"1"},"Converter":{"StreamTransformer":["1","2"]},"HtmlEscape":{"Converter":["String","String"],"StreamTransformer":["String","String"],"Converter.S":"String","Converter.T":"String"},"_HtmlEscapeSink":{"StringConversionSink":[],"Sink":["String"]},"JsonUnsupportedObjectError":{"Error":[]},"JsonCyclicError":{"Error":[]},"JsonCodec":{"Codec":["Object?","String"],"Codec.S":"Object?"},"JsonEncoder":{"Converter":["Object?","String"],"StreamTransformer":["Object?","String"],"Converter.S":"Object?","Converter.T":"String"},"_JsonEncoderSink":{"Sink":["Object?"]},"_JsonUtf8EncoderSink":{"Sink":["Object?"]},"JsonDecoder":{"Converter":["String","Object?"],"StreamTransformer":["String","Object?"],"Converter.S":"String","Converter.T":"Object?"},"Latin1Codec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"Latin1Encoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"Latin1Decoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"_Latin1DecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Latin1AllowInvalidDecoderSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"LineSplitter":{"StreamTransformer":["String","String"]},"_LineSplitterSink":{"StringConversionSink":[],"Sink":["String"]},"_LineSplitIterable":{"Iterable":["String"],"Iterable.E":"String"},"_LineSplitIterator":{"Iterator":["String"]},"StringConversionSink":{"Sink":["String"]},"_ClosableStringSink":{"StringSink":[]},"_StringConversionSinkAsStringSinkAdapter":{"StringSink":[]},"_StringSinkConversionSink":{"StringConversionSink":[],"Sink":["String"]},"_StringAdapterSink":{"StringConversionSink":[],"Sink":["String"]},"_Utf8StringSinkAdapter":{"ByteConversionSink":[],"Sink":["List<int>"]},"_Utf8ConversionSink":{"ByteConversionSink":[],"Sink":["List<int>"]},"Utf8Codec":{"Encoding":[],"Codec":["String","List<int>"],"Codec.S":"String"},"Utf8Encoder":{"Converter":["String","List<int>"],"StreamTransformer":["String","List<int>"],"Converter.S":"String","Converter.T":"List<int>"},"_Utf8EncoderSink":{"StringConversionSink":[],"Sink":["String"]},"Utf8Decoder":{"Converter":["List<int>","String"],"StreamTransformer":["List<int>","String"],"Converter.S":"List<int>","Converter.T":"String"},"BigInt":{"Comparable":["BigInt"]},"DateTime":{"Comparable":["DateTime"]},"double":{"num":[],"Comparable":["num"]},"Duration":{"Comparable":["Duration"]},"int":{"num":[],"Comparable":["num"]},"List":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"num":{"Comparable":["num"]},"RegExp":{"Pattern":[]},"RegExpMatch":{"Match":[]},"Set":{"EfficientLengthIterable":["1"],"Iterable":["1"]},"String":{"Comparable":["String"],"Pattern":[]},"StringBuffer":{"StringSink":[]},"AssertionError":{"Error":[]},"TypeError":{"Error":[]},"ArgumentError":{"Error":[]},"RangeError":{"Error":[]},"IndexError":{"Error":[]},"NoSuchMethodError":{"Error":[]},"UnsupportedError":{"Error":[]},"UnimplementedError":{"Error":[]},"StateError":{"Error":[]},"ConcurrentModificationError":{"Error":[]},"OutOfMemoryError":{"Error":[]},"StackOverflowError":{"Error":[]},"_Exception":{"Exception":[]},"FormatException":{"Exception":[]},"_GeneratorIterable":{"ListIterable":["1"],"EfficientLengthIterable":["1"],"Iterable":["1"],"Iterable.E":"1","ListIterable.E":"1"},"_StringStackTrace":{"StackTrace":[]},"Runes":{"Iterable":["int"],"Iterable.E":"int"},"RuneIterator":{"Iterator":["int"]},"_Uri":{"Uri":[]},"_SimpleUri":{"Uri":[]},"_DataUri":{"Uri":[]},"NullRejectionException":{"Exception":[]},"_JSRandom":{"Random":[]},"_JSSecureRandom":{"Random":[]},"Int8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint8ClampedList":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint16List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Int32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Uint32List":{"List":["int"],"EfficientLengthIterable":["int"],"Iterable":["int"]},"Float32List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"Float64List":{"List":["double"],"EfficientLengthIterable":["double"],"Iterable":["double"]},"InteractiveAgent":{"Agent0":[]},"UserCancellationException":{"CanceledException":[],"Exception":[]},"HttpChannel":{"StreamChannelMixin":["String"],"StreamChannel":["String"],"StreamChannelMixin.T":"String"},"DbgClient":{"Client0":[]},"HelpCommand":{"Command":[]},"HistoryCommand":{"Command":[]},"QuitCommand":{"Command":[]},"SummarizeCommand":{"Command":[]},"SystemPromptCommand":{"Command":[]},"ToolsCommand":{"Command":[]},"PersistentConversationManager":{"ConversationManager":[]},"PersistentFileSystem":{"FileSystem":[]},"MemoryFileSystem":{"FileSystem":[]},"InMemorySecrets":{"Secrets":[]},"McpToolSet":{"ToolSet":[],"ToolSetBase":[]},"ToolSet":{"ToolSetBase":[]},"EmptyToolSet":{"ToolSet":[],"ToolSetBase":[]},"CombinedToolSet":{"ToolSet":[],"ToolSetBase":[]},"LogSink0":{"Sink":["String"]},"LogSink":{"Sink":["String"]},"ApiKeyCredentials":{"AuthCredentials":[]},"ApiKeyProvider":{"AuthProvider":[]},"AnthropicException":{"Exception":[]},"ApiException":{"Exception":[]},"AuthenticationException":{"Exception":[]},"RateLimitException":{"Exception":[]},"AuthInterceptor":{"Interceptor0":[]},"ErrorInterceptor":{"Interceptor0":[]},"LoggingInterceptor":{"Interceptor0":[]},"TextBlock":{"ContentBlock":[]},"ThinkingBlock":{"ContentBlock":[]},"RedactedThinkingBlock":{"ContentBlock":[]},"ToolUseBlock":{"ContentBlock":[]},"ServerToolUseBlock":{"ContentBlock":[]},"WebSearchToolResultBlock":{"ContentBlock":[]},"WebFetchToolResultBlock":{"ContentBlock":[]},"CodeExecutionToolResultBlock":{"ContentBlock":[]},"BashCodeExecutionToolResultBlock":{"ContentBlock":[]},"TextEditorCodeExecutionToolResultBlock":{"ContentBlock":[]},"ToolSearchToolResultBlock":{"ContentBlock":[]},"ContainerUploadBlock":{"ContentBlock":[]},"CompactionBlock":{"ContentBlock":[]},"WebSearchResultSuccess":{"WebSearchResult":[]},"WebSearchResultError":{"WebSearchResult":[]},"CharLocationCitation":{"Citation":[]},"PageLocationCitation":{"Citation":[]},"ContentBlockLocationCitation":{"Citation":[]},"WebSearchResultLocationCitation":{"Citation":[]},"TextInputBlock":{"InputContentBlock":[]},"ImageInputBlock":{"InputContentBlock":[]},"ToolUseInputBlock":{"InputContentBlock":[]},"ToolResultTextContent":{"ToolResultContent":[]},"ToolResultInputBlock":{"InputContentBlock":[]},"TextMessageContent":{"MessageContent":[]},"BlocksMessageContent":{"MessageContent":[]},"TextSystemPrompt":{"SystemPrompt":[]},"Base64ImageSource":{"ImageSource":[]},"TextDelta":{"ContentBlockDelta":[]},"InputJsonDelta":{"ContentBlockDelta":[]},"ThinkingDelta":{"ContentBlockDelta":[]},"CompactionDelta":{"ContentBlockDelta":[]},"SignatureDelta":{"ContentBlockDelta":[]},"CitationsDelta":{"ContentBlockDelta":[]},"MessageStartEvent":{"MessageStreamEvent":[]},"MessageDeltaEvent":{"MessageStreamEvent":[]},"MessageStopEvent":{"MessageStreamEvent":[]},"ContentBlockStartEvent":{"MessageStreamEvent":[]},"ContentBlockDeltaEvent":{"MessageStreamEvent":[]},"ContentBlockStopEvent":{"MessageStreamEvent":[]},"PingEvent":{"MessageStreamEvent":[]},"ErrorEvent":{"MessageStreamEvent":[]},"WebSearchTool":{"BuiltInTool":[]},"DirectToolCaller":{"ToolCaller":[]},"ServerToolCaller":{"ToolCaller":[]},"ToolChoiceAuto":{"ToolChoice":[]},"CustomToolDefinition":{"ToolDefinition":[]},"BuiltInToolDefinition":{"ToolDefinition":[]},"InputMemoryStream":{"InputStream":[]},"OutputMemoryStream":{"OutputStream":[]},"DelegatingStreamSink":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"HandlerTransformer":{"StreamSinkTransformer":["1","2"]},"_HandlerSink":{"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_SafeCloseSink":{"DelegatingStreamSink":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"SettledResults":{"Results":[],"BetterResults":[]},"Results":{"BetterResults":[]},"BetterSuccess":{"BetterOutcome":["1"]},"BetterFailure":{"BetterOutcome":["1"]},"CanceledException":{"Exception":[]},"CancelableToken":{"CancelationToken":[]},"CanonicalizedMap":{"Map":["2","3"]},"DefaultEquality":{"Equality":["1"]},"IterableEquality":{"Equality":["Iterable<1>"]},"ListEquality":{"Equality":["List<1>"]},"_UnorderedEquality":{"Equality":["2"]},"SetEquality":{"_UnorderedEquality":["1","Set<1>"],"Equality":["Set<1>"],"_UnorderedEquality.E":"1","_UnorderedEquality.T":"Set<1>"},"MapEquality":{"Equality":["Map<1,2>"]},"DeepCollectionEquality":{"Equality":["@"]},"DigestSink":{"Sink":["Digest"]},"Hash":{"Converter":["List<int>","Digest"],"StreamTransformer":["List<int>","Digest"]},"HashSink":{"Sink":["List<int>"]},"_Sha256":{"Converter":["List<int>","Digest"],"StreamTransformer":["List<int>","Digest"],"Converter.S":"List<int>","Converter.T":"Digest"},"_Sha32BitSink":{"Sink":["List<int>"]},"_Sha256Sink":{"Sink":["List<int>"]},"AnthropicChatModel":{"ChatModel":["AnthropicChatOptions"],"ChatModel.0":"AnthropicChatOptions"},"AnthropicChatOptions":{"ChatModelOptions":[]},"_ServerTool":{"Tool":[]},"MessageStreamEventTransformer":{"StreamTransformer":["MessageStreamEvent","ChatResult<ChatMessage>"]},"GoogleChatModel":{"ChatModel":["GoogleChatModelOptions"],"ChatModel.0":"GoogleChatModelOptions"},"GoogleChatModelOptions":{"ChatModelOptions":[]},"MistralChatModel":{"ChatModel":["MistralChatModelOptions"],"ChatModel.0":"MistralChatModelOptions"},"MistralChatModelOptions":{"ChatModelOptions":[]},"OllamaChatModel":{"ChatModel":["OllamaChatOptions"],"ChatModel.0":"OllamaChatOptions"},"OllamaChatOptions":{"ChatModelOptions":[]},"OpenAIChatModel":{"ChatModel":["OpenAIChatOptions"],"ChatModel.0":"OpenAIChatOptions"},"OpenAIChatOptions":{"ChatModelOptions":[]},"FallbackEventHandler":{"OpenAIResponsesEventHandler":[]},"FunctionCallEventHandler":{"OpenAIResponsesEventHandler":[]},"OutputItemEventHandler":{"OpenAIResponsesEventHandler":[]},"ReasoningEventHandler":{"OpenAIResponsesEventHandler":[]},"TerminalEventHandler":{"OpenAIResponsesEventHandler":[]},"TextEventHandler":{"OpenAIResponsesEventHandler":[]},"ToolEventHandler":{"OpenAIResponsesEventHandler":[]},"OpenAIResponsesChatModel":{"ChatModel":["OpenAIResponsesChatModelOptions"],"ChatModel.0":"OpenAIResponsesChatModelOptions"},"OpenAIResponsesChatModelOptions":{"ChatModelOptions":[]},"XAIResponsesChatModel":{"ChatModel":["XAIResponsesChatModelOptions"],"ChatModel.0":"XAIResponsesChatModelOptions"},"XAIResponsesChatModelOptions":{"ChatModelOptions":[]},"AnthropicProvider":{"Provider":["AnthropicChatOptions","EmbeddingsModelOptions","AnthropicMediaGenerationModelOptions"],"ChatOrchestratorProvider":[]},"CohereProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"GoogleProvider":{"Provider":["GoogleChatModelOptions","GoogleEmbeddingsModelOptions","GoogleMediaGenerationModelOptions"],"ChatOrchestratorProvider":[]},"MistralProvider":{"Provider":["MistralChatModelOptions","MistralEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OllamaProvider":{"Provider":["OllamaChatOptions","OllamaEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OpenAIProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"OpenAIProviderBase":{"Provider":["1","OpenAIEmbeddingsModelOptions","2"]},"OpenAIResponsesProvider":{"Provider":["OpenAIResponsesChatModelOptions","OpenAIEmbeddingsModelOptions","OpenAIResponsesMediaGenerationModelOptions"]},"XAIProvider":{"Provider":["OpenAIChatOptions","OpenAIEmbeddingsModelOptions","MediaGenerationModelOptions"]},"XAIResponsesProvider":{"Provider":["XAIResponsesChatModelOptions","EmbeddingsModelOptions","XAIResponsesMediaGenerationModelOptions"]},"RetryHttpClient":{"Client0":[]},"ChatResult":{"LanguageModelResult":["1"]},"Parts":{"ListBase":["Part"],"List":["Part"],"EfficientLengthIterable":["Part"],"Iterable":["Part"],"ListBase.E":"Part"},"StandardPart":{"Part":[]},"TextPart":{"StandardPart":[],"Part":[]},"DataPart":{"StandardPart":[],"Part":[]},"LinkPart":{"StandardPart":[],"Part":[]},"ToolPart":{"StandardPart":[],"Part":[]},"ThinkingPart":{"StandardPart":[],"Part":[]},"ApiKeyCredentials0":{"AuthCredentials0":[]},"ApiKeyProvider1":{"AuthProvider0":[]},"GoogleAIException":{"Exception":[]},"ApiException1":{"Exception":[]},"AuthenticationException1":{"Exception":[]},"RateLimitException1":{"Exception":[]},"StreamException0":{"Exception":[]},"LoggingInterceptor2":{"Interceptor1":[]},"TextPart0":{"Part0":[]},"InlineDataPart":{"Part0":[]},"FileDataPart":{"Part0":[]},"FunctionCallPart":{"Part0":[]},"FunctionResponsePart":{"Part0":[]},"ExecutableCodePart":{"Part0":[]},"CodeExecutionResultPart":{"Part0":[]},"VideoMetadataPart":{"Part0":[]},"ThoughtPart":{"Part0":[]},"ThoughtSignaturePart":{"Part0":[]},"ToolCallPart":{"Part0":[]},"ToolResponsePart":{"Part0":[]},"PartMetadataPart":{"Part0":[]},"RequestAbortedException":{"Exception":[]},"BaseClient":{"Client0":[]},"BrowserClient":{"Client0":[]},"ByteStream":{"StreamView":["List<int>"],"Stream":["List<int>"],"Stream.T":"List<int>","StreamView.T":"List<int>"},"ClientException":{"Exception":[]},"MultipartRequest":{"BaseRequest":[]},"Request":{"BaseRequest":[]},"StreamedResponseV2":{"StreamedResponse":[]},"CaseInsensitiveMap":{"CanonicalizedMap":["String","String","1"],"Map":["String","1"],"CanonicalizedMap.K":"String","CanonicalizedMap.V":"1","CanonicalizedMap.C":"String"},"ChannelIterator":{"Iterator":["num"]},"ColorUint8":{"Color":[],"Iterable":["num"],"Iterable.E":"num"},"RpcException":{"Exception":[]},"Parameter":{"Parameters":[]},"_MissingParameter":{"Parameter":[],"Parameters":[]},"Peer":{"Client":[],"Server":[]},"_RespondToFormatExceptionsTransformer":{"StreamChannelTransformer":["Object?","Object?"]},"Level":{"Comparable":["Level"]},"Element":{"Node":[]},"Text":{"Node":[]},"UnparsedContent":{"Node":[]},"BlockquoteSyntax":{"BlockSyntax":[]},"CodeBlockSyntax":{"BlockSyntax":[]},"EmptyBlockSyntax":{"BlockSyntax":[]},"FencedCodeBlockSyntax":{"BlockSyntax":[]},"FootnoteDefSyntax":{"BlockSyntax":[]},"HeaderSyntax":{"BlockSyntax":[]},"HorizontalRuleSyntax":{"BlockSyntax":[]},"HtmlBlockSyntax":{"BlockSyntax":[]},"LinkReferenceDefinitionSyntax":{"BlockSyntax":[]},"ListSyntax":{"BlockSyntax":[]},"OrderedListSyntax":{"BlockSyntax":[]},"OrderedListWithCheckboxSyntax":{"BlockSyntax":[]},"ParagraphSyntax":{"BlockSyntax":[]},"SetextHeaderSyntax":{"BlockSyntax":[]},"TableSyntax":{"BlockSyntax":[]},"UnorderedListSyntax":{"BlockSyntax":[]},"UnorderedListWithCheckboxSyntax":{"BlockSyntax":[]},"HtmlRenderer":{"NodeVisitor":[]},"AutolinkExtensionSyntax":{"InlineSyntax":[]},"AutolinkSyntax":{"InlineSyntax":[]},"CodeSyntax":{"InlineSyntax":[]},"DecodeHtmlSyntax":{"InlineSyntax":[]},"DelimiterSyntax":{"InlineSyntax":[]},"SimpleDelimiter":{"Delimiter":[]},"DelimiterRun":{"Delimiter":[]},"EmailAutolinkSyntax":{"InlineSyntax":[]},"EmphasisSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"EscapeHtmlSyntax":{"InlineSyntax":[]},"EscapeSyntax":{"InlineSyntax":[]},"ImageSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"InlineHtmlSyntax":{"InlineSyntax":[]},"LineBreakSyntax":{"InlineSyntax":[]},"LinkSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"SoftLineBreakSyntax":{"InlineSyntax":[]},"StrikethroughSyntax":{"DelimiterSyntax":[],"InlineSyntax":[]},"TextSyntax":{"InlineSyntax":[]},"BearerTokenCredentials":{"AuthCredentials1":[]},"ApiKeyProvider2":{"AuthProvider1":[]},"MistralException":{"Exception":[]},"ApiException2":{"Exception":[]},"AuthenticationException2":{"Exception":[]},"RateLimitException2":{"Exception":[]},"StreamException1":{"Exception":[]},"AuthInterceptor1":{"Interceptor2":[]},"ErrorInterceptor0":{"Interceptor2":[]},"LoggingInterceptor1":{"Interceptor2":[]},"SystemMessage0":{"ChatMessage1":[]},"UserMessage0":{"ChatMessage1":[]},"AssistantMessage0":{"ChatMessage1":[]},"ToolMessage0":{"ChatMessage1":[]},"TextContentPart0":{"ContentPart":[]},"ImageUrlContentPart":{"ContentPart":[]},"FunctionTool0":{"Tool2":[]},"ErrorInterceptor1":{"Interceptor3":[]},"LoggingInterceptor0":{"Interceptor3":[]},"ApiKeyProvider0":{"AuthProvider2":[]},"OpenAIException":{"Exception":[]},"ApiException0":{"Exception":[]},"AuthenticationException0":{"Exception":[]},"PermissionDeniedException":{"Exception":[]},"NotFoundException":{"Exception":[]},"ConflictException":{"Exception":[]},"UnprocessableEntityException":{"Exception":[]},"RateLimitException0":{"Exception":[]},"BadRequestException":{"Exception":[]},"InternalServerException":{"Exception":[]},"RequestTimeoutException":{"Exception":[]},"StreamException":{"Exception":[]},"AuthInterceptor0":{"Interceptor4":[]},"ErrorInterceptor2":{"Interceptor4":[]},"SystemMessage":{"ChatMessage2":[]},"UserMessage":{"ChatMessage2":[]},"AssistantMessage":{"ChatMessage2":[]},"ToolMessage":{"ChatMessage2":[]},"TextContentPart":{"ContentPart0":[]},"ImageContentPart":{"ContentPart0":[]},"UserTextContent":{"UserMessageContent":[]},"UserPartsContent":{"UserMessageContent":[]},"UrlCitation":{"Annotation":[]},"FileCitation":{"Annotation":[]},"ContainerFileCitation":{"Annotation":[]},"FilePathAnnotation":{"Annotation":[]},"InputTextContent":{"InputContent":[]},"AssistantTextContent":{"InputContent":[]},"InputImageContent":{"InputContent":[]},"InputFileContent":{"InputContent":[]},"OutputTextContent":{"OutputContent":[]},"ReasoningTextContent":{"OutputContent":[]},"SummaryTextContent":{"OutputContent":[]},"RefusalContent":{"OutputContent":[]},"InputTextOutputContent":{"OutputContent":[]},"MessageItem":{"Item":[]},"FunctionCallItem":{"Item":[]},"FunctionCallOutputString":{"FunctionCallOutput":[]},"FunctionCallOutputItem":{"Item":[]},"MessageOutputItem":{"OutputItem":[]},"FunctionCallOutputItemResponse":{"OutputItem":[]},"ReasoningItem":{"OutputItem":[]},"CompactionOutputItem":{"OutputItem":[]},"WebSearchCallOutputItem":{"OutputItem":[]},"FileSearchCallOutputItem":{"OutputItem":[]},"CodeInterpreterLogsOutput":{"CodeInterpreterOutput":[]},"CodeInterpreterImageOutput":{"CodeInterpreterOutput":[]},"CodeInterpreterCallOutputItem":{"OutputItem":[]},"ImageGenerationCallOutputItem":{"OutputItem":[]},"LocalShellCallOutputItem":{"OutputItem":[]},"ShellCallOutputItem":{"OutputItem":[]},"LocalShellEnvironment":{"ShellEnvironment":[]},"ContainerReferenceEnvironment":{"ShellEnvironment":[]},"ShellCallOutputResultItem":{"OutputItem":[]},"ShellCallExitOutcome":{"ShellCallOutcome":[]},"ShellCallTimeoutOutcome":{"ShellCallOutcome":[]},"LocalShellCallOutputResultItem":{"OutputItem":[]},"McpCallOutputItem":{"OutputItem":[]},"ToolSearchCallOutputItem":{"OutputItem":[]},"ToolSearchOutputItem":{"OutputItem":[]},"ComputerCallOutputItem":{"OutputItem":[]},"ResponseInputText":{"ResponseInput":[]},"ResponseInputItems":{"ResponseInput":[]},"ResponseCreatedEvent":{"ResponseStreamEvent":[]},"ResponseQueuedEvent":{"ResponseStreamEvent":[]},"ResponseInProgressEvent":{"ResponseStreamEvent":[]},"ResponseCompletedEvent":{"ResponseStreamEvent":[]},"ResponseFailedEvent":{"ResponseStreamEvent":[]},"ResponseIncompleteEvent":{"ResponseStreamEvent":[]},"OutputItemAddedEvent":{"ResponseStreamEvent":[]},"OutputItemDoneEvent":{"ResponseStreamEvent":[]},"ContentPartAddedEvent":{"ResponseStreamEvent":[]},"ContentPartDoneEvent":{"ResponseStreamEvent":[]},"OutputTextDeltaEvent":{"ResponseStreamEvent":[]},"OutputTextDoneEvent":{"ResponseStreamEvent":[]},"OutputTextAnnotationAddedEvent":{"ResponseStreamEvent":[]},"RefusalDeltaEvent":{"ResponseStreamEvent":[]},"RefusalDoneEvent":{"ResponseStreamEvent":[]},"FunctionCallArgumentsDeltaEvent":{"ResponseStreamEvent":[]},"FunctionCallArgumentsDoneEvent":{"ResponseStreamEvent":[]},"ReasoningTextDeltaEvent":{"ResponseStreamEvent":[]},"ReasoningTextDoneEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryPartAddedEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryPartDoneEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryTextDeltaEvent":{"ResponseStreamEvent":[]},"ReasoningSummaryTextDoneEvent":{"ResponseStreamEvent":[]},"ResponseAudioDeltaEvent":{"ResponseStreamEvent":[]},"ResponseAudioDoneEvent":{"ResponseStreamEvent":[]},"ResponseAudioTranscriptDeltaEvent":{"ResponseStreamEvent":[]},"ResponseAudioTranscriptDoneEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallSearchingEvent":{"ResponseStreamEvent":[]},"ResponseWebSearchCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallSearchingEvent":{"ResponseStreamEvent":[]},"ResponseFileSearchCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallInterpretingEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCodeDeltaEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCodeDoneEvent":{"ResponseStreamEvent":[]},"ResponseCodeInterpreterCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallGeneratingEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallPartialImageEvent":{"ResponseStreamEvent":[]},"ResponseImageGenerationCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallInProgressEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallFailedEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallArgumentsDeltaEvent":{"ResponseStreamEvent":[]},"ResponseMcpCallArgumentsDoneEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsInProgressEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsCompletedEvent":{"ResponseStreamEvent":[]},"ResponseMcpListToolsFailedEvent":{"ResponseStreamEvent":[]},"ResponseCustomToolCallInputDeltaEvent":{"ResponseStreamEvent":[]},"ResponseCustomToolCallInputDoneEvent":{"ResponseStreamEvent":[]},"ErrorEvent0":{"ResponseStreamEvent":[]},"UnknownEvent":{"ResponseStreamEvent":[]},"CodeInterpreterContainerId":{"CodeInterpreterContainer":[]},"CodeInterpreterContainerAuto":{"CodeInterpreterContainer":[]},"ContainerNetworkPolicyDisabled":{"ContainerNetworkPolicy":[]},"ContainerNetworkPolicyAllowlist":{"ContainerNetworkPolicy":[]},"ClickAction":{"ComputerAction":[]},"DoubleClickAction":{"ComputerAction":[]},"DragAction":{"ComputerAction":[]},"KeyPressAction":{"ComputerAction":[]},"MoveAction":{"ComputerAction":[]},"ScreenshotAction":{"ComputerAction":[]},"ScrollAction":{"ComputerAction":[]},"TypeAction":{"ComputerAction":[]},"WaitAction":{"ComputerAction":[]},"FunctionTool":{"ResponseTool":[],"NamespaceAllowedTool":[]},"WebSearchTool0":{"ResponseTool":[]},"ComparisonFilter":{"FileSearchFilter":[]},"CompoundFilter":{"FileSearchFilter":[]},"FileSearchTool":{"ResponseTool":[]},"CodeInterpreterTool":{"ResponseTool":[]},"ComputerUseTool":{"ResponseTool":[]},"ImageGenerationTool":{"ResponseTool":[]},"McpTool":{"ResponseTool":[]},"ShellTool":{"ResponseTool":[]},"ComputerTool":{"ResponseTool":[]},"NamespaceTool":{"ResponseTool":[]},"ToolSearchTool":{"ResponseTool":[]},"LocalShellTool":{"ResponseTool":[]},"CustomTool":{"ResponseTool":[],"NamespaceAllowedTool":[]},"UnknownNamespaceTool":{"NamespaceAllowedTool":[]},"PathException":{"Exception":[]},"PosixStyle":{"InternalStyle":[]},"UrlStyle":{"InternalStyle":[]},"WindowsStyle":{"InternalStyle":[]},"PdfArray":{"PdfDataType":[]},"Ascii85Encoder":{"Converter":["Uint8List","Uint8List"],"StreamTransformer":["Uint8List","Uint8List"],"Converter.S":"Uint8List","Converter.T":"Uint8List"},"PdfBool":{"PdfDataType":[]},"PdfDict":{"PdfDataType":[],"PdfDict.T":"1"},"PdfDictStream":{"PdfDict":["PdfDataType"],"PdfDataType":[],"PdfDict.T":"PdfDataType"},"PdfIndirect":{"PdfDataType":[]},"PdfName":{"PdfDataType":[]},"PdfNum":{"PdfDataType":[]},"PdfNumList":{"PdfDataType":[]},"PdfObjectBase":{"PdfObjectBase.T":"1"},"PdfString":{"PdfDataType":[]},"PdfXref":{"PdfIndirect":[],"PdfDataType":[]},"PdfXrefTable":{"PdfDataType":[]},"PdfGraphicStates":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfAnnot":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfAnnotNamedLink":{"PdfAnnotBase":[]},"PdfCatalog":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfFont":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"PdfImage":{"PdfXObject":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfInfo":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfObject":{"PdfObjectBase":["1"],"PdfObjectBase.T":"1"},"PdfObjectStream":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfOutline":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfPage":{"PdfGraphicStream":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfPageList":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfType1Font":{"PdfFont":[],"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"],"PdfObjectBase.T":"PdfDict<PdfDataType>"},"PdfXObject":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"AnnotationLink":{"AnnotationBuilder":[]},"SizedBox":{"SpanningWidget":[],"Widget":[]},"Padding":{"SpanningWidget":[],"Widget":[]},"Align":{"SpanningWidget":[],"Widget":[]},"ConstrainedBox":{"SpanningWidget":[],"Widget":[]},"BorderRadius":{"BorderRadiusGeometry":[]},"Border":{"BoxBorder":[]},"Container0":{"SpanningWidget":[],"Widget":[]},"DecoratedBox":{"SpanningWidget":[],"Widget":[]},"Header":{"SpanningWidget":[],"Widget":[]},"FlexContext":{"WidgetContext":[]},"Flex":{"SpanningWidget":[],"Widget":[]},"Row":{"SpanningWidget":[],"Widget":[]},"Column":{"SpanningWidget":[],"Widget":[]},"Flexible":{"SpanningWidget":[],"Widget":[]},"Expanded":{"SpanningWidget":[],"Widget":[]},"EdgeInsets":{"EdgeInsetsGeometry":[]},"Alignment":{"AlignmentGeometry":[]},"MultiPage":{"Page":[]},"Placeholder":{"Widget":[]},"TableContext":{"WidgetContext":[]},"IntrinsicColumnWidth":{"TableColumnWidth":[]},"FlexColumnWidth":{"TableColumnWidth":[]},"Table":{"SpanningWidget":[],"Widget":[]},"_Word":{"_Span":[]},"_WidgetSpan":{"_Span":[]},"WidgetSpan":{"InlineSpan":[]},"TextSpan":{"InlineSpan":[]},"RichTextContext":{"WidgetContext":[]},"RichText":{"SpanningWidget":[],"Widget":[]},"Text0":{"RichText":[],"SpanningWidget":[],"Widget":[]},"InheritedDirectionality":{"Inherited":[]},"ThemeData":{"Inherited":[]},"StatelessWidget":{"SpanningWidget":[],"Widget":[]},"SingleChildWidget":{"SpanningWidget":[],"Widget":[]},"MultiChildWidget":{"Widget":[]},"_WhereNotNullStreamSink":{"EventSink":["1?"],"Sink":["1?"]},"WhereNotNullStreamTransformer":{"StreamTransformer":["1?","1"]},"FileLocation":{"SourceLocation":[],"Comparable":["SourceLocation"]},"_FileSpan":{"SourceSpanWithContext":[],"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceLocation":{"Comparable":["SourceLocation"]},"SourceLocationMixin":{"SourceLocation":[],"Comparable":["SourceLocation"]},"SourceSpan":{"Comparable":["SourceSpan"]},"SourceSpanBase":{"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceSpanException":{"Exception":[]},"SourceSpanFormatException":{"FormatException":[],"Exception":[]},"SourceSpanMixin":{"SourceSpan":[],"Comparable":["SourceSpan"]},"SourceSpanWithContext":{"SourceSpan":[],"Comparable":["SourceSpan"]},"Chain":{"StackTrace":[]},"LazyChain":{"Chain":[],"StackTrace":[]},"Trace":{"StackTrace":[]},"UnparsedFrame":{"Frame":[]},"CloseGuaranteeChannel":{"StreamChannelMixin":["1"],"StreamChannel":["1"],"StreamChannelMixin.T":"1"},"_CloseGuaranteeStream":{"Stream":["1"],"Stream.T":"1"},"_CloseGuaranteeSink":{"DelegatingStreamSink":["1"],"StreamSink":["1"],"EventSink":["1"],"Sink":["1"]},"_JsonDocument":{"StreamChannelTransformer":["Object?","String"]},"_StreamChannel":{"StreamChannelMixin":["1"],"StreamChannel":["1"],"StreamChannelMixin.T":"1"},"StreamChannelMixin":{"StreamChannel":["1"]},"StringScannerException":{"FormatException":[],"Exception":[]},"HtmlSink":{"Sink":["String"]},"HtmlStreamingSink":{"StreamingStringSink":[],"Sink":["String"]},"HtmlNestedSink":{"Sink":["String"]},"HelpCommand0":{"Command":[]},"NewConversationCommand":{"Command":[]},"CompactCommand":{"Command":[]},"HtmlHistoryCommand":{"Command":[]},"HtmlSummarizeCommand":{"Command":[]},"DialogComplexInputItem":{"IDialogComplexItem":[]},"DialogComplexDropdownItem":{"IDialogComplexItem":[]},"DialogComplexField":{"IDialogField":[]},"DialogField":{"IDialogField":[]},"GoogleEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"MistralEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"OllamaEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"OpenAIEmbeddingsModelOptions":{"EmbeddingsModelOptions":[]},"AnthropicMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"GoogleMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"OpenAIResponsesMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"XAIResponsesMediaGenerationModelOptions":{"MediaGenerationModelOptions":[]},"PdfPattern":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]},"PdfShading":{"PdfObject":["PdfDict<PdfDataType>"],"PdfObjectBase":["PdfDict<PdfDataType>"]}}'));
   B._Universe_addErasedTypes(init.typeUniverse, JSON.parse('{"UnmodifiableListBase":1,"__CastListBase__CastIterableBase_ListMixin":2,"NativeTypedArray":1,"StreamTransformerBase":2,"_DelayedEvent":1,"ChunkedConversionSink":1,"OpenAIProviderBase":2,"ToolDefinition1":1}'));
   var string$ = {
     x00_____: "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\u03f6\x00\u0404\u03f4 \u03f4\u03f6\u01f6\u01f6\u03f6\u03fc\u01f4\u03ff\u03ff\u0584\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u05d4\u01f4\x00\u01f4\x00\u0504\u05c4\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0400\x00\u0400\u0200\u03f7\u0200\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u03ff\u0200\u0200\u0200\u03f7\x00",
@@ -75750,6 +76497,7 @@
       JSArray_ListItem: findType("JSArray<ListItem>"),
       JSArray_List_int: findType("JSArray<List<int>>"),
       JSArray_MagicNumber: findType("JSArray<MagicNumber>"),
+      JSArray_Map_String_dynamic: findType("JSArray<Map<String,@>>"),
       JSArray_Map_of_String_and_nullable_Object: findType("JSArray<Map<String,Object?>>"),
       JSArray_MultipartFile: findType("JSArray<MultipartFile>"),
       JSArray_NativeArrayBuffer: findType("JSArray<NativeArrayBuffer>"),
@@ -75759,17 +76507,18 @@
       JSArray_Page: findType("JSArray<Page>"),
       JSArray_Paragraph: findType("JSArray<Paragraph>"),
       JSArray_Part: findType("JSArray<Part0>"),
-      JSArray_Pattern: findType("JSArray<Pattern>"),
       JSArray_PdfAnnot: findType("JSArray<PdfAnnot>"),
       JSArray_PdfGraphicState: findType("JSArray<PdfGraphicState>"),
       JSArray_PdfObject_PdfDataType: findType("JSArray<PdfObject<PdfDataType>>"),
       JSArray_PdfPage: findType("JSArray<PdfPage>"),
       JSArray_PdfString: findType("JSArray<PdfString>"),
       JSArray_PdfXref: findType("JSArray<PdfXref>"),
+      JSArray_Record_2_Element_and_bool: findType("JSArray<+(Element,bool)>"),
       JSArray_ResponseTool: findType("JSArray<ResponseTool>"),
       JSArray_StandardPart: findType("JSArray<StandardPart>"),
       JSArray_StreamingToolCall: findType("JSArray<StreamingToolCall>"),
       JSArray_String: findType("JSArray<String>"),
+      JSArray_TableRow: findType("JSArray<TableRow>"),
       JSArray_TextPart: findType("JSArray<TextPart>"),
       JSArray_Tool: findType("JSArray<Tool1>"),
       JSArray_ToolExecutionResult: findType("JSArray<ToolExecutionResult>"),
@@ -75790,7 +76539,7 @@
       JSArray_double: findType("JSArray<double>"),
       JSArray_dynamic: findType("JSArray<@>"),
       JSArray_int: findType("JSArray<int>"),
-      JSArray_nullable_Future_dynamic: findType("JSArray<Future<@>?>"),
+      JSArray_nullable_Future_void: findType("JSArray<Future<~>?>"),
       JSArray_nullable_String: findType("JSArray<String?>"),
       JSArray_num: findType("JSArray<num>"),
       JSIndexable_dynamic: findType("JSIndexable<@>"),
@@ -75915,6 +76664,7 @@
       Record_2_int_and_dynamic: findType("+(int,@)"),
       Record_2_nullable_Object_and_nullable_Object: findType("+(Object?,Object?)"),
       Record_3_String_containerId_and_String_fileId_and_nullable_String_fileName: findType("+containerId,fileId,fileName(String,String,String?)"),
+      RefusalCategory: findType("RefusalCategory"),
       RegExpMatch: findType("RegExpMatch"),
       Request: findType("Request"),
       RequestContext: findType("RequestContext"),
@@ -75965,6 +76715,8 @@
       String_Function_Match: findType("String(Match)"),
       String_Function_String: findType("String(String)"),
       Symbol: findType("Symbol0"),
+      TableColumnWidth: findType("TableColumnWidth"),
+      TableContext: findType("TableContext"),
       TextBlock: findType("TextBlock"),
       TextContentPart: findType("TextContentPart"),
       TextPart: findType("TextPart"),
@@ -76148,8 +76900,6 @@
     A.NativeUint8List_methods = B.NativeUint8List.prototype;
     A.PlainJavaScriptObject_methods = J.PlainJavaScriptObject.prototype;
     A.UnknownJavaScriptObject_methods = J.UnknownJavaScriptObject.prototype;
-    A.List_empty13 = makeConstList([], type$.JSArray_Pattern);
-    A.AccessControlList_List_empty_List_empty = new B.AccessControlList(A.List_empty13, A.List_empty13);
     A.Alignment_1_0 = new B.Alignment(1, 0);
     A.Alignment_m1_1 = new B.Alignment(-1, 1);
     A.ApiException_ka3 = new B.ApiException0(-1, null, null, null, null, "OpenAI Responses request failed");
@@ -76169,6 +76919,7 @@
     A.BorderRadius_yh9 = new B.BorderRadius(A.Radius_10_10, A.Radius_10_10, A.Radius_10_10, A.Radius_10_10);
     A.BorderStyle_false = new B.BorderStyle(false);
     A.BorderStyle_true = new B.BorderStyle(true);
+    A.BoxConstraints_0Yu = new B.BoxConstraints(0, 1 / 0, 0, 1 / 0);
     A.PdfColor_1_0_0_0 = new B.PdfColor(1, 0, 0, 0);
     A.BorderSide_GfX = new B.BorderSide(A.PdfColor_1_0_0_0, 0, A.BorderStyle_false);
     A.PdfColor_MQH = new B.PdfColor(1, 0.08235294117647059, 0.396078431372549, 0.7529411764705882);
@@ -76216,6 +76967,8 @@
     A.CONSTANT2 = new B.Instantiation1(B.math__max$closure(), type$.Instantiation1_double);
     A.CONSTANT0 = new B.Instantiation1(B.math__max$closure(), type$.Instantiation1_int);
     A.CONSTANT1 = new B.Instantiation1(B.math__min$closure(), type$.Instantiation1_double);
+    A.List_empty13 = makeConstList([], B.findType("JSArray<Pattern>"));
+    A.C_AccessControlList = new B.AccessControlList();
     A.C_AsciiCodec = new B.AsciiCodec();
     A.C_Base64Encoder = new B.Base64Encoder();
     A.C_Base64Codec = new B.Base64Codec();
@@ -76240,12 +76993,14 @@
     A.C_ErrorInterceptor0 = new B.ErrorInterceptor1();
     A.C_ErrorInterceptor1 = new B.ErrorInterceptor2();
     A.C_FencedCodeBlockSyntax = new B.FencedCodeBlockSyntax();
+    A.C_FlexColumnWidth = new B.FlexColumnWidth();
     A.C_FootnoteDefSyntax = new B.FootnoteDefSyntax();
     A.C_FunctionCallEventHandler = new B.FunctionCallEventHandler();
     A.C_GoogleSearch = new B.GoogleSearch();
     A.C_HeaderSyntax = new B.HeaderSyntax();
     A.C_HorizontalRuleSyntax = new B.HorizontalRuleSyntax();
     A.C_HtmlBlockSyntax = new B.HtmlBlockSyntax();
+    A.C_IntrinsicColumnWidth = new B.IntrinsicColumnWidth();
     A.C_JS_CONST = function getTagFallback(o) {
   var s = Object.prototype.toString.call(o);
   return s.substring(8, s.length - 1);
@@ -76470,6 +77225,7 @@
     A.EdgeInsets_14_14_14_14 = new B.EdgeInsets(14, 14, 14, 14);
     A.EdgeInsets_40_40_40_40 = new B.EdgeInsets(40, 40, 40, 40);
     A.EdgeInsets_4_2_4_2 = new B.EdgeInsets(4, 2, 4, 2);
+    A.EdgeInsets_6_4_6_4 = new B.EdgeInsets(6, 4, 6, 4);
     A.EdgeInsets_Igm = new B.EdgeInsets(0, 5.669291338582678, 0, 11.338582677165356);
     A.EdgeInsets_YoQ = new B.EdgeInsets(0, 0, 0, 14.173228346456694);
     A.EdgeInsets_oKU = new B.EdgeInsets(0, 8.503937007874017, 0, 14.173228346456694);
@@ -76594,6 +77350,10 @@
     A.List_65533 = makeConstList([65533], type$.JSArray_int);
     A.List_65p = makeConstList([0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.333, 0.555, 0.5, 0.5, 1, 0.833, 0.278, 0.333, 0.333, 0.5, 0.57, 0.25, 0.333, 0.25, 0.278, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.333, 0.333, 0.57, 0.57, 0.57, 0.5, 0.93, 0.722, 0.667, 0.722, 0.722, 0.667, 0.611, 0.778, 0.778, 0.389, 0.5, 0.778, 0.667, 0.944, 0.722, 0.778, 0.611, 0.778, 0.722, 0.556, 0.667, 0.722, 0.722, 1, 0.722, 0.722, 0.667, 0.333, 0.278, 0.333, 0.581, 0.5, 0.333, 0.5, 0.556, 0.444, 0.556, 0.444, 0.333, 0.5, 0.556, 0.278, 0.333, 0.556, 0.278, 0.833, 0.556, 0.5, 0.556, 0.556, 0.444, 0.389, 0.333, 0.556, 0.5, 0.722, 0.5, 0.5, 0.444, 0.394, 0.22, 0.394, 0.52, 0.35, 0.5, 0.35, 0.333, 0.5, 0.5, 1, 0.5, 0.5, 0.333, 1, 0.556, 0.333, 1, 0.35, 0.667, 0.35, 0.35, 0.333, 0.333, 0.5, 0.5, 0.35, 0.5, 1, 0.333, 1, 0.389, 0.333, 0.722, 0.35, 0.444, 0.722, 0.25, 0.333, 0.5, 0.5, 0.5, 0.5, 0.22, 0.5, 0.333, 0.747, 0.3, 0.5, 0.57, 0.333, 0.747, 0.333, 0.4, 0.57, 0.3, 0.3, 0.333, 0.556, 0.54, 0.25, 0.333, 0.3, 0.33, 0.5, 0.75, 0.75, 0.75, 0.5, 0.722, 0.722, 0.722, 0.722, 0.722, 0.722, 1, 0.722, 0.667, 0.667, 0.667, 0.667, 0.389, 0.389, 0.389, 0.389, 0.722, 0.722, 0.778, 0.778, 0.778, 0.778, 0.778, 0.57, 0.778, 0.722, 0.722, 0.722, 0.722, 0.722, 0.611, 0.556, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.722, 0.444, 0.444, 0.444, 0.444, 0.444, 0.278, 0.278, 0.278, 0.278, 0.5, 0.556, 0.5, 0.5, 0.5, 0.5, 0.5, 0.57, 0.5, 0.556, 0.556, 0.556, 0.556, 0.5, 0.556, 0.5], type$.JSArray_double);
     A.List_78D = makeConstList([0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.333, 0.42, 0.5, 0.5, 0.833, 0.778, 0.214, 0.333, 0.333, 0.5, 0.675, 0.25, 0.333, 0.25, 0.278, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.333, 0.333, 0.675, 0.675, 0.675, 0.5, 0.92, 0.611, 0.611, 0.667, 0.722, 0.611, 0.611, 0.722, 0.722, 0.333, 0.444, 0.667, 0.556, 0.833, 0.667, 0.722, 0.611, 0.722, 0.611, 0.5, 0.556, 0.722, 0.611, 0.833, 0.611, 0.556, 0.556, 0.389, 0.278, 0.389, 0.422, 0.5, 0.333, 0.5, 0.5, 0.444, 0.5, 0.444, 0.278, 0.5, 0.5, 0.278, 0.278, 0.444, 0.278, 0.722, 0.5, 0.5, 0.5, 0.5, 0.389, 0.389, 0.278, 0.5, 0.444, 0.667, 0.444, 0.444, 0.389, 0.4, 0.275, 0.4, 0.541, 0.35, 0.5, 0.35, 0.333, 0.5, 0.556, 0.889, 0.5, 0.5, 0.333, 1, 0.5, 0.333, 0.944, 0.35, 0.556, 0.35, 0.35, 0.333, 0.333, 0.556, 0.556, 0.35, 0.5, 0.889, 0.333, 0.98, 0.389, 0.333, 0.667, 0.35, 0.389, 0.556, 0.25, 0.389, 0.5, 0.5, 0.5, 0.5, 0.275, 0.5, 0.333, 0.76, 0.276, 0.5, 0.675, 0.333, 0.76, 0.333, 0.4, 0.675, 0.3, 0.3, 0.333, 0.5, 0.523, 0.25, 0.333, 0.3, 0.31, 0.5, 0.75, 0.75, 0.75, 0.5, 0.611, 0.611, 0.611, 0.611, 0.611, 0.611, 0.889, 0.667, 0.611, 0.611, 0.611, 0.611, 0.333, 0.333, 0.333, 0.333, 0.722, 0.667, 0.722, 0.722, 0.722, 0.722, 0.722, 0.675, 0.722, 0.722, 0.722, 0.722, 0.722, 0.556, 0.611, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.667, 0.444, 0.444, 0.444, 0.444, 0.444, 0.278, 0.278, 0.278, 0.278, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.675, 0.5, 0.5, 0.5, 0.5, 0.5, 0.444, 0.5, 0.444], type$.JSArray_double);
+    A.RefusalCategory_unknown_0_unknown = new B.RefusalCategory("unknown", 0, "unknown");
+    A.RefusalCategory_cyber_1_cyber = new B.RefusalCategory("cyber", 1, "cyber");
+    A.RefusalCategory_bio_2_bio = new B.RefusalCategory("bio", 2, "bio");
+    A.List_8nB = makeConstList([A.RefusalCategory_unknown_0_unknown, A.RefusalCategory_cyber_1_cyber, A.RefusalCategory_bio_2_bio], B.findType("JSArray<RefusalCategory>"));
     A.List_972 = makeConstList([0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384, 24576], type$.JSArray_int);
     A.List_BSx = makeConstList([0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 0, 16, 17, 18, 18, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29], type$.JSArray_int);
     A.List_CBz = makeConstList([0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.333, 0.408, 0.5, 0.5, 0.833, 0.778, 0.18, 0.333, 0.333, 0.5, 0.564, 0.25, 0.333, 0.25, 0.278, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.278, 0.278, 0.564, 0.564, 0.564, 0.444, 0.921, 0.722, 0.667, 0.667, 0.722, 0.611, 0.556, 0.722, 0.722, 0.333, 0.389, 0.722, 0.611, 0.889, 0.722, 0.722, 0.556, 0.722, 0.667, 0.556, 0.611, 0.722, 0.722, 0.944, 0.722, 0.722, 0.611, 0.333, 0.278, 0.333, 0.469, 0.5, 0.333, 0.444, 0.5, 0.444, 0.5, 0.444, 0.333, 0.5, 0.5, 0.278, 0.278, 0.5, 0.278, 0.778, 0.5, 0.5, 0.5, 0.5, 0.333, 0.389, 0.278, 0.5, 0.5, 0.722, 0.5, 0.5, 0.444, 0.48, 0.2, 0.48, 0.541, 0.35, 0.5, 0.35, 0.333, 0.5, 0.444, 1, 0.5, 0.5, 0.333, 1, 0.556, 0.333, 0.889, 0.35, 0.611, 0.35, 0.35, 0.333, 0.333, 0.444, 0.444, 0.35, 0.5, 1, 0.333, 0.98, 0.389, 0.333, 0.722, 0.35, 0.444, 0.722, 0.25, 0.333, 0.5, 0.5, 0.5, 0.5, 0.2, 0.5, 0.333, 0.76, 0.276, 0.5, 0.564, 0.333, 0.76, 0.333, 0.4, 0.564, 0.3, 0.3, 0.333, 0.5, 0.453, 0.25, 0.333, 0.3, 0.31, 0.5, 0.75, 0.75, 0.75, 0.444, 0.722, 0.722, 0.722, 0.722, 0.722, 0.722, 0.889, 0.667, 0.611, 0.611, 0.611, 0.611, 0.333, 0.333, 0.333, 0.333, 0.722, 0.722, 0.722, 0.722, 0.722, 0.722, 0.722, 0.564, 0.722, 0.722, 0.722, 0.722, 0.722, 0.722, 0.556, 0.5, 0.444, 0.444, 0.444, 0.444, 0.444, 0.444, 0.667, 0.444, 0.444, 0.444, 0.444, 0.444, 0.278, 0.278, 0.278, 0.278, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], type$.JSArray_double);
@@ -79969,6 +80729,7 @@
     A._CanonicalClass_8 = new B._CanonicalClass(8);
     A._CanonicalClass_26 = new B._CanonicalClass(26);
     A.Map_ZvSry = new B.GeneralConstantMap([300, A._CanonicalClass_230, 768, A._CanonicalClass_230, 769, A._CanonicalClass_230, 770, A._CanonicalClass_230, 771, A._CanonicalClass_230, 772, A._CanonicalClass_230, 773, A._CanonicalClass_230, 774, A._CanonicalClass_230, 775, A._CanonicalClass_230, 776, A._CanonicalClass_230, 777, A._CanonicalClass_230, 778, A._CanonicalClass_230, 779, A._CanonicalClass_230, 780, A._CanonicalClass_230, 781, A._CanonicalClass_230, 782, A._CanonicalClass_230, 783, A._CanonicalClass_230, 784, A._CanonicalClass_230, 785, A._CanonicalClass_230, 786, A._CanonicalClass_230, 787, A._CanonicalClass_230, 788, A._CanonicalClass_230, 789, A._CanonicalClass_232, 790, A._CanonicalClass_220, 791, A._CanonicalClass_220, 792, A._CanonicalClass_220, 793, A._CanonicalClass_220, 794, A._CanonicalClass_232, 795, A._CanonicalClass_216, 796, A._CanonicalClass_220, 797, A._CanonicalClass_220, 798, A._CanonicalClass_220, 799, A._CanonicalClass_220, 800, A._CanonicalClass_220, 801, A._CanonicalClass_202, 802, A._CanonicalClass_202, 803, A._CanonicalClass_220, 804, A._CanonicalClass_220, 805, A._CanonicalClass_220, 806, A._CanonicalClass_220, 807, A._CanonicalClass_202, 808, A._CanonicalClass_202, 809, A._CanonicalClass_220, 810, A._CanonicalClass_220, 811, A._CanonicalClass_220, 812, A._CanonicalClass_220, 813, A._CanonicalClass_220, 814, A._CanonicalClass_220, 815, A._CanonicalClass_220, 816, A._CanonicalClass_220, 817, A._CanonicalClass_220, 818, A._CanonicalClass_220, 819, A._CanonicalClass_220, 820, A._CanonicalClass_1, 821, A._CanonicalClass_1, 822, A._CanonicalClass_1, 823, A._CanonicalClass_1, 824, A._CanonicalClass_1, 825, A._CanonicalClass_220, 826, A._CanonicalClass_220, 827, A._CanonicalClass_220, 828, A._CanonicalClass_220, 829, A._CanonicalClass_230, 830, A._CanonicalClass_230, 831, A._CanonicalClass_230, 832, A._CanonicalClass_230, 833, A._CanonicalClass_230, 834, A._CanonicalClass_230, 835, A._CanonicalClass_230, 836, A._CanonicalClass_230, 837, A._CanonicalClass_240, 838, A._CanonicalClass_230, 839, A._CanonicalClass_220, 840, A._CanonicalClass_220, 841, A._CanonicalClass_220, 842, A._CanonicalClass_230, 843, A._CanonicalClass_230, 844, A._CanonicalClass_230, 845, A._CanonicalClass_220, 846, A._CanonicalClass_220, 848, A._CanonicalClass_230, 849, A._CanonicalClass_230, 850, A._CanonicalClass_230, 851, A._CanonicalClass_220, 852, A._CanonicalClass_220, 853, A._CanonicalClass_220, 854, A._CanonicalClass_220, 855, A._CanonicalClass_230, 856, A._CanonicalClass_232, 857, A._CanonicalClass_220, 858, A._CanonicalClass_220, 859, A._CanonicalClass_230, 860, A._CanonicalClass_233, 861, A._CanonicalClass_234, 862, A._CanonicalClass_234, 863, A._CanonicalClass_233, 864, A._CanonicalClass_234, 865, A._CanonicalClass_234, 866, A._CanonicalClass_233, 867, A._CanonicalClass_230, 868, A._CanonicalClass_230, 869, A._CanonicalClass_230, 870, A._CanonicalClass_230, 871, A._CanonicalClass_230, 872, A._CanonicalClass_230, 873, A._CanonicalClass_230, 874, A._CanonicalClass_230, 875, A._CanonicalClass_230, 876, A._CanonicalClass_230, 877, A._CanonicalClass_230, 878, A._CanonicalClass_230, 879, A._CanonicalClass_230, 1155, A._CanonicalClass_230, 1156, A._CanonicalClass_230, 1157, A._CanonicalClass_230, 1158, A._CanonicalClass_230, 1159, A._CanonicalClass_230, 1425, A._CanonicalClass_220, 1426, A._CanonicalClass_230, 1427, A._CanonicalClass_230, 1428, A._CanonicalClass_230, 1429, A._CanonicalClass_230, 1430, A._CanonicalClass_220, 1431, A._CanonicalClass_230, 1432, A._CanonicalClass_230, 1433, A._CanonicalClass_230, 1434, A._CanonicalClass_222, 1435, A._CanonicalClass_220, 1436, A._CanonicalClass_230, 1437, A._CanonicalClass_230, 1438, A._CanonicalClass_230, 1439, A._CanonicalClass_230, 1440, A._CanonicalClass_230, 1441, A._CanonicalClass_230, 1442, A._CanonicalClass_220, 1443, A._CanonicalClass_220, 1444, A._CanonicalClass_220, 1445, A._CanonicalClass_220, 1446, A._CanonicalClass_220, 1447, A._CanonicalClass_220, 1448, A._CanonicalClass_230, 1449, A._CanonicalClass_230, 1450, A._CanonicalClass_220, 1451, A._CanonicalClass_230, 1452, A._CanonicalClass_230, 1453, A._CanonicalClass_222, 1454, A._CanonicalClass_228, 1455, A._CanonicalClass_230, 1456, A._CanonicalClass_10, 1457, A._CanonicalClass_11, 1458, A._CanonicalClass_12, 1459, A._CanonicalClass_13, 1460, A._CanonicalClass_14, 1461, A._CanonicalClass_15, 1462, A._CanonicalClass_16, 1463, A._CanonicalClass_17, 1464, A._CanonicalClass_18, 1465, A._CanonicalClass_19, 1466, A._CanonicalClass_19, 1467, A._CanonicalClass_20, 1468, A._CanonicalClass_21, 1469, A._CanonicalClass_22, 1471, A._CanonicalClass_23, 1473, A._CanonicalClass_24, 1474, A._CanonicalClass_25, 1476, A._CanonicalClass_230, 1477, A._CanonicalClass_220, 1479, A._CanonicalClass_18, 1552, A._CanonicalClass_230, 1553, A._CanonicalClass_230, 1554, A._CanonicalClass_230, 1555, A._CanonicalClass_230, 1556, A._CanonicalClass_230, 1557, A._CanonicalClass_230, 1558, A._CanonicalClass_230, 1559, A._CanonicalClass_230, 1560, A._CanonicalClass_30, 1561, A._CanonicalClass_31, 1562, A._CanonicalClass_32, 1611, A._CanonicalClass_27, 1612, A._CanonicalClass_28, 1613, A._CanonicalClass_29, 1614, A._CanonicalClass_30, 1615, A._CanonicalClass_31, 1616, A._CanonicalClass_32, 1617, A._CanonicalClass_33, 1618, A._CanonicalClass_34, 1619, A._CanonicalClass_230, 1620, A._CanonicalClass_230, 1621, A._CanonicalClass_220, 1622, A._CanonicalClass_220, 1623, A._CanonicalClass_230, 1624, A._CanonicalClass_230, 1625, A._CanonicalClass_230, 1626, A._CanonicalClass_230, 1627, A._CanonicalClass_230, 1628, A._CanonicalClass_220, 1629, A._CanonicalClass_230, 1630, A._CanonicalClass_230, 1631, A._CanonicalClass_220, 1648, A._CanonicalClass_35, 1750, A._CanonicalClass_230, 1751, A._CanonicalClass_230, 1752, A._CanonicalClass_230, 1753, A._CanonicalClass_230, 1754, A._CanonicalClass_230, 1755, A._CanonicalClass_230, 1756, A._CanonicalClass_230, 1759, A._CanonicalClass_230, 1760, A._CanonicalClass_230, 1761, A._CanonicalClass_230, 1762, A._CanonicalClass_230, 1763, A._CanonicalClass_220, 1764, A._CanonicalClass_230, 1767, A._CanonicalClass_230, 1768, A._CanonicalClass_230, 1770, A._CanonicalClass_220, 1771, A._CanonicalClass_230, 1772, A._CanonicalClass_230, 1773, A._CanonicalClass_220, 1809, A._CanonicalClass_36, 1840, A._CanonicalClass_230, 1841, A._CanonicalClass_220, 1842, A._CanonicalClass_230, 1843, A._CanonicalClass_230, 1844, A._CanonicalClass_220, 1845, A._CanonicalClass_230, 1846, A._CanonicalClass_230, 1847, A._CanonicalClass_220, 1848, A._CanonicalClass_220, 1849, A._CanonicalClass_220, 1850, A._CanonicalClass_230, 1851, A._CanonicalClass_220, 1852, A._CanonicalClass_220, 1853, A._CanonicalClass_230, 1854, A._CanonicalClass_220, 1855, A._CanonicalClass_230, 1856, A._CanonicalClass_230, 1857, A._CanonicalClass_230, 1858, A._CanonicalClass_220, 1859, A._CanonicalClass_230, 1860, A._CanonicalClass_220, 1861, A._CanonicalClass_230, 1862, A._CanonicalClass_220, 1863, A._CanonicalClass_230, 1864, A._CanonicalClass_220, 1865, A._CanonicalClass_230, 1866, A._CanonicalClass_230, 2027, A._CanonicalClass_230, 2028, A._CanonicalClass_230, 2029, A._CanonicalClass_230, 2030, A._CanonicalClass_230, 2031, A._CanonicalClass_230, 2032, A._CanonicalClass_230, 2033, A._CanonicalClass_230, 2034, A._CanonicalClass_220, 2035, A._CanonicalClass_230, 2070, A._CanonicalClass_230, 2071, A._CanonicalClass_230, 2072, A._CanonicalClass_230, 2073, A._CanonicalClass_230, 2075, A._CanonicalClass_230, 2076, A._CanonicalClass_230, 2077, A._CanonicalClass_230, 2078, A._CanonicalClass_230, 2079, A._CanonicalClass_230, 2080, A._CanonicalClass_230, 2081, A._CanonicalClass_230, 2082, A._CanonicalClass_230, 2083, A._CanonicalClass_230, 2085, A._CanonicalClass_230, 2086, A._CanonicalClass_230, 2087, A._CanonicalClass_230, 2089, A._CanonicalClass_230, 2090, A._CanonicalClass_230, 2091, A._CanonicalClass_230, 2092, A._CanonicalClass_230, 2093, A._CanonicalClass_230, 2137, A._CanonicalClass_220, 2138, A._CanonicalClass_220, 2139, A._CanonicalClass_220, 2276, A._CanonicalClass_230, 2277, A._CanonicalClass_230, 2278, A._CanonicalClass_220, 2279, A._CanonicalClass_230, 2280, A._CanonicalClass_230, 2281, A._CanonicalClass_220, 2282, A._CanonicalClass_230, 2283, A._CanonicalClass_230, 2284, A._CanonicalClass_230, 2285, A._CanonicalClass_220, 2286, A._CanonicalClass_220, 2287, A._CanonicalClass_220, 2288, A._CanonicalClass_27, 2289, A._CanonicalClass_28, 2290, A._CanonicalClass_29, 2291, A._CanonicalClass_230, 2292, A._CanonicalClass_230, 2293, A._CanonicalClass_230, 2294, A._CanonicalClass_220, 2295, A._CanonicalClass_230, 2296, A._CanonicalClass_230, 2297, A._CanonicalClass_220, 2298, A._CanonicalClass_220, 2299, A._CanonicalClass_230, 2300, A._CanonicalClass_230, 2301, A._CanonicalClass_230, 2302, A._CanonicalClass_230, 2303, A._CanonicalClass_230, 2364, A._CanonicalClass_7, 2381, A._CanonicalClass_9, 2385, A._CanonicalClass_230, 2386, A._CanonicalClass_220, 2387, A._CanonicalClass_230, 2388, A._CanonicalClass_230, 2492, A._CanonicalClass_7, 2509, A._CanonicalClass_9, 2620, A._CanonicalClass_7, 2637, A._CanonicalClass_9, 2748, A._CanonicalClass_7, 2765, A._CanonicalClass_9, 2876, A._CanonicalClass_7, 2893, A._CanonicalClass_9, 3021, A._CanonicalClass_9, 3149, A._CanonicalClass_9, 3157, A._CanonicalClass_84, 3158, A._CanonicalClass_91, 3260, A._CanonicalClass_7, 3277, A._CanonicalClass_9, 3405, A._CanonicalClass_9, 3530, A._CanonicalClass_9, 3640, A._CanonicalClass_103, 3641, A._CanonicalClass_103, 3642, A._CanonicalClass_9, 3656, A._CanonicalClass_107, 3657, A._CanonicalClass_107, 3658, A._CanonicalClass_107, 3659, A._CanonicalClass_107, 3768, A._CanonicalClass_118, 3769, A._CanonicalClass_118, 3784, A._CanonicalClass_122, 3785, A._CanonicalClass_122, 3786, A._CanonicalClass_122, 3787, A._CanonicalClass_122, 3864, A._CanonicalClass_220, 3865, A._CanonicalClass_220, 3893, A._CanonicalClass_220, 3895, A._CanonicalClass_220, 3897, A._CanonicalClass_216, 3953, A._CanonicalClass_129, 3954, A._CanonicalClass_130, 3956, A._CanonicalClass_132, 3962, A._CanonicalClass_130, 3963, A._CanonicalClass_130, 3964, A._CanonicalClass_130, 3965, A._CanonicalClass_130, 3968, A._CanonicalClass_130, 3970, A._CanonicalClass_230, 3971, A._CanonicalClass_230, 3972, A._CanonicalClass_9, 3974, A._CanonicalClass_230, 3975, A._CanonicalClass_230, 4038, A._CanonicalClass_220, 4151, A._CanonicalClass_7, 4153, A._CanonicalClass_9, 4154, A._CanonicalClass_9, 4237, A._CanonicalClass_220, 4957, A._CanonicalClass_230, 4958, A._CanonicalClass_230, 4959, A._CanonicalClass_230, 5908, A._CanonicalClass_9, 5940, A._CanonicalClass_9, 6098, A._CanonicalClass_9, 6109, A._CanonicalClass_230, 6313, A._CanonicalClass_228, 6457, A._CanonicalClass_222, 6458, A._CanonicalClass_230, 6459, A._CanonicalClass_220, 6679, A._CanonicalClass_230, 6680, A._CanonicalClass_220, 6752, A._CanonicalClass_9, 6773, A._CanonicalClass_230, 6774, A._CanonicalClass_230, 6775, A._CanonicalClass_230, 6776, A._CanonicalClass_230, 6777, A._CanonicalClass_230, 6778, A._CanonicalClass_230, 6779, A._CanonicalClass_230, 6780, A._CanonicalClass_230, 6783, A._CanonicalClass_220, 6832, A._CanonicalClass_230, 6833, A._CanonicalClass_230, 6834, A._CanonicalClass_230, 6835, A._CanonicalClass_230, 6836, A._CanonicalClass_230, 6837, A._CanonicalClass_220, 6838, A._CanonicalClass_220, 6839, A._CanonicalClass_220, 6840, A._CanonicalClass_220, 6841, A._CanonicalClass_220, 6842, A._CanonicalClass_220, 6843, A._CanonicalClass_230, 6844, A._CanonicalClass_230, 6845, A._CanonicalClass_220, 6964, A._CanonicalClass_7, 6980, A._CanonicalClass_9, 7019, A._CanonicalClass_230, 7020, A._CanonicalClass_220, 7021, A._CanonicalClass_230, 7022, A._CanonicalClass_230, 7023, A._CanonicalClass_230, 7024, A._CanonicalClass_230, 7025, A._CanonicalClass_230, 7026, A._CanonicalClass_230, 7027, A._CanonicalClass_230, 7082, A._CanonicalClass_9, 7083, A._CanonicalClass_9, 7142, A._CanonicalClass_7, 7154, A._CanonicalClass_9, 7155, A._CanonicalClass_9, 7223, A._CanonicalClass_7, 7376, A._CanonicalClass_230, 7377, A._CanonicalClass_230, 7378, A._CanonicalClass_230, 7380, A._CanonicalClass_1, 7381, A._CanonicalClass_220, 7382, A._CanonicalClass_220, 7383, A._CanonicalClass_220, 7384, A._CanonicalClass_220, 7385, A._CanonicalClass_220, 7386, A._CanonicalClass_230, 7387, A._CanonicalClass_230, 7388, A._CanonicalClass_220, 7389, A._CanonicalClass_220, 7390, A._CanonicalClass_220, 7391, A._CanonicalClass_220, 7392, A._CanonicalClass_230, 7394, A._CanonicalClass_1, 7395, A._CanonicalClass_1, 7396, A._CanonicalClass_1, 7397, A._CanonicalClass_1, 7398, A._CanonicalClass_1, 7399, A._CanonicalClass_1, 7400, A._CanonicalClass_1, 7405, A._CanonicalClass_220, 7412, A._CanonicalClass_230, 7416, A._CanonicalClass_230, 7417, A._CanonicalClass_230, 7616, A._CanonicalClass_230, 7617, A._CanonicalClass_230, 7618, A._CanonicalClass_220, 7619, A._CanonicalClass_230, 7620, A._CanonicalClass_230, 7621, A._CanonicalClass_230, 7622, A._CanonicalClass_230, 7623, A._CanonicalClass_230, 7624, A._CanonicalClass_230, 7625, A._CanonicalClass_230, 7626, A._CanonicalClass_220, 7627, A._CanonicalClass_230, 7628, A._CanonicalClass_230, 7629, A._CanonicalClass_234, 7630, A._CanonicalClass_214, 7631, A._CanonicalClass_220, 7632, A._CanonicalClass_202, 7633, A._CanonicalClass_230, 7634, A._CanonicalClass_230, 7635, A._CanonicalClass_230, 7636, A._CanonicalClass_230, 7637, A._CanonicalClass_230, 7638, A._CanonicalClass_230, 7639, A._CanonicalClass_230, 7640, A._CanonicalClass_230, 7641, A._CanonicalClass_230, 7642, A._CanonicalClass_230, 7643, A._CanonicalClass_230, 7644, A._CanonicalClass_230, 7645, A._CanonicalClass_230, 7646, A._CanonicalClass_230, 7647, A._CanonicalClass_230, 7648, A._CanonicalClass_230, 7649, A._CanonicalClass_230, 7650, A._CanonicalClass_230, 7651, A._CanonicalClass_230, 7652, A._CanonicalClass_230, 7653, A._CanonicalClass_230, 7654, A._CanonicalClass_230, 7655, A._CanonicalClass_230, 7656, A._CanonicalClass_230, 7657, A._CanonicalClass_230, 7658, A._CanonicalClass_230, 7659, A._CanonicalClass_230, 7660, A._CanonicalClass_230, 7661, A._CanonicalClass_230, 7662, A._CanonicalClass_230, 7663, A._CanonicalClass_230, 7664, A._CanonicalClass_230, 7665, A._CanonicalClass_230, 7666, A._CanonicalClass_230, 7667, A._CanonicalClass_230, 7668, A._CanonicalClass_230, 7669, A._CanonicalClass_230, 7676, A._CanonicalClass_233, 7677, A._CanonicalClass_220, 7678, A._CanonicalClass_230, 7679, A._CanonicalClass_220, 8400, A._CanonicalClass_230, 8401, A._CanonicalClass_230, 8402, A._CanonicalClass_1, 8403, A._CanonicalClass_1, 8404, A._CanonicalClass_230, 8405, A._CanonicalClass_230, 8406, A._CanonicalClass_230, 8407, A._CanonicalClass_230, 8408, A._CanonicalClass_1, 8409, A._CanonicalClass_1, 8410, A._CanonicalClass_1, 8411, A._CanonicalClass_230, 8412, A._CanonicalClass_230, 8417, A._CanonicalClass_230, 8421, A._CanonicalClass_1, 8422, A._CanonicalClass_1, 8423, A._CanonicalClass_230, 8424, A._CanonicalClass_220, 8425, A._CanonicalClass_230, 8426, A._CanonicalClass_1, 8427, A._CanonicalClass_1, 8428, A._CanonicalClass_220, 8429, A._CanonicalClass_220, 8430, A._CanonicalClass_220, 8431, A._CanonicalClass_220, 8432, A._CanonicalClass_230, 11503, A._CanonicalClass_230, 11504, A._CanonicalClass_230, 11505, A._CanonicalClass_230, 11647, A._CanonicalClass_9, 11744, A._CanonicalClass_230, 11745, A._CanonicalClass_230, 11746, A._CanonicalClass_230, 11747, A._CanonicalClass_230, 11748, A._CanonicalClass_230, 11749, A._CanonicalClass_230, 11750, A._CanonicalClass_230, 11751, A._CanonicalClass_230, 11752, A._CanonicalClass_230, 11753, A._CanonicalClass_230, 11754, A._CanonicalClass_230, 11755, A._CanonicalClass_230, 11756, A._CanonicalClass_230, 11757, A._CanonicalClass_230, 11758, A._CanonicalClass_230, 11759, A._CanonicalClass_230, 11760, A._CanonicalClass_230, 11761, A._CanonicalClass_230, 11762, A._CanonicalClass_230, 11763, A._CanonicalClass_230, 11764, A._CanonicalClass_230, 11765, A._CanonicalClass_230, 11766, A._CanonicalClass_230, 11767, A._CanonicalClass_230, 11768, A._CanonicalClass_230, 11769, A._CanonicalClass_230, 11770, A._CanonicalClass_230, 11771, A._CanonicalClass_230, 11772, A._CanonicalClass_230, 11773, A._CanonicalClass_230, 11774, A._CanonicalClass_230, 11775, A._CanonicalClass_230, 12330, A._CanonicalClass_218, 12331, A._CanonicalClass_228, 12332, A._CanonicalClass_232, 12333, A._CanonicalClass_222, 12334, A._CanonicalClass_224, 12335, A._CanonicalClass_224, 12441, A._CanonicalClass_8, 12442, A._CanonicalClass_8, 42607, A._CanonicalClass_230, 42612, A._CanonicalClass_230, 42613, A._CanonicalClass_230, 42614, A._CanonicalClass_230, 42615, A._CanonicalClass_230, 42616, A._CanonicalClass_230, 42617, A._CanonicalClass_230, 42618, A._CanonicalClass_230, 42619, A._CanonicalClass_230, 42620, A._CanonicalClass_230, 42621, A._CanonicalClass_230, 42655, A._CanonicalClass_230, 42736, A._CanonicalClass_230, 42737, A._CanonicalClass_230, 43014, A._CanonicalClass_9, 43204, A._CanonicalClass_9, 43232, A._CanonicalClass_230, 43233, A._CanonicalClass_230, 43234, A._CanonicalClass_230, 43235, A._CanonicalClass_230, 43236, A._CanonicalClass_230, 43237, A._CanonicalClass_230, 43238, A._CanonicalClass_230, 43239, A._CanonicalClass_230, 43240, A._CanonicalClass_230, 43241, A._CanonicalClass_230, 43242, A._CanonicalClass_230, 43243, A._CanonicalClass_230, 43244, A._CanonicalClass_230, 43245, A._CanonicalClass_230, 43246, A._CanonicalClass_230, 43247, A._CanonicalClass_230, 43248, A._CanonicalClass_230, 43249, A._CanonicalClass_230, 43307, A._CanonicalClass_220, 43308, A._CanonicalClass_220, 43309, A._CanonicalClass_220, 43347, A._CanonicalClass_9, 43443, A._CanonicalClass_7, 43456, A._CanonicalClass_9, 43696, A._CanonicalClass_230, 43698, A._CanonicalClass_230, 43699, A._CanonicalClass_230, 43700, A._CanonicalClass_220, 43703, A._CanonicalClass_230, 43704, A._CanonicalClass_230, 43710, A._CanonicalClass_230, 43711, A._CanonicalClass_230, 43713, A._CanonicalClass_230, 43766, A._CanonicalClass_9, 44013, A._CanonicalClass_9, 64286, A._CanonicalClass_26, 65056, A._CanonicalClass_230, 65057, A._CanonicalClass_230, 65058, A._CanonicalClass_230, 65059, A._CanonicalClass_230, 65060, A._CanonicalClass_230, 65061, A._CanonicalClass_230, 65062, A._CanonicalClass_230, 65063, A._CanonicalClass_220, 65064, A._CanonicalClass_220, 65065, A._CanonicalClass_220, 65066, A._CanonicalClass_220, 65067, A._CanonicalClass_220, 65068, A._CanonicalClass_220, 65069, A._CanonicalClass_220], B.findType("GeneralConstantMap<int,_CanonicalClass>"));
+    A.Map_bpo4S = new B.GeneralConstantMap([0, A.C_IntrinsicColumnWidth, 1, A.C_FlexColumnWidth], B.findType("GeneralConstantMap<int,TableColumnWidth>"));
     A.CharacterCategory_0 = new B.CharacterCategory(0, "lu");
     A.CharacterCategory_1 = new B.CharacterCategory(1, "ll");
     A.CharacterCategory_2 = new B.CharacterCategory(2, "lt");
@@ -80067,7 +80828,10 @@
     A.PageOrientation_1 = new B.PageOrientation(1, "landscape");
     A.PageOrientation_2 = new B.PageOrientation(2, "portrait");
     A.PaintPhase_0 = new B.PaintPhase(0, "all");
+    A.PaintPhase_1 = new B.PaintPhase(1, "background");
+    A.PaintPhase_2 = new B.PaintPhase(2, "foreground");
     A.PdfAnnotFlags_2 = new B.PdfAnnotFlags(2, "print");
+    A.PdfColor_1_1_1_1 = new B.PdfColor(1, 1, 1, 1);
     A.PdfColor_HN0 = new B.PdfColor(1, 0.6196078431372549, 0.6196078431372549, 0.6196078431372549);
     A.PdfColor_HvE = new B.PdfColor(1, 0.8784313725490196, 0.8784313725490196, 0.8784313725490196);
     A.PdfColor_NP2 = new B.PdfColor(1, 0.8274509803921568, 0.1843137254901961, 0.1843137254901961);
@@ -80142,8 +80906,8 @@
     A.Set_ZohEo = new B.ConstantStringSet(A.Object_vaD, 5, type$.ConstantStringSet_String);
     A.Set_empty0 = new B.ConstantStringSet(A.Object_empty, 0, B.findType("ConstantStringSet<GoogleServerSideTool>"));
     A.Set_empty = new B.ConstantStringSet(A.Object_empty, 0, B.findType("ConstantStringSet<XAIServerSideTool>"));
-    A.Object_z8r = {p: 0, h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, h6: 6, ul: 7, ol: 8, li: 9, blockquote: 10, pre: 11, hr: 12, table: 13};
-    A.Set_fmwJh = new B.ConstantStringSet(A.Object_z8r, 14, type$.ConstantStringSet_String);
+    A.Object_TRM = {p: 0, h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, h6: 6, ul: 7, ol: 8, li: 9, blockquote: 10, pre: 11, hr: 12, table: 13, thead: 14, tbody: 15, tr: 16, th: 17, td: 18};
+    A.Set_z3PW = new B.ConstantStringSet(A.Object_TRM, 19, type$.ConstantStringSet_String);
     A.ShapeJoiningType_0 = new B.ShapeJoiningType(0, "right");
     A.ShapeJoiningType_1 = new B.ShapeJoiningType(1, "left");
     A.ShapeJoiningType_2 = new B.ShapeJoiningType(2, "dual");
@@ -80160,6 +80924,8 @@
     A.StopReason_refusal_7_refusal = new B.StopReason("refusal", 7, "refusal");
     A.StopReason_stop_sequence_2_stopSequence = new B.StopReason("stop_sequence", 2, "stopSequence");
     A.StopReason_tool_use_3_toolUse = new B.StopReason("tool_use", 3, "toolUse");
+    A.TableCellVerticalAlignment_2 = new B.TableCellVerticalAlignment(2, "top");
+    A.TableWidth_1 = new B.TableWidth(1, "max");
     A.TaskListItemState_0 = new B.TaskListItemState(0, "checked");
     A.TaskListItemState_1 = new B.TaskListItemState(1, "unchecked");
     A.TextAlign_2 = new B.TextAlign(2, "start");
@@ -80427,7 +81193,6 @@
         t6 = $.$get$emptyPattern();
       return B._setArrayType([t1, t2, t3, t4, t5, t6, t6], B.findType("JSArray<RegExp>"));
     });
-    _lazyFinal($, "ExtensionSet_commonMark", "$get$ExtensionSet_commonMark", () => B.ExtensionSet$(B.List_List$unmodifiable(B._setArrayType([A.C_FencedCodeBlockSyntax], type$.JSArray_BlockSyntax), type$.BlockSyntax), B.List_List$unmodifiable(B._setArrayType([B.InlineHtmlSyntax$()], type$.JSArray_InlineSyntax), type$.InlineSyntax)));
     _lazyFinal($, "ExtensionSet_gitHubFlavored", "$get$ExtensionSet_gitHubFlavored", () => B.ExtensionSet$(B.List_List$unmodifiable(B._setArrayType([A.C_FencedCodeBlockSyntax, A.C_TableSyntax, A.C_UnorderedListWithCheckboxSyntax, A.C_OrderedListWithCheckboxSyntax, A.C_FootnoteDefSyntax], type$.JSArray_BlockSyntax), type$.BlockSyntax), B.List_List$unmodifiable(B._setArrayType([B.InlineHtmlSyntax$(), new B.StrikethroughSyntax(true, true, B._setArrayType([B.DelimiterTag$("del", 1), B.DelimiterTag$("del", 2)], type$.JSArray_DelimiterTag), B.RegExp_RegExp("~+", true, true), 126), new B.AutolinkExtensionSyntax(B.RegExp_RegExp("((?:(?:https?|ftp):\\/\\/|www\\.)(?:[-_a-z0-9]+\\.)*(?:[-a-z0-9]+\\.[-a-z0-9]+)[^\\s<]*[^\\s<?!.,:*_~])|([-_.+a-z0-9]+@(?:[-_a-z0-9]+\\.)+[-_a-z0-9]*[a-z0-9])", false, true), null)], type$.JSArray_InlineSyntax), type$.InlineSyntax)));
     _lazyFinal($, "InlineParser__defaultSyntaxes", "$get$InlineParser__defaultSyntaxes", () => {
       var t1 = B.RegExp_RegExp("<([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>", true, true),

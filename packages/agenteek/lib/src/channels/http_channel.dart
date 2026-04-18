@@ -40,7 +40,7 @@ class HttpChannel
 
   void _process(String data) async {
     // avoid concurrent messages in HTTP channel
-    if (!_pendingOperation.isCompleted) {
+    while (!_pendingOperation.isCompleted) {
       dbg.trace('AWAITING PENDING OPERATION...');
       await _pendingOperation.future;
     }

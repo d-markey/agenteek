@@ -72,7 +72,7 @@ Future<ToolSet> initializeToolSets(
               scope: 'Tools for ${mcpConf.name}',
               url: mcpConf.url!,
               headers: authHeader,
-              toolsAcl: AccessControlList(blackList: ['custom_node']),
+              toolsAcl: AccessControlList.allowAll,
             );
           },
   });

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:agenteek/agenteek.dart';
@@ -17,6 +16,7 @@ import 'dialog/dialog_field_type.dart';
 import '_export_pdf.dart';
 import '_html_sink.dart';
 import '_user_command_handler.dart';
+import '_prompt_history.dart';
 
 class AgentUI {
   AgentUI(this.conversationManager) {
@@ -58,28 +58,33 @@ class AgentUI {
     systemOutput = HtmlSink(_outputController, 'SYSTEM', 'system');
 
     if (BuildConfig.withAutoConf) {
-      final toolbar = _getElementById<web.HTMLDivElement>('toolbar');
-      final autoConfBtn = web.HTMLButtonElement()
-        ..innerText = 'Auto Configure'
-        ..className = 'button accent'
-        ..title = "Auto-Configure Agent"
-        ..ariaLabel = "Auto-Configure Agent"
-        ..onclick = (web.Event e) {
-          ConfigStore.autoConf(Uri.parse('autoconf.json'))
-              .then((conf) {
-                if (conf == null) {
-                  _agentConfCtrlr.add(null);
-                } else {
-                  _notifyAgentConfig(conf);
-                }
-              })
-              .catchError((ex, st) {
-                systemOutput.add('Failed to auto configure: $ex');
-                print('$ex @ $st');
-                _agentConfCtrlr.add(null);
-              });
-        }.toJS;
-      toolbar.appendChild(autoConfBtn);
+      final auconfUri = Uri.parse('autoconf.json');
+      ConfigStore.hasAutoConf(auconfUri).then((available) {
+        if (available) {
+          final toolbar = _getElementById<web.HTMLDivElement>('toolbar');
+          final autoConfBtn = web.HTMLButtonElement()
+            ..innerText = 'Auto Configure'
+            ..className = 'button accent'
+            ..title = "Auto-Configure Agent"
+            ..ariaLabel = "Auto-Configure Agent"
+            ..onclick = (web.Event e) {
+              ConfigStore.autoConf(Uri.parse('autoconf.json'))
+                  .then((conf) {
+                    if (conf == null) {
+                      _agentConfCtrlr.add(null);
+                    } else {
+                      _notifyAgentConfig(conf);
+                    }
+                  })
+                  .catchError((ex, st) {
+                    systemOutput.add('Failed to auto configure: $ex');
+                    print('$ex @ $st');
+                    _agentConfCtrlr.add(null);
+                  });
+            }.toJS;
+          toolbar.appendChild(autoConfBtn);
+        }
+      });
     }
 
     // bind user input and command handler
@@ -107,40 +112,8 @@ class AgentUI {
   late final FutureOr<String> Function() userInput;
   late final UserCommandHandler userCommandHandler;
 
-  static const _kPromptHistoryKey = 'agenteek_prompt_history';
-
   /// In-memory history of submitted prompts (oldest first).
-  /// Loaded from [sessionStorage] on startup and persisted after every submit.
-  final List<String> _promptHistory = _loadPromptHistory();
-
-  static List<String> _loadPromptHistory() {
-    try {
-      final raw = web.window.sessionStorage.getItem(_kPromptHistoryKey);
-      if (raw != null) {
-        final decoded = jsonDecode(raw);
-        if (decoded is List) return decoded.cast<String>();
-      }
-    } catch (_) {}
-    return [];
-  }
-
-  void _savePromptHistory() {
-    try {
-      web.window.sessionStorage.setItem(
-        _kPromptHistoryKey,
-        jsonEncode(_promptHistory),
-      );
-    } catch (_) {}
-  }
-
-  /// Current navigation position within [_promptHistory].
-  /// Points past the end when no history item is selected.
-  int _historyCursor = 0;
-
-  /// Temporary buffer that holds the draft text while the user navigates
-  /// through history, so it can be restored when they press ArrowDown back
-  /// to the "new" position.
-  String _historyDraft = '';
+  final _history = PromptHistory();
 
   final _agentConfCtrlr = StreamController<WebAgentConfig?>();
   Stream<WebAgentConfig?> get agentConfiguration => _agentConfCtrlr.stream;
@@ -315,21 +288,16 @@ class AgentUI {
   PromptCallback bindUserInput() => () {
     final completer = Completer<String>();
 
-    // Reset navigation cursor to "past the end" for this new input session.
-    _historyCursor = _promptHistory.length;
-    _historyDraft = '';
-
     _prompt.disabled = false;
     _prompt.focus();
 
     void submit() {
       final userInput = _prompt.value.trim();
       if (userInput.isNotEmpty) {
-        // Push to history (avoid consecutive duplicates) and persist.
-        if (_promptHistory.isEmpty || _promptHistory.last != userInput) {
-          _promptHistory.add(userInput);
-          _savePromptHistory();
-        }
+        // Push to history.
+        _history.push(userInput);
+
+        // Send prompt
         userOutput.add(userInput);
         _prompt.value = '';
         _prompt.disabled = true;
@@ -347,33 +315,23 @@ class AgentUI {
       submit();
     }.toJS;
 
-    // Handle ArrowUp / ArrowDown for history navigation.
+    // Handle Alt + ArrowUp / ArrowDown for history navigation.
     _prompt.onkeydown = (web.KeyboardEvent e) {
-      final key = e.key;
-      if (key == 'ArrowUp') {
-        if (_promptHistory.isEmpty) return;
-        // Save the current draft the first time we navigate away.
-        if (_historyCursor == _promptHistory.length) {
-          _historyDraft = _prompt.value;
-        }
-        if (_historyCursor > 0) {
-          _historyCursor--;
-          _prompt.value = _promptHistory[_historyCursor];
-          // Move caret to end.
+      if (e.altKey) {
+        final key = e.key;
+        if (key == 'ArrowUp') {
+          _history.init(_prompt.value);
+          _prompt.value = _history.prev();
           final len = _prompt.value.length;
           _prompt.setSelectionRange(len, len);
-        }
-        e.preventDefault();
-      } else if (key == 'ArrowDown') {
-        if (_historyCursor < _promptHistory.length) {
-          _historyCursor++;
-          _prompt.value = _historyCursor == _promptHistory.length
-              ? _historyDraft
-              : _promptHistory[_historyCursor];
+          e.preventDefault();
+        } else if (key == 'ArrowDown') {
+          _history.init(_prompt.value);
+          _prompt.value = _history.next();
           final len = _prompt.value.length;
           _prompt.setSelectionRange(len, len);
+          e.preventDefault();
         }
-        e.preventDefault();
       }
     }.toJS;
 

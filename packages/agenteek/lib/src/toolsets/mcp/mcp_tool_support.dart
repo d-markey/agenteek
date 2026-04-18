@@ -64,6 +64,7 @@ mcp.CallToolResult _wrapToolResult(dynamic result) {
     return mcp.CallToolResult(
       content: [mcp.Content.text(text: result.toString())],
       structuredContent: {'error': result.toString()},
+      isError: true,
     );
   } else if (_isJsonStructure(result)) {
     return mcp.CallToolResult(
