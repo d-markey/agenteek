@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>About Agenteek Web Agent</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    html,
+    body {
+      overflow: auto !important;
+      height: auto !important;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 24px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #1a1a1a;
+      font-size: 1.8em;
+    }
+
+    h2 {
+      margin-top: 1.5em;
+      color: #1a1a1a;
+      border-bottom: 1px solid #e6eef8;
+      padding-bottom: 8px;
+      font-size: 1.4em;
+    }
+
+    p {
+      margin-bottom: 1em;
+    }
+
+    ul {
+      margin-bottom: 1em;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background-color: #f1f5f9;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+
+<body>
+  <p>
+    <strong><a href="https://github.com/d-markey/agenteek" target="_blank">Agenteek</a></strong>
+    is a modular Dart monorepo for building agentic AI applications. It provides abstractions for creating AI
+    agents, managing conversations with history and checkpoints, and equipping agents with security-scoped toolsets.
+  </p>
+  <p>
+    <strong>Agenteek Web Agent</strong> is an example of an application built with Agenteek.
+  </p>
+
+  <h2>Features & Tools</h2>
+  <p>
+    <strong>Agenteek Web Agent</strong> can activate multiple models from various providers.
+    Models are identified by an ID, e.g., <code>google/gemma-4-26b-a4b-it</code>
+    (see <a href="https://docs.dartantic.ai/providers" target="_blank">available models</a>).
+    A token or API Key is usually necessary to authenticate with the provider.
+  </p>
+  <p>
+    The agent comes with several tools out of the box:
+  </p>
+  <ul>
+    <li><strong>DeepWiki</strong> and <strong>Context7</strong></li>
+    <li><strong>GitHub tools</strong> (requires a Personal Access Token (PAT) to activate)</li>
+  </ul>
+  <p>
+    Additionally, custom (HTTP) MCP servers can be added to extend functionality.
+  </p>
+  <p>
+    Configuring the model, the GitHub PAT, and any additional MCP servers is done in the
+    <strong>Configure Agent</strong> window.
+  </p>
+
+  <h2>Under the Hood</h2>
+  <p>Agenteek is built on top of <strong><a href="https://dart.dev/" target="_blank">Dart</a></strong> and
+    <a href="https://sellsbrothers.com/" target="_blank">Chris Sells'</a>
+    <strong><a href="https://pub.dev/packages/dartantic_ai" target="_blank">dartantic</a></strong>.
+    Connectivity to Gen AI providers is provided by
+    <strong><a href="https://pub.dev/packages/dartantic_ai" target="_blank">dartantic</a></strong>,
+    which in turn relies on various packages, including
+    <a href="https://pub.dev/packages/mistralai_dart" target="_blank">mistralai_dart</a>,
+    <a href="https://pub.dev/packages/anthropic_sdk_dart" target="_blank">anthropic_sdk_dart</a>,
+    <a href="https://pub.dev/packages/googleai_dart" target="_blank">googleai_dart</a>,
+    <a href="https://pub.dev/packages/openai_dart" target="_blank">openai_dart</a>...
+  </p>
+
+  <p style="color: #842029; background-color: #f8d7da; border: 1px solid #f5c2c7; border-radius: 6px; padding: 12px; margin-top: 16px;">
+    <strong>Security Warning:</strong> Agent settings are stored in the browser's local storage. This includes API keys. Users should be cautious when they're using Agenteek Web Agent from a public or someone else's computer.
+  </p>
+
+  <h2>Notes</h2>
+  <ul>
+    <li>Access to the Github tools is still unstable; see <a
+        href="https://github.com/github/github-mcp-server/issues/2342"
+        target="_blank">https://github.com/github/github-mcp-server/issues/2342</a>.</li>
+  </ul>
+</body>
+
+</html>

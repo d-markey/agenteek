@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="scaffolded-by" content="https://github.com/dart-lang/sdk">
-  <title>agenteek_web</title>
+  <title>Agenteek Web Agent</title>
   <link rel="stylesheet" href="styles.css">
   <script defer src="messages.js"></script>
   <script defer src="main.dart.js"></script>
@@ -17,13 +17,13 @@
 
   <div class="app" role="application">
     <header>
-      <div class="brand">My Custom Web Agent</div>
+      <div class="brand">Agenteek Web Agent</div>
       <div style="display: flex; gap: 16px; align-items: center;" id="toolbar">
         <div class="log-toggle">
           <input type="checkbox" id="logToggle" aria-label="Enable logs" />
           <label class="lbl" for="logToggle">Enable Logs</label>
         </div>
-        <button id="exportPdf" class="button accent" title="Export to PDF" aria-label="Export to PDF">
+        <button id="exportPdf" class="button" title="Export to PDF" aria-label="Export to PDF">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true">
             <path
@@ -38,13 +38,22 @@
           Export PDF
         </button>
         <button id="configModel" class="button accent" title="Configure Agent" aria-label="Configure Agent">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path
               d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
           Configure Agent
+        </button>
+        <button id="aboutBtn" class="button" title="About Agenteek" aria-label="About Agenteek">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+          About
         </button>
       </div>
     </header>
@@ -54,7 +63,7 @@
     </main>
 
 
-    <footer class="composer" aria-label="Message composer">
+    <footer class="composer" aria-label="Message composer" style="flex-direction: column; align-items: stretch; gap: 8px;">
       <div class="composer-inner">
         <textarea id="composer" disabled
           placeholder="Write a message and type Enter or click on the Send button; type Shift+Enter to insert a new line..."
@@ -80,21 +89,11 @@
           </span>
         </button>
       </div>
+      <div style="font-size: 11px; color: #991b1b; text-align: center;">
+        <strong>Security Warning:</strong> Agent settings (including API keys) are stored locally in this browser. Be cautious on shared computers.
+      </div>
     </footer>
   </div>
-
-  <script>
-    const actionBtn = document.getElementById('action-btn');
-    document.getElementById('composer').addEventListener('keydown', (e) => {
-      if (e.keyCode == 0x0D && !e.shiftKey) {
-        e.preventDefault();
-        // Only trigger send when NOT in cancel mode
-        if (!actionBtn.disabled && !actionBtn.classList.contains('cancel')) {
-          actionBtn.click();
-        }
-      }
-    });
-  </script>
 
   <!-- Modal Dialog Overlay -->
   <div id="dlg-overlay" class="overlay hidden">
@@ -107,6 +106,54 @@
       </div>
     </div>
   </div>
+
+  <!-- About Modal Overlay -->
+  <div id="about-overlay" class="overlay hidden">
+    <div class="dialog"
+      style="width: 80%; max-width: 800px; height: 80vh; display: flex; flex-direction: column; padding: 0;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee;">
+        <h2 style="margin: 0; font-size: 1.25rem;">About Agenteek Web Agent</h2>
+        <button id="about-close" class="button" aria-label="Close" style="padding: 4px 8px;">✕</button>
+      </div>
+      <iframe src="about.html"
+        style="flex: 1; width: 100%; border: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; background: white;"></iframe>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const actionBtn = document.getElementById('action-btn');
+
+      document.getElementById('composer').addEventListener('keydown', (e) => {
+        if (e.keyCode == 0x0D && !e.shiftKey) {
+          e.preventDefault();
+          // Only trigger send when NOT in cancel mode
+          if (!actionBtn.disabled && !actionBtn.classList.contains('cancel')) {
+            actionBtn.click();
+          }
+        }
+      });
+
+      const aboutBtn = document.getElementById('aboutBtn');
+      const aboutOverlay = document.getElementById('about-overlay');
+      const aboutClose = document.getElementById('about-close');
+
+      if (aboutBtn && aboutOverlay && aboutClose) {
+        aboutBtn.addEventListener('click', () => {
+          aboutOverlay.classList.remove('hidden');
+        });
+        aboutClose.addEventListener('click', () => {
+          aboutOverlay.classList.add('hidden');
+        });
+        aboutOverlay.addEventListener('click', (e) => {
+          if (e.target === aboutOverlay) {
+            aboutOverlay.classList.add('hidden');
+          }
+        });
+      }
+    });
+  </script>
 
 </body>
 
