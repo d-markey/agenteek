@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:agenteek/src/secrets/in_memory_secrets.dart';
+
 import 'secrets.dart';
 
 Future<Secrets> loadSecrets(String key) async {
@@ -10,8 +12,11 @@ Future<Secrets> loadSecrets(String key) async {
   }
   final secrets = <String, String>{};
   final lines = await file.readAsLines();
-  for (var line in lines.map((l) => l.trim()).where((l) => l.isNotEmpty)) {
-    var idx = line.indexOf(':');
+  for (final line in lines.map((l) => l.trim()).where((l) => l.isNotEmpty)) {
+    // skip comments
+    if (line.startsWith('#')) continue;
+    final idx = line.indexOf(':');
+    // skip malformed lines
     if (idx <= 0) continue;
     final key = line.substring(0, idx).trim().toLowerCase();
     final value = line.substring(idx + 1).trim();

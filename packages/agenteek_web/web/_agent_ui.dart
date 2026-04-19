@@ -325,13 +325,18 @@ class AgentUI {
           final len = _prompt.value.length;
           _prompt.setSelectionRange(len, len);
           e.preventDefault();
+          e.stopImmediatePropagation();
         } else if (key == 'ArrowDown') {
           _history.init(_prompt.value);
           _prompt.value = _history.next();
           final len = _prompt.value.length;
           _prompt.setSelectionRange(len, len);
           e.preventDefault();
+          e.stopImmediatePropagation();
         }
+      } else {
+        // reset history and let event propagate
+        _history.reset();
       }
     }.toJS;
 

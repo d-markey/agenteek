@@ -18,6 +18,7 @@ export 'src/conversations/persistent_conversation_manager.dart';
 export 'src/file_system/file_system.dart';
 export 'src/file_system/in_memory_file_system.dart';
 export 'src/secrets/secrets.dart';
+export 'src/secrets/in_memory_secrets.dart';
 export 'src/toolsets/agent/agent_toolset.dart';
 export 'src/toolsets/mcp/mcp_tool_support.dart';
 export 'src/toolsets/mcp/mcp_toolset.dart';

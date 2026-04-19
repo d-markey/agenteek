@@ -4,6 +4,7 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
+import 'in_memory_secrets.dart';
 import 'secrets.dart';
 
 Future<Secrets> loadSecrets(String key) {
@@ -24,3 +25,5 @@ Future<Secrets> loadSecrets(String key) {
     );
   }
 }
+
+const Secrets environmentSecrets = InMemorySecrets({});

@@ -19,7 +19,7 @@ void main() async {
     'secrets': () async {
       final file = await FileLocator.find(dir, '.secret.keys');
       if (file != null) {
-        secrets = await InMemorySecrets.load(file.path);
+        secrets = await Secrets.load(file.path);
       } else {
         secrets = InMemorySecrets(const {});
       }

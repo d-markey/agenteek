@@ -56,7 +56,7 @@ void main(List<String> arguments) async {
     throw Exception('Could not find ".secret.keys" file.');
   }
 
-  final secrets = await InMemorySecrets.load(secretsFile.path);
+  final secrets = await Secrets.load(secretsFile.path);
 
   final agentsConf = await loadAgentsConf(
     await File(args.teamConfPath).readAsString(),
