@@ -4,6 +4,8 @@ import 'package:web/web.dart' as web;
 
 import '_logger.stub.dart' as base_;
 
+String getLogDir() => '';
+
 class LogSink extends base_.LogSink {
   LogSink(super.name);
 
@@ -21,6 +23,9 @@ class LogSink extends base_.LogSink {
       _log(message.split('\n').map((l) => '[$name] $l').join('\n'));
     }
   }
+
+  @override
+  void flush() {}
 
   @override
   void close() => disable();

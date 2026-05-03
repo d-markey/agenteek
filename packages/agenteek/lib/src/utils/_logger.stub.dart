@@ -1,3 +1,5 @@
+String getLogDir() => throw UnimplementedError();
+
 class LogSink implements Sink<String> {
   LogSink(this.name);
 
@@ -8,6 +10,8 @@ class LogSink implements Sink<String> {
 
   @override
   void add(String message) => throw UnimplementedError();
+
+  void flush() => throw UnimplementedError();
 
   @override
   void close() => throw UnimplementedError();

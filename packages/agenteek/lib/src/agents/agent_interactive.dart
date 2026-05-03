@@ -4,12 +4,13 @@ import 'package:cancelation_token/cancelation_token.dart';
 
 import '../commands/command.dart';
 import '../commands/command_registry.dart';
-import '../commands/help_command.dart';
-import '../commands/history_command.dart';
-import '../commands/quit_command.dart';
-import '../commands/summarize_command.dart';
-import '../commands/system_prompt_command.dart';
-import '../commands/tools_command.dart';
+import '../commands/built_in/compact_command.dart';
+import '../commands/built_in/help_command.dart';
+import '../commands/built_in/history_command.dart';
+import '../commands/built_in/quit_command.dart';
+import '../commands/built_in/summarize_command.dart';
+import '../commands/built_in/system_prompt_command.dart';
+import '../commands/built_in/tools_command.dart';
 import '../utils/debug.dart' as dbg;
 import '../utils/types.dart';
 import 'agent.dart';
@@ -20,10 +21,10 @@ class InteractiveAgent extends Agent {
     super.modelOptions,
     required super.conversationManager,
     super.displayName,
-    super.systemPrompt,
+    super.role = '',
     super.modelOutput,
     super.streamingOutput,
-    super.streamingThinkingOutput,
+    super.streamingThinking,
     super.toolSet,
     super.onError,
     required PromptCallback prompt,
@@ -37,6 +38,7 @@ class InteractiveAgent extends Agent {
       this.commandRegistry.register(QuitCommand(callback: stopInteracting));
       this.commandRegistry.register(HistoryCommand.to(modelOutput));
       this.commandRegistry.register(SummarizeCommand.to(modelOutput));
+      this.commandRegistry.register(CompactCommand.to(modelOutput));
       this.commandRegistry.register(SystemPromptCommand.to(modelOutput));
       this.commandRegistry.register(ToolsCommand.to(modelOutput));
     }
@@ -60,17 +62,15 @@ class InteractiveAgent extends Agent {
     (Command?, List<String>) $parseCommand(String input) {
       final parts = input.trim().split(RegExp(r'\s+'));
       if (parts.isEmpty || !parts[0].startsWith('/')) return (null, []);
-
-      final label = parts[0].substring(1);
-      final args = parts.sublist(1);
-
-      // Check external handler first
-      var cmd = handleUserCommand?.call(label, args);
-      // Then check internal registry
-      cmd ??= commandRegistry.lookup(label);
-
-      return (cmd, args);
+      final label = parts[0].substring(1), args = parts.sublist(1);
+      return (
+        // Check external handler first, then internal registry
+        handleUserCommand?.call(label, args) ?? commandRegistry.lookup(label),
+        args,
+      );
     }
+
+    var throttling = Future<void>.value();
 
     Future<void> $handleUserInput() async {
       while (!completer.isCompleted) {
@@ -95,20 +95,25 @@ class InteractiveAgent extends Agent {
           // handle prompt
           if (prompt.isEmpty) continue;
 
-          // invoke() will call onError and return a recovery string if available.
+          // In case of problem, invokeStream() will call onError() and return a recovery string if available.
           // If it rethrows, it means the error was not "handled" (returned null).
 
-          final token = tokenFactory?.call();
-          final response = await invokeStream(prompt, token: token);
+          await throttling;
 
-          if (response.trim().isNotEmpty) {
-            modelOutput.add(response);
+          await for (var response in invoke(
+            prompt,
+            token: tokenFactory?.call(),
+          )) {
+            if (response.trim().isNotEmpty) {
+              modelOutput.add(response);
+            }
           }
-        } catch (ex) {
-          dbg.trace('!!! UNHANDLED ERROR: $ex');
-          // If invoke() threw, onError was already called once.
-          // We call it again here only if it's an unexpected error
-          // that escaped the inner blocks.
+        } catch (ex, st) {
+          // This should be an unexpected error that escaped the inner blocks.
+          // If invokeStream() threw, onError was already called once.
+          dbg.error('!!! UNHANDLED ERROR: $ex\n$st');
+        } finally {
+          throttling = Future.delayed(const Duration(seconds: 4));
         }
       }
     }

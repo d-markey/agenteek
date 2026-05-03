@@ -5,7 +5,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:cancelation_token/cancelation_token.dart';
 import 'package:web/web.dart' as web;
 
-import '_agent_config.dart';
+import 'config/web_agent_config.dart';
 import 'config/build_config.dart';
 import 'config/config_store.dart';
 import 'config/agent_config_data.dart';
@@ -15,8 +15,7 @@ import 'dialog/dialog.dart';
 import 'dialog/dialog_field_type.dart';
 import '_export_pdf.dart';
 import '_html_sink.dart';
-import '_user_command_handler.dart';
-import '_prompt_history.dart';
+import '_web_prompt_history.dart';
 
 class AgentUI {
   AgentUI(this.conversationManager) {
@@ -89,7 +88,6 @@ class AgentUI {
 
     // bind user input and command handler
     userInput = bindUserInput();
-    userCommandHandler = bindUserCommandHandler();
   }
 
   final ConversationManager conversationManager;
@@ -110,18 +108,15 @@ class AgentUI {
   late final web.HTMLTextAreaElement _prompt;
 
   late final FutureOr<String> Function() userInput;
-  late final UserCommandHandler userCommandHandler;
 
-  /// In-memory history of submitted prompts (oldest first).
-  final _history = PromptHistory();
+  /// In-memory history of submitted prompts.
+  final _history = WebPromptHistory();
 
   final _agentConfCtrlr = StreamController<WebAgentConfig?>();
   Stream<WebAgentConfig?> get agentConfiguration => _agentConfCtrlr.stream;
   WebAgentConfig? _current;
 
-  void clearMessages() {
-    _outputController.clear();
-  }
+  void clearMessages() => _outputController.clear();
 
   void shutdown() {
     _toggleLogBtn.onchange = null;
@@ -192,82 +187,7 @@ class AgentUI {
   }
 
   Future<void> reconfigureAgent() async {
-    final result = await ModalDialog.show(
-      DialogConfig(
-        title: 'Configure Agent',
-        fields: [
-          DialogComplexField(
-            label: 'Model Info',
-            key: AgentConfigData.kModelInfo,
-            isFixed: true,
-            items: [
-              DialogComplexInputItem(
-                label: 'Model ID',
-                key: ModelInfoData.kId,
-                initialValues: [ConfigStore.current.modelInfo.id],
-                placeholder: 'gemini',
-              ),
-              DialogComplexInputItem(
-                label: 'API Key',
-                key: ModelInfoData.kApiKey,
-                type: DialogFieldType.password,
-                initialValues: [ConfigStore.current.modelInfo.apiKey],
-                placeholder: 'Enter your API key...',
-              ),
-            ],
-          ),
-          DialogField(
-            label: 'GitHub PAT:',
-            key: AgentConfigData.kGithubPat,
-            type: DialogFieldType.password,
-            initialValue: ConfigStore.current.githubPat,
-            placeholder: 'ghp_...',
-          ),
-          if (BuildConfig.withCustomMcp)
-            DialogComplexField(
-              label: 'Custom MCP Servers',
-              key: AgentConfigData.kCustomMcp,
-              items: [
-                DialogComplexInputItem(
-                  label: 'Name',
-                  key: CustomMcpData.kName,
-                  type: DialogFieldType.text,
-                  initialValues: ConfigStore.current.mcpServers
-                      .map((m) => m.name)
-                      .toList(),
-                  placeholder: 'My Custom MCP Server',
-                ),
-                DialogComplexInputItem(
-                  label: 'URL',
-                  key: CustomMcpData.kUrl,
-                  type: DialogFieldType.text,
-                  initialValues: ConfigStore.current.mcpServers
-                      .map((m) => m.url)
-                      .toList(),
-                  placeholder: 'http://localhost:8000',
-                ),
-                DialogComplexDropdownItem(
-                  label: 'Auth Header',
-                  key: CustomMcpData.kAuthHeader,
-                  options: const ['', 'Authorization', 'X-Api-Key', 'X-Token'],
-                  initialValues: ConfigStore.current.mcpServers
-                      .map((m) => m.authHeader)
-                      .toList(),
-                ),
-                DialogComplexInputItem(
-                  label: 'Auth',
-                  key: CustomMcpData.kAuthToken,
-                  type: DialogFieldType.password,
-                  initialValues: ConfigStore.current.mcpServers
-                      .map((m) => m.authToken)
-                      .toList(),
-                  placeholder: 'API key / token',
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
+    final result = await ConfigStore.current.display();
 
     if (result == null) {
       _agentConfCtrlr.add(null);
@@ -291,7 +211,7 @@ class AgentUI {
     _prompt.disabled = false;
     _prompt.focus();
 
-    void submit() {
+    void $submit(web.Event _) {
       final userInput = _prompt.value.trim();
       if (userInput.isNotEmpty) {
         // Push to history.
@@ -311,39 +231,39 @@ class AgentUI {
     // Enter send mode: blue, paper-plane icon
     _setSendMode();
     _actionBtn.disabled = false;
-    _actionBtn.onclick = (web.Event e) {
-      submit();
-    }.toJS;
+    _actionBtn.onclick = $submit.toJS;
 
     // Handle Alt + ArrowUp / ArrowDown for history navigation.
-    _prompt.onkeydown = (web.KeyboardEvent e) {
-      if (e.altKey) {
-        final key = e.key;
-        if (key == 'ArrowUp') {
-          _history.init(_prompt.value);
-          _prompt.value = _history.prev();
-          final len = _prompt.value.length;
-          _prompt.setSelectionRange(len, len);
-          e.preventDefault();
-          e.stopImmediatePropagation();
-        } else if (key == 'ArrowDown') {
-          _history.init(_prompt.value);
-          _prompt.value = _history.next();
-          final len = _prompt.value.length;
-          _prompt.setSelectionRange(len, len);
-          e.preventDefault();
-          e.stopImmediatePropagation();
-        }
-      } else {
-        // reset history and let event propagate
-        _history.reset();
-      }
-    }.toJS;
+    _prompt.onkeydown = _navigatePromptHistory.toJS;
 
     return completer.future;
   };
 
   CancelableToken? _token;
+
+  void _navigatePromptHistory(web.KeyboardEvent e) {
+    if (e.altKey) {
+      final key = e.key;
+      if (key == 'ArrowUp') {
+        _history.init(_prompt.value);
+        _prompt.value = _history.prev();
+        final len = _prompt.value.length;
+        _prompt.setSelectionRange(len, len);
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      } else if (key == 'ArrowDown') {
+        _history.init(_prompt.value);
+        _prompt.value = _history.next();
+        final len = _prompt.value.length;
+        _prompt.setSelectionRange(len, len);
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    } else {
+      // reset history and let event propagate
+      _history.reset();
+    }
+  }
 
   /// Switches the action button to send mode (blue, paper-plane icon).
   void _setSendMode() {
@@ -372,50 +292,81 @@ class AgentUI {
     return _token!;
   }
 
-  UserCommandHandler bindUserCommandHandler() => (label, args) {
-    switch (label.toLowerCase()) {
-      case 'exit':
-      case 'quit':
-      case 'q':
-      case 'x':
-        return QuitCommand(
-          callback: () {
-            _agentConfCtrlr.close();
-          },
-        );
-
-      case 'help':
-      case 'h':
-      case '?':
-        return HelpCommand.to(systemOutput);
-
-      case 'tools':
-        return ToolsCommand.to(systemOutput);
-
-      case 'history':
-        return HtmlHistoryCommand.to(systemOutput.nested);
-
-      case 'summarize':
-      case 'sum':
-        return HtmlSummarizeCommand.to(systemOutput.nested);
-
-      case 'systemprompt':
-      case 'system-prompt':
-      case 'system':
-        return SystemPromptCommand.to(systemOutput);
-
-      case 'new':
-      case 'clear':
-        return NewConversationCommand(systemOutput);
-
-      case 'compact':
-        return CompactCommand(systemOutput);
-
-      default:
-        return null;
-    }
-  };
+  void quit() {
+    _agentConfCtrlr.close();
+  }
 }
 
 T _getElementById<T extends web.HTMLElement>(String id) =>
     web.document.getElementById(id) as T;
+
+extension on AgentConfigData {
+  Future<Map<String, Object?>?> display() => ModalDialog.show(
+    DialogConfig(
+      title: 'Configure Agent',
+      fields: [
+        DialogComplexField(
+          label: 'Model Info',
+          key: AgentConfigData.kModelInfo,
+          isFixed: true,
+          items: [
+            DialogComplexInputItem(
+              label: 'Model ID',
+              key: ModelInfoData.kId,
+              initialValues: [modelInfo.id],
+              placeholder: 'gemini',
+            ),
+            DialogComplexInputItem(
+              label: 'API Key',
+              key: ModelInfoData.kApiKey,
+              type: DialogFieldType.password,
+              initialValues: [modelInfo.apiKey],
+              placeholder: 'Enter your API key...',
+            ),
+          ],
+        ),
+        DialogField(
+          label: 'GitHub PAT:',
+          key: AgentConfigData.kGithubPat,
+          type: DialogFieldType.password,
+          initialValue: githubPat,
+          placeholder: 'ghp_...',
+        ),
+        if (BuildConfig.withCustomMcp)
+          DialogComplexField(
+            label: 'Custom MCP Servers',
+            key: AgentConfigData.kCustomMcp,
+            items: [
+              DialogComplexInputItem(
+                label: 'Name',
+                key: CustomMcpData.kName,
+                type: DialogFieldType.text,
+                initialValues: mcpServers.map((m) => m.name).toList(),
+                placeholder: 'My Custom MCP Server',
+              ),
+              DialogComplexInputItem(
+                label: 'URL',
+                key: CustomMcpData.kUrl,
+                type: DialogFieldType.text,
+                initialValues: mcpServers.map((m) => m.url).toList(),
+                placeholder: 'http://localhost:8000',
+              ),
+              DialogComplexDropdownItem(
+                label: 'Auth Header',
+                key: CustomMcpData.kAuthHeader,
+                options: const ['', 'Authorization', 'X-Api-Key', 'X-Token'],
+                initialValues: mcpServers.map((m) => m.authHeader).toList(),
+              ),
+              DialogComplexInputItem(
+                label: 'Auth',
+                key: CustomMcpData.kAuthToken,
+                type: DialogFieldType.password,
+                initialValues: mcpServers.map((m) => m.authToken).toList(),
+                placeholder: 'API key / token',
+              ),
+            ],
+          ),
+      ],
+    ),
+  );
+}

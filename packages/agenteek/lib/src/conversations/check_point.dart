@@ -1,1 +1,1 @@
-extension type CheckPoint(String id) {}
+extension type Checkpoint(String id) {}

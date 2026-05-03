@@ -19,9 +19,8 @@ base class FilesMcpServer extends mcp.MCPServer with mcp.ToolsSupport {
        ) {
     _toolSet = FileToolSet(
       prefix: prefix,
-      scope: implementation.name,
+      scope: 'file system for ${p.basename(fileSystem.root)}',
       root: fileSystem.root,
-      displayRoot: p.basename(fileSystem.root),
     );
     registerToolSet(_toolSet);
   }

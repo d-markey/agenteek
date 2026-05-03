@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
+import '../toolsets/toolset.dart';
 import 'check_point.dart';
 
 abstract class ConversationManager {
@@ -9,11 +10,15 @@ abstract class ConversationManager {
 
   Iterable<dartantic.ChatMessage> get history;
 
-  CheckPoint getCheckPoint();
+  int get conversationId;
 
-  Future<bool> restoreCheckPoint(CheckPoint checkPoint);
+  Checkpoint getCheckpoint();
+
+  Future<bool> restoreCheckpoint(Checkpoint checkPoint);
 
   void reset();
+
+  Future<List<String>> listConversations();
 
   Future<int> startConversation([dartantic.ChatMessage? systemInstructions]);
 
@@ -21,11 +26,75 @@ abstract class ConversationManager {
 
   Future<void> setConversation(Iterable<dartantic.ChatMessage> messages);
 
-  Future<void> add(dartantic.ChatMessage message);
-
-  Future<void> register(dartantic.ChatResult result);
+  Future<void> register(dartantic.ChatResult result, {ToolSet? toolSet});
 
   Future<bool> deleteConversation(int conversationId);
 
   void compact();
+}
+
+extension ChatResultExt on dartantic.ChatResult {
+  dartantic.ChatResult? deepClone({bool withThoughts = false}) {
+    final keepMessages = messages
+        .map((m) => m.deepClone(withThoughts: withThoughts))
+        .nonNulls
+        .toList();
+    return keepMessages.isEmpty
+        ? null
+        : dartantic.ChatResult(
+            output: output,
+            finishReason: finishReason,
+            metadata: {...metadata},
+            usage: usage,
+            messages: keepMessages,
+            thinking: thinking,
+            id: id,
+          );
+  }
+}
+
+extension ChatMessageExt on dartantic.ChatMessage {
+  dartantic.ChatMessage? deepClone({bool withThoughts = false}) {
+    final keepParts = withThoughts
+        ? parts
+        : parts.where((p) => p is! dartantic.ThinkingPart);
+    return keepParts.isEmpty
+        ? null
+        : dartantic.ChatMessage(
+            role: role,
+            parts: keepParts
+                .map((p) => dartantic.StandardPart.fromJson(p.toJson()))
+                .toList(),
+            metadata: {...metadata},
+            finishStatus: finishStatus,
+          );
+  }
+}
+
+extension HistoryExt on List<dartantic.ChatMessage> {
+  Future<void> redactObsoleteToolResults(ToolSet? toolSet) async {
+    if (toolSet == null) return;
+    final sw = Stopwatch()..start();
+    final redacted = (await toolSet.redactObsoleteToolResults(
+      this,
+    )).entries.toList();
+    for (var i = length - 1; i >= 0; i--) {
+      if (redacted.isEmpty) break;
+      final message = this[i];
+      for (var j = redacted.length - 1; j >= 0; j--) {
+        final entry = redacted[j];
+        final idx = message.parts.indexOf(entry.key);
+        if (idx >= 0) {
+          final parts = [...message.parts];
+          parts[idx] = entry.value;
+          this[i] = message.copyWith(parts: parts);
+          redacted.removeAt(j);
+          print('   redacted ${entry.value}');
+        }
+      }
+    }
+    print(
+      'Done redacting tool results (history length = $length) : ${sw.elapsed}',
+    );
+  }
 }

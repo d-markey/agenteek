@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:agenteek/agenteek_dbg.dart' as dbg show trace;
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:stream_channel/stream_channel.dart';
 
 import '_helpers.dart';

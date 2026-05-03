@@ -27,15 +27,32 @@ class Args {
     final unknown = <String>[];
 
     // read command line args
-    for (var arg in arguments) {
-      final larg = arg.toLowerCase();
+    for (var i = 0; i < arguments.length; i++) {
+      final arg = arguments[i], larg = arg.toLowerCase();
+
+      // secrets
       if (larg.startsWith('--secrets:')) {
         secretsPath = arg.substring('--secrets:'.length).trim();
-      } else if (larg.startsWith('--team-conf:')) {
+      } else if (larg == '--secrets') {
+        i++;
+        secretsPath = arguments[i].trim();
+      } else
+      // team configuration
+      if (larg.startsWith('--team-conf:')) {
         teamConfPath = arg.substring('--team-conf:'.length).trim();
-      } else if (larg.startsWith('--prompt:')) {
+      } else if (larg == '--team-conf') {
+        i++;
+        teamConfPath = arguments[i].trim();
+      } else
+      // prompt
+      if (larg.startsWith('--prompt:')) {
         promptPath = arg.substring('--prompt:'.length).trim();
-      } else if (larg == '--help' || larg == '-h') {
+      } else if (larg == '--prompt') {
+        i++;
+        promptPath = arguments[i].trim();
+      } else
+      // help
+      if (larg == '--help' || larg == '-h') {
         usage = true;
       } else {
         unknown.add(arg);

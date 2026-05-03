@@ -15,6 +15,7 @@ dependencies:
   path:
   yaml:
   glob:
+  logging:
   agenteek:
   agenteek_memory:
   agenteek_files:

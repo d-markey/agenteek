@@ -8,6 +8,8 @@ import 'debug.dart' as dbg;
 
 Directory? _logDir;
 
+String getLogDir() => _logDir?.path ?? '';
+
 Future<RandomAccessFile> _openWriter(String name) {
   var logDir = _logDir;
   if (logDir == null) {
@@ -69,6 +71,15 @@ class LogSink extends base_.LogSink {
   }
 
   @override
+  void flush() {
+    if (_output != null) {
+      _output!.flushSync();
+    } else if (_outputCompleter != null) {
+      _outputCompleter!.future.then((o) => o.flushSync());
+    }
+  }
+
+  @override
   void close() {
     if (_output != null) {
       _output!.flushSync();
@@ -109,11 +120,18 @@ class ErrorSink extends base_.ErrorSink {
   }
 
   @override
+  void flush() {
+    stderr.flush();
+  }
+
+  @override
   void close() {
     stderr.flush();
   }
 }
 
-void trace(Object message) => stderr.writeln(
-  '\n${message.toString().split('\n').map((l) => '[TRACE] $l').join('\n')}',
-);
+void trace(Object message) {
+  stderr.writeln(
+    '\n${message.toString().split('\n').map((l) => '[TRACE] $l').join('\n')}',
+  );
+}

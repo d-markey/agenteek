@@ -1,18 +1,48 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg show trace;
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_cli/agenteek_cli.dart';
 import 'package:path/path.dart' as p;
+import 'package:logging/logging.dart' as l;
 
-import 'agent_loader.dart';
-import 'agent_sink.dart';
+import 'console_sink.dart';
 import 'args.dart';
-import 'team_builder.dart';
-import 'user_command_handler.dart';
+
+final sw = Stopwatch()..start();
+var lastTimestamp = 0;
+
+void _log(l.LogRecord r) {
+  final msg = r.message.toLowerCase();
+  if (r.error != null) {
+    lastTimestamp = sw.elapsedMilliseconds;
+    print(
+      '${r.level} ${r.time} ${r.loggerName} ${r.message} ${r.error} ${r.stackTrace}',
+    );
+  } else if (msg.contains('initializing') || msg.contains('finalizing')) {
+    lastTimestamp = sw.elapsedMilliseconds;
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+  } else if (msg.contains('tool')) {
+    lastTimestamp = sw.elapsedMilliseconds;
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+  } else {
+    final dt = sw.elapsedMilliseconds - lastTimestamp;
+    if (dt < const Duration(seconds: 15).inMilliseconds) return;
+    lastTimestamp = sw.elapsedMilliseconds;
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+  }
+}
 
 void main(List<String> arguments) async {
   Log.enable();
+
+  l.hierarchicalLoggingEnabled = true;
+  l.Logger('dartantic.orchestrator')
+    ..level = l.Level.ALL
+    ..onRecord.listen(_log);
+  l.Logger('dartantic.chat_agent')
+    ..level = l.Level.ALL
+    ..onRecord.listen(_log);
 
   final args = Args.parse(arguments);
   if (args.promptPath.isNotEmpty) {
@@ -28,7 +58,7 @@ void main(List<String> arguments) async {
   // apply defaults and load configuration
   if (args.teamConfPath.isEmpty) {
     args.overrideTeamConfPath(
-      p.join(p.dirname(Platform.script.toFilePath()), 'personas_dev_team.yaml'),
+      p.join(p.dirname(Platform.script.toFilePath()), 'lgmodel/team.yaml'),
     );
   } else if (p.isRelative(args.teamConfPath)) {
     args.overrideTeamConfPath(
@@ -56,25 +86,24 @@ void main(List<String> arguments) async {
     throw Exception('Could not find ".secret.keys" file.');
   }
 
+  print('Loading secrets from: ${secretsFile.path}');
   final secrets = await Secrets.load(secretsFile.path);
 
-  final agentsConf = await loadAgentsConf(
-    await File(args.teamConfPath).readAsString(),
-    secrets,
-  );
+  print('Loading team configuration from: ${args.teamConfPath}');
+  final agentsConf = await loadAgentsConf(File(args.teamConfPath), secrets);
 
   // initialize team from configuration
   final agents = buildTeam(
     agentsConf,
     secrets: secrets,
     getUserInput: () => readMessage('\x1B[44mYou\x1B[0m'),
-    outputCallbackBuilder: (name) => AgentSink('\x1B[94m$name\x1B[0m'),
+    outputCallbackBuilder: (name) => ConsoleSink('\x1B[94m$name\x1B[0m'),
     inputCallbackBuilder: (instructorName, name) =>
-        AgentSink('\x1B[44m$instructorName => $name\x1B[0m'),
+        ConsoleSink('\x1B[44m$instructorName => $name\x1B[0m'),
   );
 
-  // the root agent is **LAST** in list
-  final rootAgent = agents[agentsConf.last.displayName] as InteractiveAgent;
+  // the root agent is the only interactive agent
+  final rootAgent = agents.values.whereType<InteractiveAgent>().single;
 
   // TODO: the root agent may summarize his history
   // rootAgent.toolSet.registerAll(
@@ -85,11 +114,11 @@ void main(List<String> arguments) async {
   // );
 
   dbg.trace(
-    'rootAgent = $rootAgent / ${rootAgent.name} / tools: ${rootAgent.toolNames.join(', ')}',
+    'rootAgent = $rootAgent / ${rootAgent.displayName} / tools: ${rootAgent.toolNames.join(', ')}',
   );
 
   // process user instructions
-  await rootAgent.interactWithUser(handleUserCommand: userCommandHandler);
+  await rootAgent.interactWithUser(/*handleUserCommand: userCommandHandler*/);
 
   dbg.trace('Shutting down...');
   await Future.wait(agents.values.map((a) => a.dispose()));

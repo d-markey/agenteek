@@ -19,7 +19,6 @@ base class MemoryMcpServer extends mcp.MCPServer with mcp.ToolsSupport {
     _toolSet = MemoryToolSet(
       owner: owner,
       prefix: 'memory',
-      scope: implementation.name,
       fileSystem: fileSystem,
     );
     registerToolSet(_toolSet);

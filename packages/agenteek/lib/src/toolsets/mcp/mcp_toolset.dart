@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dart_mcp/client.dart' as mcp;
-import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../../utils/access_control_list.dart';
 import '../../utils/debug.dart' as dbg;
 import '../../utils/types.dart';
 import '../../utils/zod.dart';
+import '../tool.dart';
+import '../tool_outcome.dart';
 import '../toolset.dart';
 import '_json_to_markdown.dart';
 
@@ -56,8 +57,8 @@ class McpToolSet extends ToolSet {
           if (description.isNotEmpty) description += '; ';
           description += '**scope: $scope**';
         }
-        final declaration = dartantic.Tool(
-          name: '${prefix}_${tool.name}',
+        final declaration = Tool(
+          name: '$prefix.${tool.name}',
           description: description,
           inputSchema: z.of(tool),
           onCall: _getHandlerFor(tool),
@@ -67,53 +68,40 @@ class McpToolSet extends ToolSet {
     }
   }
 
-  JsonToolFunction _getHandlerFor(mcp.Tool tool) {
+  FutureOr<ToolOutcome> Function(Json) _getHandlerFor(mcp.Tool tool) {
     final name = tool.name;
 
-    return (args) async {
-      try {
-        dbg.trace('Calling tool $name...');
-        final res =
-            await _connection.callTool(
-                  mcp.CallToolRequest(name: name, arguments: args),
-                )
-                as Json;
-        dbg.trace('Tool $name results: $res');
+    return (Json args) async {
+      dbg.trace('Calling tool $name...');
+      final res = await _connection.callTool(
+        mcp.CallToolRequest(name: name, arguments: args),
+      );
+      dbg.trace('Tool $name results: $res');
+      if (res.isError == true) return ToolError(res as Json);
 
-        if (_experimental && res.containsKey('structuredContent')) {
-          final structured = _decodeIfNeeded(res['structuredContent']);
-          if (structured != null) {
-            String? table;
-            if (structured case List data) {
+      if (_experimental && res.structuredContent != null) {
+        final structured = _decodeIfNeeded(res.structuredContent);
+        if (structured != null) {
+          String? table;
+          if (structured case List data) {
+            table = JsonToMarkdownConverter.convert(data);
+          } else if (structured case {'content': Object? data}) {
+            data = _decodeIfNeeded(data);
+            if (data is List) {
               table = JsonToMarkdownConverter.convert(data);
-            } else if (structured case {'content': Object? data}) {
-              data = _decodeIfNeeded(data);
-              if (data is List) {
-                table = JsonToMarkdownConverter.convert(data);
-                if (table != null) {
-                  structured.remove('content');
-                  if (structured.isNotEmpty) {
-                    table = '${jsonEncode(structured)}\n\n$table';
-                  }
+              if (table != null) {
+                structured.remove('content');
+                if (structured.isNotEmpty) {
+                  table = '${jsonEncode(structured)}\n\n$table';
                 }
               }
             }
-            if (table != null) {
-              res.remove('structuredContent');
-              res['content'] = {'type': 'text', 'text': table};
-            }
           }
-          dbg.trace('[EXPERIMENTAL] Tool $name results: $res');
+          return ToolSuccess(table ?? res);
         }
-
-        return res;
-      } catch (ex, st) {
-        dbg.trace('Error executing $name: $ex\nStacktrace: $st');
-        return {
-          'error': 'Error executing $name: $ex',
-          'stacktrace': st.toString(),
-        };
       }
+
+      return ToolSuccess(res);
     };
   }
 
@@ -124,9 +112,9 @@ class McpToolSet extends ToolSet {
       } catch (_) {
         try {
           data = (data as String)
-              .replaceAll(r'\r', '\r')
-              .replaceAll(r'\n', '\n')
-              .replaceAll(r'\t', '\t');
+              .replaceAll('\\r', '\r')
+              .replaceAll('\\n', '\n')
+              .replaceAll('\\t', '\t');
           data = jsonDecode(data);
         } catch (_) {}
       }

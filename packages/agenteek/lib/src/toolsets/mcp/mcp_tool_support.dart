@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:dart_mcp/client.dart' as mcp;
 import 'package:dart_mcp/server.dart' as mcp;
-import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../../channels/http_channel.dart';
 import '../../utils/access_control_list.dart';
+import '../tool.dart';
 import '../toolset.dart';
 import 'mcp_toolset.dart';
 
@@ -26,6 +26,7 @@ extension McpToolSetExt on mcp.Implementation {
       await mcpToolset.initialize(toolsAcl: toolsAcl);
       return mcpToolset;
     } catch (ex) {
+      print('Failed to initialize MCP server: $ex');
       return null;
     }
   }
@@ -35,12 +36,11 @@ extension ToolSupportExt on mcp.ToolsSupport {
   void registerToolSet(ToolSet toolSet) {
     for (var toolName in toolSet.names) {
       final tool = toolSet.getTool(toolName)!;
-      final schema = tool.inputSchema;
       registerTool(
         mcp.Tool(
           name: toolName,
           description: tool.description,
-          inputSchema: mcp.ObjectSchema.fromMap(schema.value),
+          inputSchema: mcp.ObjectSchema.fromMap(tool.inputSchema.value),
         ),
         _wrapToolHandler(tool),
       );
@@ -49,34 +49,28 @@ extension ToolSupportExt on mcp.ToolsSupport {
 }
 
 Future<mcp.CallToolResult> Function(mcp.CallToolRequest) _wrapToolHandler(
-  dartantic.Tool tool,
+  Tool tool,
 ) => (mcp.CallToolRequest req) async {
   try {
-    final res = await tool.call(req.arguments ?? {});
+    final res = await tool.call(req.arguments ?? const {});
     return _wrapToolResult(res);
   } catch (ex) {
-    return _wrapToolResult(ex);
+    return _wrapToolError(ex);
   }
 };
 
-mcp.CallToolResult _wrapToolResult(dynamic result) {
-  if (result is Exception || result is Error) {
-    return mcp.CallToolResult(
-      content: [mcp.Content.text(text: result.toString())],
-      structuredContent: {'error': result.toString()},
-      isError: true,
-    );
-  } else if (_isJsonStructure(result)) {
-    return mcp.CallToolResult(
-      content: [mcp.Content.text(text: jsonEncode(result))],
-      structuredContent: {'result': result},
-    );
-  } else {
-    return mcp.CallToolResult(
-      content: [mcp.Content.text(text: result.toString())],
-    );
-  }
-}
+mcp.CallToolResult _wrapToolResult(dynamic result) => mcp.CallToolResult(
+  content: [
+    mcp.Content.text(
+      text: _isJsonStructure(result) ? jsonEncode(result) : result.toString(),
+    ),
+  ],
+);
+
+mcp.CallToolResult _wrapToolError(Object error) => mcp.CallToolResult(
+  content: [mcp.Content.text(text: '**ERROR**: $error')],
+  isError: true,
+);
 
 bool _isJsonStructure(dynamic data) {
   if (data is Map) {

@@ -38,18 +38,12 @@ void main() async {
     secrets: secrets,
   );
 
-  final conversationManager = PersistentConversationManager(MemoryFileSystem());
+  final conversationManager = InMemoryConversationManager();
 
   final agent = InteractiveAgent(
     agentConf.modelInfo,
     conversationManager: conversationManager,
     displayName: agentConf.displayName,
-    systemPrompt:
-        'Follow mathematical operator precedence, i.e. multiplications before additions. '
-        'To check if a number is prime, check remainders of divisions by numbers greater than 1 and less than half the checked number: if all remainders are positive, it means the number is prime. '
-        'When checking for primality: as soon as a remainder is zero, no further checks are necessary and the number is prime. '
-        'When possible, reuse previous calculations and tool results and indicate which results were reused. '
-        'Note that "a - b" (subtracting b from a) is equivalent to "a + -b". ',
     prompt: () {
       stdout.write('\x1B[94mYou\x1B[0m: ');
       return stdin.readLineSync()?.trim() ?? '';
@@ -58,10 +52,17 @@ void main() async {
     toolSet: mcpTools,
   );
 
-  await agent.startNewConversation();
+  await agent.startNewConversation(
+    systemPrompt:
+        'Follow mathematical operator precedence, i.e. multiplications before additions. '
+        'To check if a number is prime, check remainders of divisions by numbers greater than 1 and less than half the checked number: if all remainders are positive, it means the number is prime. '
+        'When checking for primality: as soon as a remainder is zero, no further checks are necessary and the number is prime. '
+        'When possible, reuse previous calculations and tool results and indicate which results were reused. '
+        'Note that "a - b" (subtracting b from a) is equivalent to "a + -b". ',
+  );
 
   print(
-    '${agent.name} Agent is running with model ${agent.agent.chatModelName}.',
+    '${agent.displayName} Agent is running with model ${agent.chatModelName}.',
   );
   await agent.interactWithUser(handleUserCommand: commandHandler);
 
@@ -69,7 +70,7 @@ void main() async {
   mcpTools.dispose();
 }
 
-class AgentSink implements Sink<String> {
+class AgentSink implements OutputSink {
   AgentSink(this.name);
 
   final String name;
@@ -80,6 +81,9 @@ class AgentSink implements Sink<String> {
       stdout.writeln('\x1B[94m$name\x1B[0m: $line');
     }
   }
+
+  @override
+  void writeln(String message) => add(message);
 
   @override
   void close() {}

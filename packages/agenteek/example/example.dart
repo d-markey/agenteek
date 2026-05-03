@@ -3,7 +3,7 @@ import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek/agenteek.dart';
 
 void main() async {
-  dbg.trace = (_) {};
+  dbg.enableTrace = false;
 
   // 1. Setup secrets (manual for web or loaded for CLI)
   // In a real app, you'd load this from an environment variable or secret store.
@@ -20,7 +20,7 @@ void main() async {
     secrets: secrets,
   );
 
-  final conversationManager = PersistentConversationManager(MemoryFileSystem());
+  final conversationManager = InMemoryConversationManager();
 
   // 3. Create the interactive agent
   final agent = InteractiveAgent(
@@ -32,7 +32,7 @@ void main() async {
       return stdin.readLineSync() ?? '';
     },
     // Use the model output sink to print agent responses to console
-    modelOutput: ConsoleSink(config.displayName),
+    modelOutput: OutputSink(ConsoleSink(config.displayName)),
     // Use error handling with recovery
     onError: (error, [st]) async {
       print('\n[SYSTEM ERROR]: $error');
@@ -56,7 +56,7 @@ void main() async {
 
 /// A simple sink to print agent responses to the console.
 /// We use 'implements' because Sink is an interface class.
-class ConsoleSink implements Sink<String> {
+class ConsoleSink implements OutputSink {
   final String name;
   ConsoleSink(this.name);
 
@@ -66,6 +66,9 @@ class ConsoleSink implements Sink<String> {
       stdout.write('\n$name > $data\n');
     }
   }
+
+  @override
+  void writeln(String data) => add(data);
 
   @override
   void close() {}

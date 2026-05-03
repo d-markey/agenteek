@@ -17,7 +17,7 @@ class AgentConfiguration {
     this.roots = const {},
     this.mcp = const {},
     Secrets? secrets,
-  }) : _modelInfo = dartantic.ModelStringParser.parse(modelInfo) {
+  }) : _modelInfo = .parse(modelInfo) {
     final apiKeyName = this.apiKeyName ?? '';
     if (apiKeyName.isNotEmpty) {
       // lookup api key
@@ -49,7 +49,7 @@ class AgentConfiguration {
   final String displayName;
   final String role;
   final String instructor;
-  final Map<String, Map<String, String>> roots;
+  final Map<String, Map<String, Object?>> roots;
   final Map<String, AccessControlList> mcp;
 
   final _team = <String>[];
@@ -131,7 +131,7 @@ extension on dartantic.ModelStringParser {
     String? chatModelName,
     String? embeddingsModelName,
     String? mediaModelName,
-  }) => dartantic.ModelStringParser(
+  }) => .new(
     providerName ?? this.providerName,
     chatModelName: chatModelName ?? this.chatModelName,
     embeddingsModelName: embeddingsModelName ?? this.embeddingsModelName,

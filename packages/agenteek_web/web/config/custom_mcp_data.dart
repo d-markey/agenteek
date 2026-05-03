@@ -27,16 +27,16 @@ extension type CustomMcpData._(Map<String, Object?> _json) {
 
   String get id => name.replaceAll(' ', '_').toLowerCase();
 
-  String get name => _json[kName] as String? ?? '';
+  String get name => _json[kName]?.toString().trim() ?? '';
 
   Uri? get url {
-    final url = _json[kUrl] as String? ?? '';
+    final url = _json[kUrl]?.toString().trim() ?? '';
     return url.isEmpty ? null : Uri.parse(url);
   }
 
   bool get hasAuth => authHeader.isNotEmpty && authToken.isNotEmpty;
 
-  String get authHeader => _json[kAuthHeader] as String? ?? '';
+  String get authHeader => _json[kAuthHeader]?.toString().trim() ?? '';
 
-  String get authToken => _json[kAuthToken] as String? ?? '';
+  String get authToken => _json[kAuthToken]?.toString().trim() ?? '';
 }

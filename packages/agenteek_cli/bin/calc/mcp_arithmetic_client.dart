@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg show trace;
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:dart_mcp/client.dart';
 
 import 'mcp_arithmetic.dart' as mcp;

@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
-
 import '../utils/debug.dart' as dbg;
-import '../utils/log.dart';
 import '../utils/types.dart';
+import 'tool.dart';
+import 'tool_outcome.dart';
 import 'toolset_base.dart';
 import 'toolset_combined.dart';
+import 'toolset_exception.dart';
 
 class ToolSet extends ToolSetBase {
   ToolSet();
 
-  static const ToolSet empty = EmptyToolSet._();
+  static const ToolSet empty = _EmptyToolSet._();
 
   factory ToolSet.combined(Iterable<ToolSet> toolSets) {
     final toolsets = toolSets.toSet();
@@ -25,20 +25,19 @@ class ToolSet extends ToolSetBase {
     return CombinedToolSet(toolsets);
   }
 
-  final _tools = <dartantic.Tool>[];
+  final _tools = <Tool>[];
 
   @override
-  List<dartantic.Tool> get tools => _tools;
+  List<Tool> get tools => _tools;
 
   @override
   Iterable<String> get names => _tools.map((t) => t.name);
 
   @override
-  dartantic.Tool? getTool(String name) =>
-      _tools.where((t) => t.name == name).firstOrNull;
+  Tool? getTool(String name) => _tools.where((t) => t.name == name).firstOrNull;
 
   @override
-  void register(dartantic.Tool tool) {
+  void register(Tool tool) {
     final existingTool = getTool(tool.name);
     if (existingTool != null) {
       throw StateError('A tool is already registered for ${tool.name}');
@@ -47,16 +46,18 @@ class ToolSet extends ToolSetBase {
   }
 
   @override
-  Future<dynamic> invoke(String name, Json args) async {
+  Future<ToolOutcome<T>> invoke<T>(String name, Json args) async {
     if (_disposed) {
       throw StateError('Cannot invoke a tool after the toolset was disposed.');
     }
     final tool = getTool(name);
-    if (tool == null) return tool.notFoundError();
+    if (tool == null) {
+      return ToolError<T>(ToolNotFoundException(name, tools));
+    }
     try {
-      return await tool.call(args);
+      return await tool.invoke<T>(args);
     } catch (ex, st) {
-      return tool.executionError(ex, st);
+      return ToolError<T>(ex, st);
     }
   }
 
@@ -71,8 +72,8 @@ class ToolSet extends ToolSetBase {
   }
 }
 
-class EmptyToolSet extends ToolSetBase implements ToolSet {
-  const EmptyToolSet._();
+class _EmptyToolSet extends ToolSetBase implements ToolSet {
+  const _EmptyToolSet._();
 
   @override
   Future<void> dispose() => Future.value();
@@ -81,42 +82,28 @@ class EmptyToolSet extends ToolSetBase implements ToolSet {
   bool get disposed => false;
 
   @override
-  dartantic.Tool<Object>? getTool(String name) => null;
+  Tool? getTool(String name) => null;
 
   @override
-  Future<dynamic> invoke(String name, Json args) =>
-      throw Exception('Tool "$name" not found.');
+  Future<ToolOutcome<T>> invoke<T>(String name, Json args) => Future.value(
+    ToolError<T>('Tool not found: "$name".', StackTrace.current),
+  );
 
   @override
   Iterable<String> get names => const [];
 
   @override
-  void register(dartantic.Tool<Object> tool) {}
+  void register(Tool tool) {}
 
   @override
-  final _tools = const <dartantic.Tool<Object>>[];
+  final _tools = const <Tool>[];
 
   @override
-  List<dartantic.Tool<Object>> get tools => _tools;
+  List<Tool> get tools => _tools;
 
   @override
   bool get _disposed => false;
 
   @override
   set _disposed(bool value) {}
-}
-
-extension on dartantic.Tool? {
-  static const _unknownToolResult = {'error': 'Unknown tool'};
-
-  Json notFoundError() => _unknownToolResult;
-
-  Json executionError(Object exception, [StackTrace? st]) {
-    final message = exception.toString();
-    modelLogger.append(
-      () =>
-          'Exception in tool ${this?.name ?? '???'}: $message, stacktrace=$st',
-    );
-    return {'error': message, 'stackTrace': ?st?.toString()};
-  }
 }

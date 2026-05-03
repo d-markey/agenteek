@@ -14,9 +14,10 @@ String _getLabelHtml(String label, String? id, bool collapsible) {
   return '<aside$toggleHtml>$label</aside>';
 }
 
-String _getCopyButtonHtml() {
-  return '<button class="copy-btn" onclick="copyMessageHtml(event, this)" title="Copy HTML" style="position: absolute; top: 8px; right: 8px; background: transparent; border: none; cursor: pointer; color: var(--muted); font-size: 16px;">📋</button>';
-}
+final _copyButtonHtml =
+    '<button class="copy-btn" onclick="copyMessageHtml(event, this)" title="Copy HTML" style="position: absolute; top: 8px; right: 8px; background: transparent; border: none; cursor: pointer; color: var(--muted); font-size: 16px;">'
+    '📋'
+    '</button>';
 
 class HtmlOutputController {
   HtmlOutputController(this._div) {
@@ -55,7 +56,7 @@ class HtmlOutputController {
   }
 }
 
-class HtmlSink implements Sink<String> {
+class HtmlSink implements OutputSink {
   HtmlSink(this._controller, dynamic label, this.cssClass)
     : _label = _wrap(label);
 
@@ -63,7 +64,7 @@ class HtmlSink implements Sink<String> {
   final StringFunc _label;
   final String cssClass;
 
-  Sink<String> get nested => HtmlNestedSink(this);
+  NestedOutputSink get nested => HtmlNestedSink(this);
 
   @override
   void add(String data) {
@@ -71,10 +72,13 @@ class HtmlSink implements Sink<String> {
   }
 
   @override
+  void writeln(String message) => add(message);
+
+  @override
   void close() {}
 }
 
-class HtmlStreamingSink implements StreamingStringSink {
+class HtmlStreamingSink implements StreamingOutputSink {
   HtmlStreamingSink(
     this._controller,
     dynamic label,
@@ -131,8 +135,7 @@ class HtmlStreamingSink implements StreamingStringSink {
     if (div != null) {
       if (collapsible && _lastData.isNotEmpty) {
         final label = _getLabelHtml(_label(), _id, true);
-        div.innerHTML =
-            '$label${_getCopyButtonHtml()}${_lastData.toHtml()}'.toJS;
+        div.innerHTML = '$label$_copyButtonHtml${_lastData.toHtml()}'.toJS;
         div.classList.add('collapsed');
       } else {
         div.remove();
@@ -156,17 +159,19 @@ class HtmlStreamingSink implements StreamingStringSink {
     if (div != null) {
       _lastData = data;
       final label = _getLabelHtml(_label(), _id, collapsible);
-      div.innerHTML =
-          '$label${_getCopyButtonHtml()}${'$data...'.toHtml()}'.toJS;
+      div.innerHTML = '$label$_copyButtonHtml${'$data...'.toHtml()}'.toJS;
       _controller.requestScroll();
     }
   }
 
   @override
+  void writeln(String message) => add(message);
+
+  @override
   void close() {}
 }
 
-class HtmlNestedSink implements Sink<String> {
+class HtmlNestedSink implements NestedOutputSink {
   HtmlNestedSink(this.parent);
 
   final HtmlSink parent;
@@ -178,6 +183,9 @@ class HtmlNestedSink implements Sink<String> {
 
   @override
   void add(String data) => _sb.writeln(data);
+
+  @override
+  void writeln(String message) => add(message);
 
   @override
   void close() {
@@ -202,9 +210,7 @@ extension on web.HTMLDivElement {
     innerHTML =
         '$innerHTML\n'
                 '<div class="message $cssClass"${id != null ? ' id="$id"' : ''} style="position: relative;">'
-                '$labelHtml'
-                '${_getCopyButtonHtml()}'
-                '${markdown.toHtml()}'
+                '$labelHtml$_copyButtonHtml${markdown.toHtml()}'
                 '</div>'
             .toJS;
   }

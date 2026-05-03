@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg show trace;
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:dart_mcp/server.dart' as mcp;
 
 void main() async {

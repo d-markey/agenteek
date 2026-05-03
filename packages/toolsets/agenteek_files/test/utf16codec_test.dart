@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:agenteek_files/src/_utf16_codec.dart';
+import 'package:agenteek_files/src/file_reader/_utf16_codec.dart';
 import 'package:test/test.dart';
 
 final throwsFormatException = throwsA(isA<FormatException>());

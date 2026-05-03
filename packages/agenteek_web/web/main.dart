@@ -1,13 +1,24 @@
 import 'package:agenteek/agenteek.dart';
+import 'package:dartantic_ai/dartantic_ai.dart';
 
 import '_agent_ui.dart';
 import 'config/config_store.dart';
-import '_toolsets.dart';
+import 'config/toolsets.dart';
 
 void main() async {
-  final memory = MemoryFileSystem();
-  final conversationManager = PersistentConversationManager(memory);
+  final conversationManager = InMemoryConversationManager();
   final agentUi = AgentUI(conversationManager);
+
+  final nestedSystemOutput = agentUi.systemOutput.nested;
+  final commands = CommandRegistry();
+  commands.register(QuitCommand(callback: agentUi.quit));
+  commands.register(HelpCommand.to(nestedSystemOutput));
+  commands.register(HistoryCommand.to(nestedSystemOutput));
+  commands.register(SummarizeCommand.to(nestedSystemOutput));
+  commands.register(CompactCommand.to(nestedSystemOutput));
+  commands.register(SystemPromptCommand.to(nestedSystemOutput));
+  commands.register(ToolsCommand.to(nestedSystemOutput));
+  commands.register(ClearCommand.to(nestedSystemOutput));
 
   InteractiveAgent? agent;
   var start = true;
@@ -47,24 +58,17 @@ void main() async {
         toolSet: toolSet,
         modelOutput: agentUi.modelOutput,
         streamingOutput: agentUi.modelStreamOutput,
-        streamingThinkingOutput: agentUi.modelThinkingStreamOutput,
+        streamingThinking: agentUi.modelThinkingStreamOutput,
         onError: (error, [st]) async {
           agentUi.systemOutput.add('Error: $error');
-          if (error is UserCancellationException) {
-            return error.pendingOutput.isNotEmpty
-                ? 'You cancelled this prompt while I was providing an answer. '
-                      'My current thoughts:\n\n'
-                      '${error.pendingOutput}'
-                : 'You cancelled this prompt; feel free to provide more context and try again.';
-          } else {
-            return 'I encountered an issue. '
-                'Please try again or rephrase your request.';
-          }
+          return 'I encountered an issue. '
+              'Please try again or rephrase your request.';
         },
         onNewConversation: () {
           agentUi.clearMessages();
           agentUi.modelOutput.add('Hello, how can I help you today?');
         },
+        commandRegistry: commands,
       );
 
       agentUi.systemOutput.add('Model info: ${agentConf.modelInfo}');
@@ -73,10 +77,7 @@ void main() async {
         start = false;
         await curAgent.startNewConversation();
       }
-      curAgent.interactWithUser(
-        handleUserCommand: agentUi.userCommandHandler,
-        tokenFactory: agentUi.createToken,
-      );
+      curAgent.interactWithUser(tokenFactory: agentUi.createToken);
     },
     onError: (ex, st) {
       agentUi.systemOutput.add('Error: $ex');

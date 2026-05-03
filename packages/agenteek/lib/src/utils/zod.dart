@@ -7,25 +7,30 @@ abstract class z {
     Map<String, Object?> properties, {
     String? description,
     List<String>? required,
-  }) => dartantic.Schema.fromMap({
+  }) => .fromMap({
     'type': 'object',
     'description': ?description,
     'properties': properties,
     'required': ?required,
   });
 
+  static dartantic.Schema array(
+    Map<String, Object?> items, [
+    String? description,
+  ]) =>
+      .fromMap({'type': 'array', 'items': items, 'description': ?description});
+
   static dartantic.Schema int([String? description]) =>
-      dartantic.Schema.fromMap({'type': 'int', 'description': ?description});
+      .fromMap({'type': 'int', 'description': ?description});
 
   static dartantic.Schema bool([String? description]) =>
-      dartantic.Schema.fromMap({'type': 'bool', 'description': ?description});
+      .fromMap({'type': 'bool', 'description': ?description});
 
   static dartantic.Schema string([String? description]) =>
-      dartantic.Schema.fromMap({'type': 'string', 'description': ?description});
+      .fromMap({'type': 'string', 'description': ?description});
 
-  static dartantic.Schema of(Tool tool) => dartantic.Schema.fromMap(
-    _removeEmptyEnums(tool.inputSchema as Map<String, Object?>),
-  );
+  static dartantic.Schema of(Tool tool) =>
+      .fromMap(_removeEmptyEnums(tool.inputSchema as Map<String, Object?>));
 
   static Map<String, Object?> _removeEmptyEnums(Map<String, Object?> schema) {
     var enums = schema['enum'];
@@ -41,4 +46,14 @@ abstract class z {
     }
     return schema;
   }
+}
+
+extension DescriptionExt on String {
+  String optional([String defaultValue = '']) => defaultValue.isEmpty
+      ? '${toString()} (optional)'
+      : '${toString()} (optional; defaults to "$defaultValue")';
+
+  String sideEffect(String sideEffect) => sideEffect.isEmpty
+      ? '${toString()}; **WARNING: this tool has side effects**'
+      : '${toString()}; **WARNING: this tool has side effects** $sideEffect';
 }

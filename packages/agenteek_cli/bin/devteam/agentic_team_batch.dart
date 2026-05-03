@@ -1,15 +1,13 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg show trace;
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_cli/agenteek_cli.dart';
-import 'package:agenteek_files/agenteek_files.dart';
+import 'package:agenteek_files/agenteek_file_reader.dart';
 import 'package:path/path.dart' as p;
 
-import 'agent_loader.dart';
-import 'agent_sink.dart';
+import 'console_sink.dart';
 import 'args.dart';
-import 'team_builder.dart';
 
 void main(List<String> argumentss) async {
   Log.enable();
@@ -72,19 +70,15 @@ void main(List<String> argumentss) async {
   }
 
   final secrets = await Secrets.load(secretsFile.path);
-
-  final agentsConf = await loadAgentsConf(
-    await File(args.teamConfPath).readAsString(),
-    secrets,
-  );
+  final agentsConf = await loadAgentsConf(File(args.teamConfPath), secrets);
 
   // initialize team from configuration
   final agents = buildTeam(
     agentsConf,
     secrets: secrets,
-    outputCallbackBuilder: (name) => AgentSink('\x1B[94m$name\x1B[0m'),
+    outputCallbackBuilder: (name) => ConsoleSink('\x1B[94m$name\x1B[0m'),
     inputCallbackBuilder: (instructorName, name) =>
-        AgentSink('\x1B[44m$instructorName => $name\x1B[0m'),
+        ConsoleSink('\x1B[44m$instructorName => $name\x1B[0m'),
   );
 
   // the root agent is **LAST** in list
@@ -100,25 +94,29 @@ void main(List<String> argumentss) async {
 
   for (var agent in agents.values) {
     dbg.trace(
-      '${agent == rootAgent ? 'rootAgent' : 'agent'} = ${agent.name} / tools: ${agent.toolNames.join(', ')}',
+      '${agent == rootAgent ? 'rootAgent' : 'agent'} = ${agent.displayName} / tools: ${agent.toolNames.join(', ')}',
     );
   }
 
   // process prompt
-  final response = await rootAgent.invoke(prompt);
-  rootAgent.modelOutput.add(response);
+  rootAgent.modelOutput.add(
+    await (rootAgent.invoke(prompt).fold('', (prev, next) => prev + next)),
+  );
 
   var done = false;
   while (!done) {
     final checkpoint = rootAgent.getCheckPoint();
-    final answer = (await rootAgent.invoke(
+    final answer = (await (rootAgent.invoke(
       'Are you finished? Answer with a single `Yes` or `No`.',
-    )).trim().toLowerCase();
+    )).fold('', (prev, next) => prev + next)).trim().toLowerCase();
     done = answer.startsWith('yes') || answer.contains('error');
     if (!done) {
       rootAgent.restoreCheckPoint(checkpoint);
-      final response = await rootAgent.invoke('Finish the task.');
-      rootAgent.modelOutput.add(response);
+      rootAgent.modelOutput.add(
+        await (rootAgent
+            .invoke('Finish the task.')
+            .fold('', (prev, next) => prev + next)),
+      );
     }
   }
 

@@ -16,6 +16,8 @@ class Log {
   static void _enable(Log log) => log._sink.enable();
   static void _disable(Log log) => log._sink.disable();
 
+  static String get logDir => _enabled ? impl_.getLogDir() : '';
+
   static void enable() {
     _enabled = true;
     _logs.forEach(_enable);
@@ -40,6 +42,9 @@ class Log {
   final LogSink _sink;
 
   String get name => _sink.name;
+
+  void forceEnable() => _sink.enable();
+  void forceDisable() => _sink.disable();
 
   void append(Object message) {
     var msg = message;
@@ -68,9 +73,7 @@ class Log {
       // sync
       final ts = '[${DateTime.now().toIso8601String()}]';
       _sink.add(msg.toString().split('\n').map((l) => '$ts $l').join('\n'));
+      _sink.flush();
     }
   }
 }
-
-final chatLogger = Log('chat');
-final modelLogger = Log('model');

@@ -74,12 +74,12 @@ Future<void> exportConversationToPdf(
           ...history
               .where((m) {
                 // Clean export: skip system messages and intermediate tool steps
-                if (m.role == dartantic.ChatMessageRole.system) return false;
+                if (m.role == .system) return false;
                 if (m.hasToolCalls || m.hasToolResults) return false;
                 return m.text.trim().isNotEmpty;
               })
               .map((m) {
-                final isUser = m.role == dartantic.ChatMessageRole.user;
+                final isUser = m.role == .user;
                 final label = isUser ? 'YOU' : 'WEB AGENT';
 
                 // Premium colors matching the UI
