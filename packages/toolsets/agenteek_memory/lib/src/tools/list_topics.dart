@@ -8,7 +8,7 @@ Tool listTopicsTool(MemoryToolSet toolset) => Tool(
   onCall: (args) => _listTopics(toolset, args),
 );
 
-Future<ToolOutcome<Json>> _listTopics(MemoryToolSet toolset, Json args) async {
+Future<ToolSuccess<Json>> _listTopics(MemoryToolSet toolset, Json args) async {
   final topics = await toolset.sync();
   return ToolSuccess<Json>({'topics': topics.keys.toList()});
 }

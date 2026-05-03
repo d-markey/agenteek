@@ -101,15 +101,16 @@ Future<ToolSuccess<String>> _replaceMultiText(
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'originalText': z.string('Original text'),
-    'newText': z.string('New text'),
-    'targetLines': z.array(
-      {'type': 'int'},
-      'Line numbers where replacement is expected; when missing or empty, the original text will be replaced if and only if there is exactly one occurence'
-          .optional(),
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'originalText': Z.string(description: 'Original text'),
+    'newText': Z.string(description: 'New text'),
+    'targetLines': Z.list(
+      items: Z.integer(),
+      description:
+          'Line numbers where replacement is expected; when missing or empty, the original text will be replaced if and only if there is exactly one occurence'
+              .optional(),
     ),
   },
   required: ['path', 'originalText', 'newText'],

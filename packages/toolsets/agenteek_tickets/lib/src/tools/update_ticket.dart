@@ -9,18 +9,14 @@ Tool updateTicketTool(TicketToolSet toolset) => Tool(
   description: toolset.scoped(
     'Update an existing ticket; the original ticket is replaced with the provided information.',
   ),
-  inputSchema: z.object(
-    {
-      'ticket_id': z.int('Ticket ID'),
-      'title': z.string('Ticket title'),
-      'description': z.string('Ticket details'),
-    },
-    required: ['ticket_id', 'title', 'description'],
-  ),
+  inputSchema: _inputSchema,
   onCall: (args) => _updateTicket(toolset, args),
 );
 
-Future<ToolOutcome<String>> _updateTicket(TicketToolSet toolset, Json args) async {
+Future<ToolSuccess<String>> _updateTicket(
+  TicketToolSet toolset,
+  Json args,
+) async {
   final id = args.getInt('ticket_id');
   final title = args.getString('title');
   final description = args.getString('description');
@@ -41,3 +37,12 @@ Future<ToolOutcome<String>> _updateTicket(TicketToolSet toolset, Json args) asyn
     return ToolSuccess.ok;
   }
 }
+
+final _inputSchema = Z.object(
+  properties: {
+    'ticket_id': Z.integer(description: 'Ticket ID'),
+    'title': Z.string(description: 'Ticket title'),
+    'description': Z.string(description: 'Ticket details'),
+  },
+  required: ['ticket_id', 'title', 'description'],
+);

@@ -13,7 +13,7 @@ Tool formatTool(DartToolSet toolSet) => Tool(
   onCall: (args) => _format(toolSet, args),
 );
 
-Future<ToolOutcome<Json>> _format(DartToolSet toolSet, Json args) async {
+Future<ToolSuccess<Json>> _format(DartToolSet toolSet, Json args) async {
   var path = args.getString('path', defaultValue: '').trim();
   if (path.startsWith('/')) path = path.substring(1);
 
@@ -30,8 +30,13 @@ Future<ToolOutcome<Json>> _format(DartToolSet toolSet, Json args) async {
   return ToolSuccess(await toolSet.exec('dart', ['format', fileOrDir.path]));
 }
 
-final _inputSchema = z.object({
-  'path': z.string(
-    'The path of the file or directory to format'.optional('root directory'),
-  ),
-});
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(
+      description: 'The path of the file or directory to format'.optional(
+        'root directory',
+      ),
+    ),
+  },
+  required: ['path'],
+);

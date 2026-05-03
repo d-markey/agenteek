@@ -46,8 +46,10 @@ class AgentToolSet extends ToolSet with Prefix {
     description:
         'Send a message (prompt) to AI Agent ${_agent.displayName} (role: ${_agent.role}); '
         'returns the response from the Agent.',
-    inputSchema: z.object(
-      {'prompt': z.string('Instructions for the Agent.')},
+    inputSchema: Z.object(
+      properties: {
+        'prompt': Z.string(description: 'Instructions for the Agent.'),
+      },
       required: ['prompt'],
     ),
     onCall: _sendMessage,

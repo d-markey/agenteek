@@ -35,7 +35,7 @@ Future<ToolSuccess<String>> _deleteLines(FileToolSet toolSet, Json args) async {
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {'path': z.string('File path')},
+final _inputSchema = Z.object(
+  properties: {'path': Z.string(description: 'File path')},
   required: ['path'],
 );

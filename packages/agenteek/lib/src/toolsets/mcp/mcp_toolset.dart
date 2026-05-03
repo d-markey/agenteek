@@ -60,7 +60,7 @@ class McpToolSet extends ToolSet {
         final declaration = Tool(
           name: '$prefix.${tool.name}',
           description: description,
-          inputSchema: z.of(tool),
+          inputSchema: tool.getSchema(),
           onCall: _getHandlerFor(tool),
         );
         register(declaration);

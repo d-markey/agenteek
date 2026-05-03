@@ -13,7 +13,7 @@ Tool testTool(DartToolSet toolSet) => Tool(
   onCall: (args) => _test(toolSet, args),
 );
 
-Future<ToolOutcome<Json>> _test(DartToolSet toolSet, Json args) async {
+Future<ToolSuccess<Json>> _test(DartToolSet toolSet, Json args) async {
   var path = args.getString('path', defaultValue: '').trim();
   if (path.startsWith('/')) path = path.substring(1);
 
@@ -32,9 +32,13 @@ Future<ToolOutcome<Json>> _test(DartToolSet toolSet, Json args) async {
   );
 }
 
-final _inputSchema = z.object({
-  'path': z.string(
-    'The path to the test directory (or to a specific test file to only run tests in that file)'
-        .optional('root directory'),
-  ),
-});
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(
+      description:
+          'The path to the test directory (or to a specific test file\'s path'
+              .optional('root directory'),
+    ),
+  },
+  required: ['path'],
+);

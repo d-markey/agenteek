@@ -58,13 +58,19 @@ Future<ToolSuccess<String>> _listFiles(FileToolSet toolSet, Json args) async {
   return ToolSuccess(results.toString());
 }
 
-final _inputSchema = z.object({
-  'path': z.string('Directory to list from'.optional('root directory')),
-  'recursive': z.bool(
-    'Whether listing should recurse through sub-directories'.optional('false'),
-  ),
-  'includeHidden': z.bool(
-    'Whether to include hidden files and directories (starting with a dot)'
-        .optional('false'),
-  ),
-});
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(
+      description: 'Directory to list from'.optional('root directory'),
+    ),
+    'recursive': Z.boolean(
+      description: 'Whether listing should recurse through sub-directories'
+          .optional('false'),
+    ),
+    'includeHidden': Z.boolean(
+      description:
+          'Whether to include hidden files and directories (starting with a dot)'
+              .optional('false'),
+    ),
+  },
+);

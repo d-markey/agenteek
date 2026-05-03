@@ -1,5 +1,4 @@
 import 'package:agenteek/agenteek.dart';
-import 'package:dartantic_ai/dartantic_ai.dart';
 
 import '_agent_ui.dart';
 import 'config/config_store.dart';

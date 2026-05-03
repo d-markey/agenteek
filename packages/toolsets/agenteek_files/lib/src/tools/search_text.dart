@@ -141,20 +141,23 @@ Future<ToolSuccess<Json>> _searchText(FileToolSet toolSet, Json args) async {
   return ToolSuccess(allMatches);
 }
 
-final _inputSchema = z.object(
-  {
-    'pattern': z.string(
-      'Search pattern: either a raw string (search will be case-insensitive) or a valid regular expression between `/` and `/`, e.g. `/pattern/`',
+final _inputSchema = Z.object(
+  properties: {
+    'pattern': Z.string(
+      description:
+          'Search pattern: raw string OR regular expression. To active a "RegExp" search, the pattern **MUST** be provided between slashes (`/`, eg: `/\\.java\$/`) otherwise it will be interpreted as a raw string. Case-sensitivity can be controlled via the `caseSensitive` argument.',
     ),
-    'path': z.string(
-      'Path to specific files or folders (must be a valid glob pattern, e.g. `dir/*.txt` to search for text files directly under `dir`, or `dir/**.txt` to search for all text files under `dir`)'
-          .optional('root directory'),
+    'path': Z.string(
+      description:
+          'Path to specific files or folders (must be a valid glob pattern, e.g. `dir/*.txt` to search for text files directly under `dir`, or `dir/**.txt` to search for all text files under `dir`)'
+              .optional('root directory'),
     ),
-    'caseSensitive': z.bool(
-      'Whether the search is case-sensitive'.optional('false'),
+    'caseSensitive': Z.boolean(
+      description: 'Whether the search is case-sensitive'.optional('false'),
     ),
-    'includeHidden': z.bool(
-      'Whether to include hidden files (starting with a dot)'.optional('false'),
+    'includeHidden': Z.boolean(
+      description: 'Whether to include hidden files (starting with a dot)'
+          .optional('false'),
     ),
   },
   required: ['pattern'],

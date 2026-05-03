@@ -7,22 +7,11 @@ Tool memorizeTopicTool(MemoryToolSet toolset) => Tool<String>(
   name: toolset.buildToolName('memorize_topic'),
   description:
       'Associate information to a topic in memory; if the topic is already present in memory, the provided information is concatenated with the existing information',
-  inputSchema: z.object(
-    {
-      'topic': z.string('Topic'),
-      'information': z.string('Information about the topic'),
-      'mode': z.string(
-        'Memorization mode, one of: '
-        '`set` to replace any pre-existing information with new information, '
-        'or `update` to append new information while retaining existing information',
-      ),
-    },
-    required: ['topic', 'information', 'mode'],
-  ),
+  inputSchema: _inputSchema,
   onCall: (args) => _memorizeTopic(toolset, args),
 );
 
-Future<ToolOutcome<String>> _memorizeTopic(
+Future<ToolSuccess<String>> _memorizeTopic(
   MemoryToolSet toolset,
   Json args,
 ) async {
@@ -51,3 +40,17 @@ Future<ToolOutcome<String>> _memorizeTopic(
 
   return ToolSuccess.ok;
 }
+
+final _inputSchema = Z.object(
+  properties: {
+    'topic': Z.string(description: 'Topic to memorize'),
+    'information': Z.string(description: 'Information about the topic'),
+    'mode': Z.string(
+      description:
+          'Memorization mode, one of: '
+          '`set` to replace any pre-existing information with new information, '
+          'or `update` to append new information while retaining existing information',
+    ),
+  },
+  required: ['topic', 'information', 'mode'],
+);

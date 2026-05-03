@@ -46,7 +46,9 @@ Future<ToolSuccess<String>> _locateFile(FileToolSet toolSet, Json args) async {
   return ToolSuccess(results.toString());
 }
 
-final _inputSchema = z.object(
-  {'baseName': z.string('The file\'s base file name ')},
+final _inputSchema = Z.object(
+  properties: {
+    'baseName': Z.string(description: 'The file\'s base file name '),
+  },
   required: ['baseName'],
 );

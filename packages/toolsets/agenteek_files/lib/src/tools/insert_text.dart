@@ -51,13 +51,14 @@ Future<ToolSuccess<String>> _insertText(FileToolSet toolSet, Json args) async {
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'line': z.int(
-      'Line number where insertion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'line': Z.integer(
+      description:
+          'Line number where insertion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
     ),
-    'newText': z.string('Text to insert.'),
+    'newText': Z.string(description: 'Text to insert.'),
   },
   required: ['path', 'line', 'newText'],
 );

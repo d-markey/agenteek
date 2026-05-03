@@ -64,17 +64,19 @@ Future<ToolSuccess<String>> _readLines(FileToolSet toolSet, Json args) async {
   }
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'startLine': z.int('Starting line number (1-based)'),
-    'endLine': z.int(
-      'Ending line number (inclusive, 1-based); if provided, must be >= startLine'
-          .optional('last line in file'),
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'startLine': Z.integer(description: 'Starting line number (1-based)'),
+    'endLine': Z.integer(
+      description:
+          'Ending line number (inclusive, 1-based); if provided, must be >= startLine'
+              .optional('last line in file'),
     ),
-    'mode': z.string(
-      'One of `raw` (lines are dumped as is) or `numbered` (line numbers are shown before each line).'
-          .optional('raw'),
+    'mode': Z.string(
+      description:
+          'One of `raw` (lines are dumped as is) or `numbered` (line numbers are shown before each line).'
+              .optional('raw'),
     ),
   },
   required: ['path', 'startLine'],

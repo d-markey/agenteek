@@ -7,14 +7,14 @@ import '../tickets_toolset.dart';
 Tool readTicketTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.read',
   description: toolset.scoped('Read an existing ticket.'),
-  inputSchema: z.object(
-    {'ticket_id': z.int('Ticket ID')},
-    required: ['ticket_id'],
-  ),
+  inputSchema: _inputSchema,
   onCall: (args) => _readTicket(toolset, args),
 );
 
-Future<ToolOutcome<Ticket>> _readTicket(TicketToolSet toolset, Json args) async {
+Future<ToolSuccess<Ticket>> _readTicket(
+  TicketToolSet toolset,
+  Json args,
+) async {
   final id = args.getInt('ticket_id');
   var ticket = toolset.tickets[id];
   if (ticket == null) {
@@ -27,3 +27,8 @@ Future<ToolOutcome<Ticket>> _readTicket(TicketToolSet toolset, Json args) async 
   if (ticket == null) throw 'Ticket "$id" not found.';
   return ToolSuccess(ticket);
 }
+
+final _inputSchema = Z.object(
+  properties: {'ticket_id': Z.integer(description: 'Ticket ID')},
+  required: ['ticket_id'],
+);

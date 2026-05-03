@@ -36,7 +36,7 @@ Future<ToolSuccess<int>> _getLineCount(FileToolSet toolSet, Json args) async {
   return ToolSuccess(lines.length);
 }
 
-final _inputSchema = z.object(
-  {'path': z.string('File path')},
+final _inputSchema = Z.object(
+  properties: {'path': Z.string(description: 'File path')},
   required: ['path'],
 );

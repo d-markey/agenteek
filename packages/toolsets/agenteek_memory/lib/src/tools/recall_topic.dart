@@ -5,20 +5,25 @@ import '../memory_toolset.dart';
 Tool recallTopicTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('recall_topic'),
   description: 'Loads information related to a topic from memory',
-  inputSchema: z.object(
-    {'topic': z.string('Topic to recall')},
-    required: ['topic'],
-  ),
+  inputSchema: _inputSchema,
   onCall: (args) => _recallTopic(toolset, args),
 );
 
-Future<ToolOutcome<String>> _recallTopic(MemoryToolSet toolset, Json args) async {
+Future<ToolSuccess<String>> _recallTopic(
+  MemoryToolSet toolset,
+  Json args,
+) async {
   final topic = args.getString('topic').trim().toLowerCase();
   if (topic.isEmpty) throw Exception('The topic argument cannot be empty.');
-  
+
   final topics = await toolset.sync();
   final info = topics[topic];
-  
+
   if (info != null) return ToolSuccess(info);
   return ToolSuccess('Unknown topic.');
 }
+
+final _inputSchema = Z.object(
+  properties: {'topic': Z.string(description: 'Topic to recall')},
+  required: ['topic'],
+);

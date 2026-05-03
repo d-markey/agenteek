@@ -29,10 +29,12 @@ Future<ToolSuccess<String>> _readPubSpec(DartToolSet toolSet, Json args) async {
   return ToolSuccess(await FileReader.readString(file));
 }
 
-final _inputSchema = z.object({
-  'path': z.string(
-    'The path of the directory where "pubspec.yaml" is located'.optional(
-      'root directory',
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(
+      description: 'The path of the directory where "pubspec.yaml" is located'
+          .optional('root directory'),
     ),
-  ),
-});
+  },
+  required: ['path'],
+);

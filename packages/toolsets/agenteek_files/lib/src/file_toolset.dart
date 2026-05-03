@@ -95,7 +95,7 @@ class FileToolSet extends ToolSet with Prefix, Scope {
     for (var message in result.messages) {
       if (message.hasToolCalls) {
         for (var call in message.toolCalls.where(
-          _sideEffectingToolNames.contains,
+          (t) => _sideEffectingToolNames.contains(t.toolName),
         )) {
           final path = call.arguments?['path']?.toString() ?? '';
           if (path.isEmpty) continue;

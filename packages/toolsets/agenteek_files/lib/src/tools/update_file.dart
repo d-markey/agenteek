@@ -51,11 +51,12 @@ Future<ToolSuccess<String>> _updateFile(FileToolSet toolSet, Json args) async {
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'newText': z.string(
-      'New text to write to the file. The full file content will be replaced.',
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'newText': Z.string(
+      description:
+          'New text to write to the file. The full file content will be replaced.',
     ),
   },
   required: ['path', 'newText'],

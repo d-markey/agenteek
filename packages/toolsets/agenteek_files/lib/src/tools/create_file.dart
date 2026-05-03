@@ -49,10 +49,10 @@ Future<ToolSuccess<String>> _createFile(FileToolSet toolSet, Json args) async {
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'text': z.string('Text to write to the file'.optional()),
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'text': Z.string(description: 'Text to write to the file'.optional()),
   },
   required: ['path'],
 );

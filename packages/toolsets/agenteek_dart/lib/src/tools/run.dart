@@ -13,7 +13,7 @@ Tool runTool(DartToolSet toolSet) => Tool(
   onCall: (args) => _run(toolSet, args),
 );
 
-Future<ToolOutcome<Json>> _run(DartToolSet toolSet, Json args) async {
+Future<ToolSuccess<Json>> _run(DartToolSet toolSet, Json args) async {
   var path = args.getString('path');
   if (path.startsWith('/')) path = path.substring(1);
 
@@ -25,7 +25,7 @@ Future<ToolOutcome<Json>> _run(DartToolSet toolSet, Json args) async {
   return ToolSuccess(await toolSet.exec('dart', ['run', script.path]));
 }
 
-final _inputSchema = z.object(
-  {'path': z.string('The path to the Dart script.')},
+final _inputSchema = Z.object(
+  properties: {'path': Z.string(description: 'The path to the Dart script.')},
   required: ['path'],
 );

@@ -118,19 +118,19 @@ class Agent {
     text
         .split('\n')
         .map((l) => l.trim())
-        .where((l) => l.isNotEmpty && l != '```' && l != '}')
+        .where((l) => l.isNotEmpty && !l.startsWith('```') && l != '}')
         .forEach((l) {
           counts.update(l, (n) => n + 1, ifAbsent: () => 1);
         });
     final entries = counts.entries.toList();
     entries.removeWhere((e) => e.value == 1);
     entries.sort((a, b) => b.value.compareTo(a.value));
-    if (entries.where((e) => e.value > 5).isNotEmpty) {
+    if (entries.where((e) => e.value > 20).isNotEmpty) {
       print(
-        'TOP 3 THOUGHTS > 5:\n${entries.take(3).map((e) => '  (${e.value}) ${e.key}').join('\n')}',
+        'TOP 3 THOUGHTS:\n${entries.take(3).map((e) => '  (${e.value}) ${e.key}').join('\n')}',
       );
     }
-    return entries.where((e) => e.value > 5).length;
+    return entries.where((e) => e.value > 20).length;
   }
 
   Stream<String> invoke(String prompt, {CancelationToken? token}) async* {
@@ -147,18 +147,41 @@ class Agent {
     Future<void> $register(dartantic.ChatResult<String> r) async {
       if (stream.isClosed) return;
 
+      var isRepeating = false;
+
       final output = r.output;
       if (output.isNotEmpty) {
         _streamingOutput?.add(output);
         fullOutput += output;
-        _checkRepetitions(fullOutput);
+        if (_checkRepetitions(fullOutput) > 2) {
+          isRepeating = true;
+        }
       }
 
       final thinking = r.thinking ?? '';
       if (thinking.isNotEmpty) {
         _streamingThinking?.add(thinking);
         fullThoughts += thinking;
-        _checkRepetitions(fullThoughts);
+        if (_checkRepetitions(fullThoughts) > 2) {
+          isRepeating = true;
+        }
+      }
+
+      if (isRepeating) {
+        if (!stream.isClosed) {
+          final msg =
+              'I seem to be lost in circles, and I am repeating myself. Please start over.';
+          final cancelled = dartantic.ChatMessage.model(msg);
+          _agentLogger.log(cancelled);
+          await conversationManager.register(
+            dartantic.ChatResult(output: msg, messages: [cancelled]),
+            toolSet: _toolSet,
+          );
+          stream.add(msg);
+          stream.close();
+        }
+        sub.cancel();
+        return;
       }
 
       if (r.messages

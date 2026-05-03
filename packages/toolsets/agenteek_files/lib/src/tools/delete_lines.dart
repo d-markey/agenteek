@@ -49,14 +49,16 @@ Future<ToolSuccess<String>> _deleteLines(FileToolSet toolSet, Json args) async {
   return ToolSuccess.ok;
 }
 
-final _inputSchema = z.object(
-  {
-    'path': z.string('File path'),
-    'startLine': z.int(
-      'Line number where deletion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(description: 'File path'),
+    'startLine': Z.integer(
+      description:
+          'Line number where deletion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
     ),
-    'endLine': z.int(
-      'Line number where deletion ends (1-based, inclusive, must be >= `startLine`). Never guess this parameter, call `read_lines` first.',
+    'endLine': Z.integer(
+      description:
+          'Line number where deletion ends (1-based, inclusive, must be >= `startLine`). Never guess this parameter, call `read_lines` first.',
     ),
   },
   required: ['path', 'startLine', 'endLine'],

@@ -10,7 +10,10 @@ Tool listTicketsTool(TicketToolSet toolset) => Tool(
   onCall: (args) => _listTickets(toolset, args),
 );
 
-Future<ToolOutcome<List<Json>>> _listTickets(TicketToolSet toolset, Json args) async {
+Future<ToolSuccess<List<Json>>> _listTickets(
+  TicketToolSet toolset,
+  Json args,
+) async {
   if (toolset.fileSystem != null) {
     final fs = toolset.fileSystem!;
     await for (var f in toolset.listTicketFiles(fs)) {

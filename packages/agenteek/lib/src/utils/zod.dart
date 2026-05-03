@@ -1,36 +1,11 @@
 import 'package:dart_mcp/client.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic show Schema;
 
-// ignore: camel_case_types
-abstract class z {
-  static dartantic.Schema object(
-    Map<String, Object?> properties, {
-    String? description,
-    List<String>? required,
-  }) => .fromMap({
-    'type': 'object',
-    'description': ?description,
-    'properties': properties,
-    'required': ?required,
-  });
+typedef Z = dartantic.Schema;
 
-  static dartantic.Schema array(
-    Map<String, Object?> items, [
-    String? description,
-  ]) =>
-      .fromMap({'type': 'array', 'items': items, 'description': ?description});
-
-  static dartantic.Schema int([String? description]) =>
-      .fromMap({'type': 'int', 'description': ?description});
-
-  static dartantic.Schema bool([String? description]) =>
-      .fromMap({'type': 'bool', 'description': ?description});
-
-  static dartantic.Schema string([String? description]) =>
-      .fromMap({'type': 'string', 'description': ?description});
-
-  static dartantic.Schema of(Tool tool) =>
-      .fromMap(_removeEmptyEnums(tool.inputSchema as Map<String, Object?>));
+extension SchemaExt on Tool {
+  dartantic.Schema getSchema() =>
+      .fromMap(_removeEmptyEnums(inputSchema as Map<String, Object?>));
 
   static Map<String, Object?> _removeEmptyEnums(Map<String, Object?> schema) {
     var enums = schema['enum'];

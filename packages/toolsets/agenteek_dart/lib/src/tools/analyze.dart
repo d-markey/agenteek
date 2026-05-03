@@ -29,8 +29,13 @@ Future<ToolSuccess<Json>> _analyze(DartToolSet toolSet, Json args) async {
   return ToolSuccess(await toolSet.exec('dart', ['analyze', fileOrDir.path]));
 }
 
-final _inputSchema = z.object({
-  'path': z.string(
-    'The path of the file or directory to analyze'.optional('root directory'),
-  ),
-});
+final _inputSchema = Z.object(
+  properties: {
+    'path': Z.string(
+      description: 'The path of the file or directory to analyze'.optional(
+        'root directory',
+      ),
+    ),
+  },
+  required: ['path'],
+);

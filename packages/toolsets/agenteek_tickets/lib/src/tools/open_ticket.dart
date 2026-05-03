@@ -7,17 +7,14 @@ import '../tickets_toolset.dart';
 Tool openTicketTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.open',
   description: toolset.scoped('Create and open a new ticket'),
-  inputSchema: z.object(
-    {
-      'title': z.string('Ticket title'),
-      'description': z.string('Ticket details'),
-    },
-    required: ['title', 'description'],
-  ),
+  inputSchema: _inputSchema,
   onCall: (args) => _openTicket(toolset, args),
 );
 
-Future<ToolOutcome<String>> _openTicket(TicketToolSet toolset, Json args) async {
+Future<ToolSuccess<String>> _openTicket(
+  TicketToolSet toolset,
+  Json args,
+) async {
   final title = args.getString('title');
   final description = args.getString('description');
   final id = await toolset.getNextTicketId();
@@ -31,3 +28,11 @@ Future<ToolOutcome<String>> _openTicket(TicketToolSet toolset, Json args) async 
   }
   return ToolSuccess('Ticket created successfully with id "$id".');
 }
+
+final _inputSchema = Z.object(
+  properties: {
+    'title': Z.string(description: 'Ticket title'),
+    'description': Z.string(description: 'Ticket details'),
+  },
+  required: ['title', 'description'],
+);

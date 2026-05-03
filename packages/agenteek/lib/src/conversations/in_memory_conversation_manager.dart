@@ -83,7 +83,7 @@ class InMemoryConversationManager extends ConversationManager {
 
   @override
   Future<void> register(dartantic.ChatResult result, {ToolSet? toolSet}) async {
-    final copy = result.deepClone(withThoughts: false);
+    final copy = result.deepClone(keepThoughts: false);
     if (copy == null) return;
 
     if (_conversationId < 0) await startConversation();

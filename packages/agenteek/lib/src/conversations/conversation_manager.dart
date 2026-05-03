@@ -34,9 +34,9 @@ abstract class ConversationManager {
 }
 
 extension ChatResultExt on dartantic.ChatResult {
-  dartantic.ChatResult? deepClone({bool withThoughts = false}) {
+  dartantic.ChatResult? deepClone({bool keepThoughts = false}) {
     final keepMessages = messages
-        .map((m) => m.deepClone(withThoughts: withThoughts))
+        .map((m) => m.deepClone(keepThoughts: keepThoughts))
         .nonNulls
         .toList();
     return keepMessages.isEmpty
@@ -54,8 +54,8 @@ extension ChatResultExt on dartantic.ChatResult {
 }
 
 extension ChatMessageExt on dartantic.ChatMessage {
-  dartantic.ChatMessage? deepClone({bool withThoughts = false}) {
-    final keepParts = withThoughts
+  dartantic.ChatMessage? deepClone({bool keepThoughts = false}) {
+    final keepParts = keepThoughts
         ? parts
         : parts.where((p) => p is! dartantic.ThinkingPart);
     return keepParts.isEmpty
@@ -74,7 +74,6 @@ extension ChatMessageExt on dartantic.ChatMessage {
 extension HistoryExt on List<dartantic.ChatMessage> {
   Future<void> redactObsoleteToolResults(ToolSet? toolSet) async {
     if (toolSet == null) return;
-    final sw = Stopwatch()..start();
     final redacted = (await toolSet.redactObsoleteToolResults(
       this,
     )).entries.toList();
@@ -89,12 +88,8 @@ extension HistoryExt on List<dartantic.ChatMessage> {
           parts[idx] = entry.value;
           this[i] = message.copyWith(parts: parts);
           redacted.removeAt(j);
-          print('   redacted ${entry.value}');
         }
       }
     }
-    print(
-      'Done redacting tool results (history length = $length) : ${sw.elapsed}',
-    );
   }
 }
