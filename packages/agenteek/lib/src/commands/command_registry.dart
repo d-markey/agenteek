@@ -17,8 +17,7 @@ class CommandRegistry {
   /// The [label] is matched case-insensitively and handles optional leading slash.
   Command? lookup(String label) {
     if (label.isEmpty) return null;
-    final cleanLabel =
-        label.startsWith('/') ? label.substring(1) : label;
+    final cleanLabel = label.startsWith('/') ? label.substring(1) : label;
     return _commands[cleanLabel.toLowerCase()];
   }
 

@@ -7,6 +7,7 @@ environment:
 workspace:
   - packages/agenteek
   - packages/agenteek_cli
+  - packages/agenteek_container
   - packages/agenteek_web
   - packages/toolsets/agenteek_dart
   - packages/toolsets/agenteek_files

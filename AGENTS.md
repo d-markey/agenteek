@@ -14,6 +14,8 @@ The workspace is divided into several categories of packages:
 
 - **[agenteek](packages/agenteek)**: The foundational library. Defines the `Agent` and `InteractiveAgent` classes, `ConversationManager` for history (memory/persistent), `ToolSet` architecture, and `McpToolSet` for Model Context Protocol integration.
 
+- **[agenteek_container](packages/agenteek_container)**: library adding support for running workloads in containers. Provides a `PodmanContainer` implementation.
+
 ### Interfaces (Frontends)
 
 - **[agenteek_cli](packages/agenteek_cli)**: Command-line entry points. Includes an example of a multi-agent "dev team" interactive loop and batch processing modes.
