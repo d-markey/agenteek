@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek_files/agenteek_file_reader.dart';
+import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';

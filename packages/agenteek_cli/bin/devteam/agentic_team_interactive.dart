@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_cli/agenteek_cli.dart';
-import 'package:path/path.dart' as p;
+import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:logging/logging.dart' as l;
+import 'package:path/path.dart' as p;
 
-import 'console_sink.dart';
 import 'args.dart';
+import 'console_sink.dart';
 
 final sw = Stopwatch()..start();
 var lastTimestamp = 0;

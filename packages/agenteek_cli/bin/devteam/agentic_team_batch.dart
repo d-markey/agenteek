@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_cli/agenteek_cli.dart';
-import 'package:agenteek_files/agenteek_file_reader.dart';
+import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:path/path.dart' as p;
 
-import 'console_sink.dart';
 import 'args.dart';
+import 'console_sink.dart';
 
 void main(List<String> argumentss) async {
   Log.enable();

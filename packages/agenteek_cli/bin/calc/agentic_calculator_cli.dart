@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek_cli/agenteek_cli.dart';
+import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:better_future/better_future.dart';
 
 import 'mcp_arithmetic_client.dart';

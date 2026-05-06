@@ -17,10 +17,11 @@ dependencies:
   glob:
   logging:
   agenteek:
-  agenteek_memory:
   agenteek_files:
-  agenteek_dart:
-  agenteek_tickets:
+  agenteek_memory_toolset:
+  agenteek_files_toolset:
+  agenteek_dart_toolset:
+  agenteek_tickets_toolset:
 
 dev_dependencies:
   lints:

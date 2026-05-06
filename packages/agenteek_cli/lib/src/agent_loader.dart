@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek_dart/agenteek_dart.dart';
-import 'package:agenteek_files/agenteek_files.dart';
-import 'package:agenteek_memory/agenteek_memory.dart';
-import 'package:agenteek_tickets/agenteek_tickets.dart';
+import 'package:agenteek_dart_toolset/agenteek_dart_toolset.dart';
+import 'package:agenteek_files_toolset/agenteek_files_toolset.dart';
+import 'package:agenteek_memory_toolset/agenteek_memory_toolset.dart';
+import 'package:agenteek_tickets_toolset/agenteek_tickets_toolset.dart';
 import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart';
 import 'package:yaml/yaml.dart';
