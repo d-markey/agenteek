@@ -69,7 +69,7 @@ The `build.yaml` controls compiler output settings.
 | `markdown` | Renders model Markdown output to HTML |
 | `pdf ^3.11.0` | PDF export of conversation |
 | `http ^1.2.0` | HTTP requests from the browser |
-| `better_future ^2.0.0` | Async utilities |
+| `better_future ^2.0.3` | Async utilities |
 | `cors_enabler` (dev) | Local dev server with CORS headers |
 | `build_runner` (dev) | Build system orchestrator |
 | `build_web_compilers` (dev) | `dart2js` integration |

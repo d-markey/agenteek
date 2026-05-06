@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../lib/agenteek_containers.dart';
+import 'package:agenteek_containers/agenteek_containers.dart';
 
 void main() async {
   final version = await PodmanContainer.getVersion();

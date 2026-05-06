@@ -94,7 +94,7 @@ class HtmlStreamingSink implements StreamingOutputSink {
   static final _uniqueId = UniqueIdGenerator();
 
   String _id = '';
-  String _lastData = '';
+  String _current = '';
 
   web.HTMLDivElement? _getDiv() =>
       _controller._div.ownerDocument?.getElementById(_id)
@@ -133,16 +133,16 @@ class HtmlStreamingSink implements StreamingOutputSink {
   Future<void> finish() {
     final div = _getDiv();
     if (div != null) {
-      if (collapsible && _lastData.isNotEmpty) {
+      if (collapsible && _current.isNotEmpty) {
         final label = _getLabelHtml(_label(), _id, true);
-        div.innerHTML = '$label$_copyButtonHtml${_lastData.toHtml()}'.toJS;
+        div.innerHTML = '$label$_copyButtonHtml${_current.toHtml()}'.toJS;
         div.classList.add('collapsed');
       } else {
         div.remove();
       }
     }
     _id = '';
-    _lastData = '';
+    _current = '';
     return Future.value();
   }
 
@@ -157,9 +157,9 @@ class HtmlStreamingSink implements StreamingOutputSink {
 
     final div = _getDiv();
     if (div != null) {
-      _lastData = data;
+      _current += data;
       final label = _getLabelHtml(_label(), _id, collapsible);
-      div.innerHTML = '$label$_copyButtonHtml${'$data...'.toHtml()}'.toJS;
+      div.innerHTML = '$label$_copyButtonHtml${'$_current...'.toHtml()}'.toJS;
       _controller.requestScroll();
     }
   }

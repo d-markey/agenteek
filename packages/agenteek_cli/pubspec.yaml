@@ -9,7 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  better_future: ^2.0.0
+  better_future: ^2.0.3
   dartantic_ai:
   dart_mcp:
   path:

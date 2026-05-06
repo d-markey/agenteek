@@ -81,7 +81,7 @@ Channels:
 | `stream_channel ^2.1.4` | `StreamChannel<T>` interface used by HTTP and stdio channels |
 | `http ^1.4.0` | HTTP transport (platform-conditional wrapper in `_client_io.dart` / `_client_web.dart`) |
 | `async ^2.13.0` | `StreamQueue`, `unawaited`, etc. |
-| `better_future ^2.0.0` | Extended `Future` utilities |
+| `better_future ^2.0.3` | Extended `Future` utilities |
 | `glob ^2.1.3` | Glob pattern matching for ACLs |
 | `yaml ^3.1.3` | YAML parsing for config loading |
 | `path ^1.9.1` | Cross-platform path manipulation |
