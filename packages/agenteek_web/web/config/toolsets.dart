@@ -2,8 +2,8 @@ import 'package:agenteek/agenteek.dart';
 import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart' as mcp;
 
-import 'build_config.dart';
 import 'agent_config_data.dart';
+import 'build_config.dart';
 
 final deepWikiMcpServer = mcp.Implementation(
   name: 'DeepWiki',
@@ -21,7 +21,7 @@ Future<ToolSet> initializeToolSets(
   AgentConfigData config,
   Secrets secrets,
 ) async {
-  final outcomes = await BetterFuture.settle<ToolSet>({
+  final outcomes = await BetterFuture.settle<ToolSet?>({
     'deepwiki': () => deepWikiMcpServer.setup(
       prefix: 'deepwiki',
       scope: 'DeepWiki information for GitHub repositories',
@@ -81,5 +81,5 @@ Future<ToolSet> initializeToolSets(
     print('Failed to initialize tools for "${failed.key}".');
   }
 
-  return ToolSet.combined(outcomes.results.map((e) => e.value));
+  return ToolSet.combined(outcomes.results.map((e) => e.value).nonNulls);
 }

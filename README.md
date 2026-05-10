@@ -9,16 +9,21 @@ This workspace is organized into several modular packages:
 ### Core & Framework
 - **[agenteek](packages/agenteek)**: The core library containing the base `Agent` abstractions, conversation management, and toolset orchestration.
 
-### Interfaces
-- **[agenteek_cli](packages/agenteek_cli)**: Command-line interface for interacting with Agenteek agents.
-- **[agenteek_web](packages/agenteek_web)**: A bare-bones web application for [chatting with agents in the browser](https://d-markey.github.io/agenteek/agenteek_web/).
+- **[agenteek_team](packages/agenteek_team)**: Configurable multi-agent harness for managing a team of Agenteek agents.
+
+- **[agenteek_files](packages/agenteek_files)**: Utility classes for reading text files.
+
+- **[agenteek_containers](packages/agenteek_containers)**: Utility classes for running workloads in containers, including a `podman` implementation via `PodmanContainer`.
 
 ### Toolsets
 Specialized capabilities that can be plugged into any agent:
-- **`agenteek_dart`**: Tools for Dart code analysis and execution.
-- **`agenteek_files`**: Tools for file system interaction.
-- **`agenteek_memory`**: Short/long-term memory management for agents.
-- **`agenteek_tickets`**: Tools for managing tasks and tickets.
+- **`agenteek_dart_toolset`**: Tools for Dart code analysis and execution.
+- **`agenteek_files_toolset`**: Tools for file system interaction.
+- **`agenteek_memory_toolset`**: Short/long-term memory management for agents.
+- **`agenteek_tickets_toolset`**: Tools for managing tasks and tickets.
+
+### Examples
+- **[agenteek_web](packages/agenteek_web)**: A bare-bones web application for [chatting with agents in the browser](https://d-markey.github.io/agenteek/agenteek_web/).
 
 ## 🚀 Getting Started
 

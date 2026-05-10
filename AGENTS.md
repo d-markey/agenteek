@@ -14,9 +14,13 @@ The workspace is divided into several categories of packages:
 
 - **[agenteek](packages/agenteek)**: The foundational library. Defines the `Agent` and `InteractiveAgent` classes, `ConversationManager` for history (memory/persistent), `ToolSet` architecture, and `McpToolSet` for Model Context Protocol integration.
 
-### Interfaces (Frontends)
+- **[agenteek_containers](packages/agenteek_containers)**: library adding support for running workloads in containers. Provides a `PodmanContainer` implementation.
 
-- **[agenteek_cli](packages/agenteek_cli)**: Command-line entry points. Includes an example of a multi-agent "dev team" interactive loop and batch processing modes.
+- **[agenteek_files](packages/agenteek_files)**: utility library for reading text files.
+
+- **[agenteek_team](packages/agenteek_team)**: Agenteek team configuration library. Configure a team of agents via YAML files and Markdown instructions.
+
+### Interfaces (Frontends)
 
 - **[agenteek_web](packages/agenteek_web)**: A browser-based chatbot UI for interacting with agents via a web interface.
 
@@ -24,13 +28,13 @@ The workspace is divided into several categories of packages:
 
 Modular building blocks that can be plugged into any agent:
 
-- **[agenteek_files](packages/toolsets/agenteek_files)**: File system access (list, search, read, write) with root-path security.
+- **[agenteek_files_toolset](packages/toolsets/agenteek_files_toolset)**: File system access (list, search, read, write) with root-path security.
 
-- **[agenteek_memory](packages/toolsets/agenteek_memory)**: Persistent topic-based memory (recall, memorize, forget).
+- **[agenteek_memory_toolset](packages/toolsets/agenteek_memory_toolset)**: Persistent topic-based memory (recall, memorize, forget).
 
-- **[agenteek_dart](packages/toolsets/agenteek_dart)**: Dart-specific developer tools (analyze, format, pubspec access).
+- **[agenteek_dart_toolset](packages/toolsets/agenteek_dart_toolset)**: Dart-specific developer tools (analyze, format, test, run).
 
-- **[agenteek_tickets](packages/toolsets/agenteek_tickets)**: Simple task/ticket management system for agents to track their work.
+- **[agenteek_tickets_toolset](packages/toolsets/agenteek_tickets_toolset)**: Simple task/ticket management system for agents to track their work.
 
 ---
 

@@ -37,7 +37,7 @@ class CombinedToolSet extends ToolSet {
         sideEffects.writeln(message);
       }
     }
-    return (sideEffects == null) ? '' : sideEffects.toString();
+    return (sideEffects == null) ? '' : sideEffects.toString().trim();
   }
 
   @override

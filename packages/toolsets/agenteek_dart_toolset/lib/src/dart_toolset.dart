@@ -1,0 +1,109 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:agenteek/agenteek.dart';
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
+import 'package:agenteek_containers/agenteek_containers.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
+
+import 'tools/analyze.dart';
+import 'tools/format.dart';
+import 'tools/pub_get.dart';
+import 'tools/run.dart';
+import 'tools/test.dart';
+
+class DartToolSet extends ToolSet with Prefix, Scope {
+  DartToolSet({
+    required String prefix,
+    String? scope,
+    String root = '.',
+    this.allowRun = false,
+  }) : prefix = prefix.toLowerCase().trim(),
+       scope = scope?.trim() ?? '',
+       root = p.canonicalize(root) + Platform.pathSeparator {
+    // register tools
+    register(analyzeTool(this));
+    register(formatTool(this));
+    register(pubGetTool(this));
+    register(testTool(this));
+    if (allowRun) register(runTool(this));
+  }
+
+  /// used as a namespace for functions
+  @override
+  final String prefix;
+
+  /// used as a scope description for tools
+  @override
+  final String scope;
+
+  /// the root folder for this toolset
+  final String root;
+
+  final bool allowRun;
+}
+
+@internal
+extension RunCommandExt on DartToolSet {
+  Future<bool> checkPodman() async {
+    try {
+      final version = await PodmanContainer.getVersion();
+      if (version.isNotEmpty) {
+        await PodmanContainer.startMachine();
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  Future<Json> exec(String command, List<String> args) async {
+    final id = Object().hashCode.toRadixString(16).padLeft(8, '0');
+
+    final completer = Completer<Json>();
+
+    dbg.trace('[$id] dart $command $args');
+    final process = await Process.start('dart', [
+      command,
+      ...args,
+    ], workingDirectory: root);
+
+    final stdErr = BytesBuilder(), stdErrDone = Completer();
+    process.stderr.listen((e) {
+      dbg.trace('[$id] [ERR] ${utf8.decode(e)}');
+      stdErr.add(e);
+    }, onDone: stdErrDone.complete);
+
+    final stdOut = BytesBuilder(), stdOutDone = Completer();
+    process.stdout.listen((e) {
+      dbg.trace(() => '[$id] [OUT] ${utf8.decode(e)}');
+      stdOut.add(e);
+    }, onDone: stdOutDone.complete);
+
+    process.exitCode.then(
+      (exitCode) async {
+        await stdErrDone.future;
+        await stdOutDone.future;
+        completer.complete({
+          'commandLine': {'command': command, 'args': args},
+          'stderr': utf8.decode(stdErr.toBytes()),
+          'stdout': utf8.decode(stdOut.toBytes()),
+          'exitCode': exitCode,
+        });
+      },
+      onError: (ex) async {
+        dbg.error('[$id] dart $command $args failed: $ex');
+        await stdErrDone.future;
+        await stdOutDone.future;
+        completer.complete({
+          'commandLine': {'command': command, 'args': args},
+          'error': ex.toString(),
+        });
+      },
+    );
+
+    return completer.future;
+  }
+}

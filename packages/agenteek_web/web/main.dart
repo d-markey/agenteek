@@ -15,7 +15,7 @@ void main() async {
   commands.register(HistoryCommand.to(nestedSystemOutput));
   commands.register(SummarizeCommand.to(nestedSystemOutput));
   commands.register(CompactCommand.to(nestedSystemOutput));
-  commands.register(SystemPromptCommand.to(nestedSystemOutput));
+  commands.register(SystemMessagesCommand.to(nestedSystemOutput));
   commands.register(ToolsCommand.to(nestedSystemOutput));
   commands.register(ClearCommand.to(nestedSystemOutput));
 

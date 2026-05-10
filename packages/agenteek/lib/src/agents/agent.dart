@@ -18,6 +18,7 @@ class Agent {
     this.modelOptions,
     String? displayName,
     this.role = '',
+    String? systemInstructions,
     this.modelOutput = const NullOutputSink(),
     StreamingOutputSink? streamingOutput,
     StreamingOutputSink? streamingThinking,
@@ -28,6 +29,7 @@ class Agent {
   }) : _streamingOutput = streamingOutput,
        _streamingThinking = streamingThinking,
        _displayName = displayName,
+       _systemPrompt = systemInstructions?.toSystemPrompt(),
        _toolSet = toolSet.isEmpty ? ToolSet.empty : CombinedToolSet({toolSet});
 
   final ConversationManager conversationManager;
@@ -36,6 +38,11 @@ class Agent {
   String get displayName => _displayName ?? _agent.displayName;
 
   final String role;
+
+  dartantic.ChatMessage? _systemPrompt;
+  set systemInstructions(String? instructions) {
+    _systemPrompt = instructions?.toSystemPrompt();
+  }
 
   final NewConversationCallback? onNewConversation;
   final ErrorCallback? onError;
@@ -58,6 +65,9 @@ class Agent {
     displayName: _displayName,
     tools: _toolSet.tools,
   );
+
+  dartantic.Provider get provider =>
+      dartantic.Agent.getProvider(_agent.providerName);
 
   void registerToolSet(ToolSet additionalToolset) {
     _toolSet = CombinedToolSet({_toolSet, additionalToolset});
@@ -82,9 +92,8 @@ class Agent {
             !m.hasToolResults,
       );
 
-  Iterable<dartantic.ChatMessage> get systemPrompts => conversationManager
-      .history
-      .where((m) => m.role == .system && m.text.isNotEmpty);
+  Iterable<dartantic.ChatMessage> get systemMessages =>
+      conversationManager.systemMessages;
 
   Checkpoint getCheckPoint() => conversationManager.getCheckpoint();
 
@@ -113,24 +122,48 @@ class Agent {
     await conversationManager.setConversation([.model(response.output)]);
   }
 
-  int _checkRepetitions(String text) {
+  static final _wordBoundary = RegExp(r'\b');
+  static final _digit = RegExp(r'[0-9]');
+  static final _hexNumber = RegExp(r'^(0x)?[a-fA-F0-9_]+$');
+  static final _word = RegExp(r'^[0-9\w]+$');
+
+  static bool _shouldKeepLine(String line) {
+    final parts = line.trim().split(_wordBoundary);
+    for (var i = parts.length - 1; i >= 0; i--) {
+      final p = parts[i].trim();
+      if (p.isEmpty) {
+        parts.removeAt(i);
+      } else if (_digit.hasMatch(p) && _hexNumber.hasMatch(p)) {
+        parts.removeAt(i);
+      } else if (!_word.hasMatch(p)) {
+        parts.removeAt(i);
+      }
+    }
+    return parts.length > 2;
+  }
+
+  /// Returns the number of repeating messages (more than 20 repetitions).
+  static int _checkRepetitions(String text, String mode) {
     final counts = <String, int>{};
-    text
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty && !l.startsWith('```') && l != '}')
-        .forEach((l) {
+    text.split('\n').map((l) => l.trim()).where(_shouldKeepLine).forEach((l) {
           counts.update(l, (n) => n + 1, ifAbsent: () => 1);
         });
     final entries = counts.entries.toList();
     entries.removeWhere((e) => e.value == 1);
-    entries.sort((a, b) => b.value.compareTo(a.value));
-    if (entries.where((e) => e.value > 20).isNotEmpty) {
+    entries.sort((a, b) {
+      final countDelta = b.value.compareTo(a.value);
+      return (countDelta == 0)
+          ? a.key.length.compareTo(b.key.length)
+          : countDelta;
+    });
+    final mostRepeated = entries.where((e) => e.value > 20);
+    if (mostRepeated.isNotEmpty) {
       print(
-        'TOP 3 THOUGHTS:\n${entries.take(3).map((e) => '  (${e.value}) ${e.key}').join('\n')}',
+        'TOP 5 ${mode.toUpperCase()}:\n'
+        '${mostRepeated.take(5).map((e) => ' - (${e.value}) ${e.key}').join('\n')}',
       );
     }
-    return entries.where((e) => e.value > 20).length;
+    return mostRepeated.length;
   }
 
   Stream<String> invoke(String prompt, {CancelationToken? token}) async* {
@@ -153,7 +186,7 @@ class Agent {
       if (output.isNotEmpty) {
         _streamingOutput?.add(output);
         fullOutput += output;
-        if (_checkRepetitions(fullOutput) > 2) {
+        if (_checkRepetitions(fullOutput, 'output') > 2) {
           isRepeating = true;
         }
       }
@@ -162,7 +195,7 @@ class Agent {
       if (thinking.isNotEmpty) {
         _streamingThinking?.add(thinking);
         fullThoughts += thinking;
-        if (_checkRepetitions(fullThoughts) > 2) {
+        if (_checkRepetitions(fullThoughts, 'thinking') > 2) {
           isRepeating = true;
         }
       }
@@ -170,7 +203,9 @@ class Agent {
       if (isRepeating) {
         if (!stream.isClosed) {
           final msg =
-              'I seem to be lost in circles, and I am repeating myself. Please start over.';
+              'It seems I am running in circles, and I am repeating myself. '
+              'Please start over. '
+              'If this happens again, try clearing my history before retrying.';
           final cancelled = dartantic.ChatMessage.model(msg);
           _agentLogger.log(cancelled);
           await conversationManager.register(
@@ -203,8 +238,6 @@ class Agent {
               .where((m) => m.role == .model)
               .expand((m) => m.parts.whereType<dartantic.TextPart>())) {
         stream.add(p.text);
-        fullOutput = '';
-        fullThoughts = '';
       }
 
       if (token != null && token.isCanceled) {
@@ -251,18 +284,20 @@ class Agent {
     yield* stream.stream;
   }
 
-  Future<int> startNewConversation({String? systemPrompt}) async {
-    systemPrompt = systemPrompt?.trim() ?? '';
-    final systemMessage = systemPrompt.isEmpty
-        ? null
-        : dartantic.ChatMessage.system(systemPrompt);
-    final chatId = await conversationManager.startConversation(systemMessage);
+  Future<int> startNewConversation() async {
+    final systemPrompt = _systemPrompt;
+    final chatId = await conversationManager.startConversation(systemPrompt);
     onNewConversation?.call();
-    if (systemMessage != null) {
-      _agentLogger.log(systemMessage);
-    }
+    if (systemPrompt != null) _agentLogger.log(systemPrompt);
     return chatId;
   }
 
   Future<void> dispose() => Future.value();
+}
+
+extension on String {
+  dartantic.ChatMessage? toSystemPrompt() {
+    final prompt = trim();
+    return prompt.isEmpty ? null : .system(prompt);
+  }
 }

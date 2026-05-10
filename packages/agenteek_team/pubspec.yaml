@@ -1,0 +1,28 @@
+name: agenteek_team
+description: Agenteek Team of Agents
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.11.5
+
+resolution: workspace
+
+dependencies:
+  better_future: ^2.0.3
+  dartantic_ai:
+  dart_mcp:
+  path:
+  yaml:
+  glob:
+  logging:
+  agenteek:
+  agenteek_files:
+  agenteek_memory_toolset:
+  agenteek_files_toolset:
+  agenteek_dart_toolset:
+  agenteek_tickets_toolset:
+
+dev_dependencies:
+  lints:
+  test:

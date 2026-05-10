@@ -1,0 +1,19 @@
+name: agenteek_memory_toolset
+description: Agenteek memory toolset.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.11.5
+
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  dartantic_interface:
+  agenteek:
+  dart_mcp:
+
+dev_dependencies:
+  lints:
+  test:

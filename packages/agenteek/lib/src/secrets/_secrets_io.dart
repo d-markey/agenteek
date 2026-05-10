@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:agenteek/src/secrets/in_memory_secrets.dart';
+import 'in_memory_secrets.dart';
 
 import 'secrets.dart';
 

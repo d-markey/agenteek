@@ -46,7 +46,7 @@ class ToolSet extends ToolSetBase {
   }
 
   @override
-  Future<ToolOutcome<T>> invoke<T>(String name, Json args) async {
+  Future<ToolOutcome<T>> invoke<T>(String name, [Json? args]) async {
     if (_disposed) {
       throw StateError('Cannot invoke a tool after the toolset was disposed.');
     }
@@ -55,7 +55,7 @@ class ToolSet extends ToolSetBase {
       return ToolError<T>(ToolNotFoundException(name, tools));
     }
     try {
-      return await tool.invoke<T>(args);
+      return await tool.invoke<T>(args ?? const {});
     } catch (ex, st) {
       return ToolError<T>(ex, st);
     }
@@ -85,7 +85,7 @@ class _EmptyToolSet extends ToolSetBase implements ToolSet {
   Tool? getTool(String name) => null;
 
   @override
-  Future<ToolOutcome<T>> invoke<T>(String name, Json args) => Future.value(
+  Future<ToolOutcome<T>> invoke<T>(String name, [Json? args]) => Future.value(
     ToolError<T>('Tool not found: "$name".', StackTrace.current),
   );
 

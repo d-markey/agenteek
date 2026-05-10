@@ -4,7 +4,7 @@ version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.11.5
 
 resolution: workspace
 
@@ -15,8 +15,8 @@ dependencies:
   dartantic_ai:
   agenteek:
   markdown:
-  cancelation_token: 
-  better_future: ^2.0.0
+  cancelation_token:
+  better_future: ^2.0.3
   pdf: ^3.11.0
   http: ^1.6.0
 
