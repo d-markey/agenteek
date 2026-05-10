@@ -4,11 +4,11 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:agenteek_team/agenteek_team.dart';
-import 'package:logging/logging.dart' as l;
 import 'package:path/path.dart' as p;
+import 'package:logging/logging.dart' as l;
 
-import 'args.dart';
 import 'console_sink.dart';
+import 'args.dart';
 
 final sw = Stopwatch()..start();
 var lastTimestamp = 0;
@@ -46,7 +46,10 @@ void main(List<String> arguments) async {
     ..onRecord.listen(_log);
 
   final args = Args.parse(arguments);
-  if (args.promptPath.isNotEmpty) {
+  if (args.teamConfPath.isEmpty) {
+    print('Missing team configuration (YAML file)');
+    usage();
+  } else if (args.promptPath.isNotEmpty) {
     print('Unsupported argument: --prompt:${args.promptPath}');
     usage();
   } else if (args.unknown.isNotEmpty) {
@@ -57,11 +60,7 @@ void main(List<String> arguments) async {
   }
 
   // apply defaults and load configuration
-  if (args.teamConfPath.isEmpty) {
-    args.overrideTeamConfPath(
-      p.join(p.dirname(Platform.script.toFilePath()), 'lgmodel/team.yaml'),
-    );
-  } else if (p.isRelative(args.teamConfPath)) {
+  if (p.isRelative(args.teamConfPath)) {
     args.overrideTeamConfPath(
       p.join(p.dirname(Platform.script.toFilePath()), args.teamConfPath),
     );

@@ -2,7 +2,7 @@ import 'dart:io' as io;
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek_tickets_toolset/agenteek_tickets_toolset.dart';
+import 'package:agenteek_tickets_toolset/tickets_toolset.dart';
 
 void main(List<String> args) {
   var owner = '', root = '', logger = null as ErrorSink?;

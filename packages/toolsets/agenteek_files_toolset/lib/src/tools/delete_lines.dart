@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
-import '../../agenteek_files_toolset.dart';
+import '../../files_toolset.dart';
 
 /// Deletes selected lines from a file.
 ///

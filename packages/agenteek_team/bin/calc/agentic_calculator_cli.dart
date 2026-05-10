@@ -44,6 +44,12 @@ void main() async {
     agentConf.modelInfo,
     conversationManager: conversationManager,
     displayName: agentConf.displayName,
+    systemInstructions:
+        'Follow mathematical operator precedence, i.e. multiplications before additions. '
+        'To check if a number is prime, check remainders of divisions by numbers greater than 1 and less than half the checked number: if all remainders are positive, it means the number is prime. '
+        'When checking for primality: as soon as a remainder is zero, no further checks are necessary and the number is prime. '
+        'When possible, reuse previous calculations and tool results and indicate which results were reused. '
+        'Note that "a - b" (subtracting b from a) is equivalent to "a + -b". ',
     prompt: () {
       stdout.write('\x1B[94mYou\x1B[0m: ');
       return stdin.readLineSync()?.trim() ?? '';
@@ -52,14 +58,7 @@ void main() async {
     toolSet: mcpTools,
   );
 
-  await agent.startNewConversation(
-    systemPrompt:
-        'Follow mathematical operator precedence, i.e. multiplications before additions. '
-        'To check if a number is prime, check remainders of divisions by numbers greater than 1 and less than half the checked number: if all remainders are positive, it means the number is prime. '
-        'When checking for primality: as soon as a remainder is zero, no further checks are necessary and the number is prime. '
-        'When possible, reuse previous calculations and tool results and indicate which results were reused. '
-        'Note that "a - b" (subtracting b from a) is equivalent to "a + -b". ',
-  );
+  await agent.startNewConversation();
 
   print(
     '${agent.displayName} Agent is running with model ${agent.chatModelName}.',

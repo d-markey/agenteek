@@ -6,7 +6,8 @@ import '../toolsets/toolset.dart';
 import 'check_point.dart';
 
 abstract class ConversationManager {
-  Iterable<dartantic.ChatMessage> get systemInstructions;
+  Iterable<dartantic.ChatMessage> get systemMessages =>
+      history.where((m) => m.role == .system && m.text.isNotEmpty);
 
   Iterable<dartantic.ChatMessage> get history;
 
@@ -20,7 +21,7 @@ abstract class ConversationManager {
 
   Future<List<String>> listConversations();
 
-  Future<int> startConversation([dartantic.ChatMessage? systemInstructions]);
+  Future<int> startConversation([dartantic.ChatMessage? systemPrompt]);
 
   Future<bool> switchToConversation(int conversationId);
 
@@ -34,9 +35,14 @@ abstract class ConversationManager {
 }
 
 extension ChatResultExt on dartantic.ChatResult {
-  dartantic.ChatResult? deepClone({bool keepThoughts = false}) {
+  dartantic.ChatResult? copyAndPrepare({
+    bool keepThoughts = false,
+    ToolSet? toolSet,
+  }) {
     final keepMessages = messages
-        .map((m) => m.deepClone(keepThoughts: keepThoughts))
+        .map(
+          (m) => m.copyAndPrepare(keepThoughts: keepThoughts, toolSet: toolSet),
+        )
         .nonNulls
         .toList();
     return keepMessages.isEmpty
@@ -54,7 +60,10 @@ extension ChatResultExt on dartantic.ChatResult {
 }
 
 extension ChatMessageExt on dartantic.ChatMessage {
-  dartantic.ChatMessage? deepClone({bool keepThoughts = false}) {
+  dartantic.ChatMessage? copyAndPrepare({
+    bool keepThoughts = false,
+    ToolSet? toolSet,
+  }) {
     final keepParts = keepThoughts
         ? parts
         : parts.where((p) => p is! dartantic.ThinkingPart);

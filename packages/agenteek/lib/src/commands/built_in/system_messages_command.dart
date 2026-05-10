@@ -1,14 +1,13 @@
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
-
 import '../../agents/agent.dart';
 import '../../output_sinks/nested_output_sink.dart';
 import '../../output_sinks/output_sink.dart';
+import '../../utils/debug.dart' as dbg;
 import '../command.dart';
 
-class SystemPromptCommand extends Command {
-  const SystemPromptCommand() : output = null;
+class SystemMessagesCommand extends Command {
+  const SystemMessagesCommand() : output = null;
 
-  SystemPromptCommand.to(this.output);
+  SystemMessagesCommand.to(this.output);
 
   final OutputSink? output;
 
@@ -16,23 +15,20 @@ class SystemPromptCommand extends Command {
   String get name => 'system';
 
   @override
-  String get description => 'Show the current system prompt.';
-
-  @override
-  List<String> get aliases => const ['system-prompt', 'sys'];
+  String get description => 'Show system messages.';
 
   @override
   Null handle(Agent agent, List<String> args) {
     try {
       final writeln = output?.writeln ?? print;
-      if (agent.systemPrompts.isEmpty) {
-        writeln('**No system prompt**');
+      if (agent.systemMessages.isEmpty) {
+        writeln('**No system messages**');
         return;
       }
 
-      writeln('### System Prompt:');
+      writeln('### System Messages:');
       writeln('');
-      writeln(agent.systemPrompts.map(($) => $.dump()).join('\n'));
+      writeln(agent.systemMessages.map(($) => $.dump()).join('\n'));
     } finally {
       if (output is NestedOutputSink) {
         (output as NestedOutputSink).close();

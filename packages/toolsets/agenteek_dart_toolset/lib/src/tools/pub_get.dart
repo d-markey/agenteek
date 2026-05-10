@@ -33,7 +33,7 @@ Future<ToolSuccess<Json>> _pubGet(DartToolSet toolSet, Json args) async {
   }
 
   return ToolSuccess(
-    await toolSet.exec('dart', ['pub', mode, '--directory=${dir.path}']),
+    await toolSet.exec('pub', [mode, '--directory=${dir.path}']),
   );
 }
 

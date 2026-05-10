@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
-import '../../agenteek_dart_toolset.dart';
+import '../dart_toolset.dart';
 
 // format
 Tool formatTool(DartToolSet toolSet) => Tool(
@@ -27,7 +27,7 @@ Future<ToolSuccess<Json>> _format(DartToolSet toolSet, Json args) async {
     }
   }
 
-  return ToolSuccess(await toolSet.exec('dart', ['format', fileOrDir.path]));
+  return ToolSuccess(await toolSet.exec('format', [fileOrDir.path]));
 }
 
 final _inputSchema = Z.object(

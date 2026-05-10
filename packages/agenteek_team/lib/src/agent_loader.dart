@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek_dart_toolset/agenteek_dart_toolset.dart';
-import 'package:agenteek_files_toolset/agenteek_files_toolset.dart';
-import 'package:agenteek_memory_toolset/agenteek_memory_toolset.dart';
-import 'package:agenteek_tickets_toolset/agenteek_tickets_toolset.dart';
+import 'package:agenteek_dart_toolset/dart_toolset.dart';
+import 'package:agenteek_files_toolset/files_toolset.dart';
+import 'package:agenteek_memory_toolset/memory_toolset.dart';
+import 'package:agenteek_tickets_toolset/tickets_toolset.dart';
 import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart';
 import 'package:yaml/yaml.dart';
@@ -70,13 +70,11 @@ Future<List<AgentConf>> loadAgentsConf(File yaml, Secrets secrets) async {
           }
           final description =
               tool.value['description']?.toString().trim() ?? '';
-          final allowRun = (tool.value['allow-run'] as bool?) ?? false;
           agentConf.registerToolSet(
             DartToolSet(
               prefix: tool.key,
               root: path,
               scope: 'Dart tools for $description',
-              allowRun: allowRun,
             ),
           );
         case 'tickets':

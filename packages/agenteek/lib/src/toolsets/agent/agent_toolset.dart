@@ -19,20 +19,14 @@ class AgentToolSet extends ToolSet with Prefix {
   /// - [role]: The unique identifier for the agent (used in tool names like ${id}_prompt).
   /// - [_agent]: The actual `Agent` instance this toolset wraps.
   /// - [modelInput]: An optional callback to intercept and process the model's input.
-  AgentToolSet(
-    this._agent, {
-    String? systemPrompt,
-    this.modelInput = const NullOutputSink(),
-  }) : _systemPrompt = systemPrompt {
+  AgentToolSet(this._agent, {this.modelInput = const NullOutputSink()}) {
     register(_sendMessageSpec);
     register(_clearHistorySpec);
-    unawaited(_agent.startNewConversation(systemPrompt: _systemPrompt));
+    unawaited(_agent.startNewConversation());
   }
 
   /// The `Agent` instance this toolset wraps.
   final Agent _agent;
-
-  final String? _systemPrompt;
 
   /// An optional callback to intercept and process the model's input.
   final Sink<String> modelInput;
@@ -79,7 +73,7 @@ class AgentToolSet extends ToolSet with Prefix {
 
   Future<ToolSuccess<String>> _clearHistory(Json args) async {
     modelInput.add('`${buildToolName('clear_history')}`');
-    await _agent.startNewConversation(systemPrompt: _systemPrompt);
+    await _agent.startNewConversation();
     return ToolSuccess.ok;
   }
 }

@@ -36,10 +36,6 @@ class FileSystemConversationManager extends ConversationManager {
   }
 
   @override
-  Iterable<dartantic.ChatMessage> get systemInstructions =>
-      _history.where((m) => m.role == .system);
-
-  @override
   Iterable<dartantic.ChatMessage> get history => _history;
 
   String _getFileName({int? conversationId}) =>
@@ -75,13 +71,11 @@ class FileSystemConversationManager extends ConversationManager {
   }).toList();
 
   @override
-  Future<int> startConversation([
-    dartantic.ChatMessage? systemInstructions,
-  ]) async {
+  Future<int> startConversation([dartantic.ChatMessage? systemPrompt]) async {
     final conversationId = _uniqueId.next();
     _history.clear();
     _checkpoints.clear();
-    _register(systemInstructions);
+    _register(systemPrompt);
     _conversationId = conversationId;
     await _save();
     return conversationId;
@@ -112,18 +106,19 @@ class FileSystemConversationManager extends ConversationManager {
 
   @override
   Future<void> register(dartantic.ChatResult result, {ToolSet? toolSet}) async {
-    final copy = result.deepClone(keepThoughts: false);
+    final copy = result.copyAndPrepare(keepThoughts: false, toolSet: toolSet);
     if (copy == null) return;
 
     if (_conversationId < 0) await startConversation();
 
+    copy.messages.forEach(_register);
+
     final sideEffects = (await toolSet?.checkSideEffects(copy)) ?? '';
     if (sideEffects.isNotEmpty) {
-      copy.messages.add(.system('**Side Effects**:\n$sideEffects'));
-      print('Side Effects: $sideEffects');
+      _register(.system('**Side Effects**:\n$sideEffects'));
+      print('Side Effects:\n$sideEffects');
     }
 
-    copy.messages.forEach(_register);
     await _history.redactObsoleteToolResults(toolSet);
 
     await _save();

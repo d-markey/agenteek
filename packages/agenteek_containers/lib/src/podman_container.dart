@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
 
 import 'container.dart';
@@ -142,7 +143,7 @@ class PodmanContainer implements Container {
   }
 
   @override
-  Future<Map<String, Object?>> run(String command, {String? workingDir}) async {
+  Future<Json> run(String command, {String? workingDir}) async {
     if (workingDir != null) {
       workingDir = _getSafePath(workingDir);
     }
@@ -156,13 +157,13 @@ class PodmanContainer implements Container {
     ]);
   }
 
-  static Future<Map<String, Object?>> _exec(
+  static Future<Json> _exec(
     String command, [
     List<String> args = const [],
   ]) async {
     final id = Object().hashCode.toRadixString(16).padLeft(8, '0');
 
-    final completer = Completer<Map<String, Object?>>();
+    final completer = Completer<Json>();
 
     dbg.trace('[$id] podman $command $args');
     final process = await Process.start('podman', [command, ...args]);

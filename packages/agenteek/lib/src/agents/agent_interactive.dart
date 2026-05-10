@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:cancelation_token/cancelation_token.dart';
 
+import '../commands/built_in/clear_command.dart';
+import '../commands/built_in/list_models_command.dart';
 import '../commands/command.dart';
 import '../commands/command_registry.dart';
 import '../commands/built_in/compact_command.dart';
@@ -9,7 +11,7 @@ import '../commands/built_in/help_command.dart';
 import '../commands/built_in/history_command.dart';
 import '../commands/built_in/quit_command.dart';
 import '../commands/built_in/summarize_command.dart';
-import '../commands/built_in/system_prompt_command.dart';
+import '../commands/built_in/system_messages_command.dart';
 import '../commands/built_in/tools_command.dart';
 import '../utils/debug.dart' as dbg;
 import '../utils/types.dart';
@@ -22,6 +24,7 @@ class InteractiveAgent extends Agent {
     required super.conversationManager,
     super.displayName,
     super.role = '',
+    super.systemInstructions = '',
     super.modelOutput,
     super.streamingOutput,
     super.streamingThinking,
@@ -34,13 +37,15 @@ class InteractiveAgent extends Agent {
        commandRegistry = commandRegistry ?? CommandRegistry() {
     // Register default commands if the registry is empty or new.
     if (this.commandRegistry.all.isEmpty) {
-      this.commandRegistry.register(HelpCommand.to(modelOutput));
       this.commandRegistry.register(QuitCommand(callback: stopInteracting));
+      this.commandRegistry.register(ClearCommand.to(modelOutput));
+      this.commandRegistry.register(HelpCommand.to(modelOutput));
       this.commandRegistry.register(HistoryCommand.to(modelOutput));
       this.commandRegistry.register(SummarizeCommand.to(modelOutput));
       this.commandRegistry.register(CompactCommand.to(modelOutput));
-      this.commandRegistry.register(SystemPromptCommand.to(modelOutput));
+      this.commandRegistry.register(SystemMessagesCommand.to(modelOutput));
       this.commandRegistry.register(ToolsCommand.to(modelOutput));
+      this.commandRegistry.register(ListModelsCommand.to(modelOutput));
     }
   }
 
@@ -113,7 +118,7 @@ class InteractiveAgent extends Agent {
           // If invokeStream() threw, onError was already called once.
           dbg.error('!!! UNHANDLED ERROR: $ex\n$st');
         } finally {
-          throttling = Future.delayed(const Duration(seconds: 4));
+          throttling = Future.delayed(const Duration(milliseconds: 500));
         }
       }
     }

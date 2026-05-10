@@ -1,10 +1,10 @@
 name: agenteek_team
-description: Agenteek command line.
+description: Agenteek Team of Agents
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.11.5
 
 resolution: workspace
 

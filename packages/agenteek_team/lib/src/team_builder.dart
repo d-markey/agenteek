@@ -1,7 +1,6 @@
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
-
-import 'agent_conf.dart';
+import '../agenteek_team.dart';
 
 // builds the team based on the provided configuration
 Map<String, Agent> buildTeam(
@@ -59,6 +58,7 @@ Map<String, Agent> buildTeam(
     final agent = agents[conf.displayName]!;
 
     conf.prepareInstructions();
+    agent.systemInstructions = conf.instructions;
 
     if (conf.instructor.isNotEmpty) {
       final instructor = agents[conf.instructor]!;
@@ -66,19 +66,11 @@ Map<String, Agent> buildTeam(
         instructor.displayName,
         conf.displayName,
       );
-      instructor.registerToolSet(
-        AgentToolSet(
-          agent,
-          systemPrompt: conf.instructions,
-          modelInput: modelInput,
-        ),
-      );
+      instructor.registerToolSet(AgentToolSet(agent, modelInput: modelInput));
     }
   }
 
-  agents[rootAgentName]!.startNewConversation(
-    systemPrompt: rootAgentConf.instructions,
-  );
+  agents[rootAgentName]!.startNewConversation();
 
   return agents;
 }

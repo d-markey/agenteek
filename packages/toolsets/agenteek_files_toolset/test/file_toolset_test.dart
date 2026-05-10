@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
-import 'package:agenteek_files_toolset/agenteek_files_toolset.dart';
+import 'package:agenteek_files_toolset/files_toolset.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 

@@ -133,9 +133,9 @@ class HtmlStreamingSink implements StreamingOutputSink {
   Future<void> finish() {
     final div = _getDiv();
     if (div != null) {
-      if (collapsible && _current.isNotEmpty) {
+      if (collapsible && _current.trim().isNotEmpty) {
         final label = _getLabelHtml(_label(), _id, true);
-        div.innerHTML = '$label$_copyButtonHtml${_current.toHtml()}'.toJS;
+        div.innerHTML = '$label$_copyButtonHtml${_current.trim().toHtml()}'.toJS;
         div.classList.add('collapsed');
       } else {
         div.remove();

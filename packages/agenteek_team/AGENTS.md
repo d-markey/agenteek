@@ -1,4 +1,4 @@
-# AGENTS.md — `agenteek_cli`
+# AGENTS.md — `agenteek_team`
 
 ## Package Purpose
 
@@ -122,17 +122,17 @@ The `FileLocator` in `lib/` handles discovery. Pass `--secrets:<path>` to overri
 
 ```bash
 # Interactive mode (default team config)
-dart run packages/agenteek_cli/bin/devteam/agentic_team_interactive.dart
+dart run packages/agenteek_team/bin/devteam/agentic_team_interactive.dart
 
 # With custom config and secrets
-dart run packages/agenteek_cli/bin/devteam/agentic_team_interactive.dart \
+dart run packages/agenteek_team/bin/devteam/agentic_team_interactive.dart \
   --team-conf:my_team.yaml \
   --secrets:/path/to/.secret.keys
 
 # Batch mode
-dart run packages/agenteek_cli/bin/devteam/agentic_team_batch.dart \
+dart run packages/agenteek_team/bin/devteam/agentic_team_batch.dart \
   --prompt:my_prompt.md
 
 # Calculator demo
-dart run packages/agenteek_cli/bin/calc/agentic_calculator_cli.dart
+dart run packages/agenteek_team/bin/calc/agentic_calculator_cli.dart
 ```

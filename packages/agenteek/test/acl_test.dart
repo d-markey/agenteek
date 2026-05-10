@@ -1,4 +1,4 @@
-import 'package:agenteek/src/utils/access_control_list.dart';
+import 'package:agenteek/agenteek.dart';
 import 'package:test/test.dart';
 
 void main() {

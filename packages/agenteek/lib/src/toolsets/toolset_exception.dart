@@ -6,7 +6,7 @@ abstract class ToolSetException implements Exception {
   final String message;
 
   @override
-  String toString() => '$runtimeType: message';
+  String toString() => '$runtimeType: $message';
 }
 
 class ToolNotFoundException extends ToolSetException {
@@ -39,23 +39,17 @@ class ToolNotFoundException extends ToolSetException {
   }
 }
 
-class MissingArgumentException implements ToolSetException {
+class MissingArgumentException extends ToolSetException {
   final String argumentName;
 
-  MissingArgumentException(this.argumentName);
-
-  @override
-  String get message =>
-      'Argument "$argumentName" is required but was not found.';
+  MissingArgumentException(this.argumentName)
+    : super('Argument "$argumentName" is required but was not found.');
 }
 
-class InvalidArgumentException implements ToolSetException {
+class InvalidArgumentException extends ToolSetException {
   final String argumentName;
   final String expectedType;
 
-  InvalidArgumentException(this.argumentName, this.expectedType);
-
-  @override
-  String get message =>
-      'Argument "$argumentName" expected to be of type $expectedType.';
+  InvalidArgumentException(this.argumentName, this.expectedType)
+    : super('Argument "$argumentName" expected to be of type $expectedType.');
 }

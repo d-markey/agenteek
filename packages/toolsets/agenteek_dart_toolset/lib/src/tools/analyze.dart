@@ -26,7 +26,7 @@ Future<ToolSuccess<Json>> _analyze(DartToolSet toolSet, Json args) async {
       throw 'Not found: ${fileOrDir.getLocalPath(toolSet.root)}';
     }
   }
-  return ToolSuccess(await toolSet.exec('dart', ['analyze', fileOrDir.path]));
+  return ToolSuccess(await toolSet.exec('analyze', [fileOrDir.path]));
 }
 
 final _inputSchema = Z.object(

@@ -1,7 +1,9 @@
-import 'package:agenteek/agenteek.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../../agenteek_dbg.dart' as dbg;
+import '../utils/log.dart';
+import 'agent.dart';
+import 'agent_interactive.dart';
 
 class AgentLogger {
   AgentLogger(this.agent)

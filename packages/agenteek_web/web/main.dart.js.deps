@@ -2609,9 +2609,10 @@ file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/compact_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/help_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/history_command.dart
+file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/list_models_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/quit_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/summarize_command.dart
-file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/system_prompt_command.dart
+file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/system_messages_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/built_in/tools_command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/command.dart
 file:///C:/_Projects/ai/tmp/agenteek/packages/agenteek/lib/src/commands/command_registry.dart

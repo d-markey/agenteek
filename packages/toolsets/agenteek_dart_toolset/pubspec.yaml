@@ -4,7 +4,7 @@ version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.11.5
 
 resolution: workspace
 
@@ -12,9 +12,11 @@ resolution: workspace
 dependencies:
   dartantic_interface:
   agenteek:
+  agenteek_containers:
   agenteek_files:
   dart_mcp:
   path:
+  meta:
 
 dev_dependencies:
   lints:
