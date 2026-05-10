@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Creates a new file at the specified path.
 ///
@@ -14,18 +15,16 @@ import '../file_toolset.dart';
 Tool<String> createFileTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('create_file'),
   description: toolSet.buildDescription('Create a new file'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _createFile(toolSet, args),
+  inputSchema: CreateFileArgs.schema,
+  onCall: (args) => _createFile(toolSet, CreateFileArgs(args)),
 );
 
-Future<ToolSuccess<String>> _createFile(FileToolSet toolSet, Json args) async {
-  // load args
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final text = args.getString('text', defaultValue: '');
-
+Future<ToolSuccess<String>> _createFile(
+  FileToolSet toolSet,
+  CreateFileArgs args,
+) async {
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
 
   // proceed
@@ -45,14 +44,6 @@ Future<ToolSuccess<String>> _createFile(FileToolSet toolSet, Json args) async {
     }
   }
   await file.parent.create(recursive: true);
-  await file.writeAsString(text);
+  await file.writeAsString(args.text);
   return ToolSuccess.ok;
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(description: 'File path'),
-    'text': Z.string(description: 'Text to write to the file'.optional()),
-  },
-  required: ['path'],
-);

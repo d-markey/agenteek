@@ -6,9 +6,10 @@ import 'package:agenteek_containers/agenteek_containers.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../dart_toolset.dart';
+import '_json_arguments.dart';
 
 // test
-Tool testTool(DartToolSet toolSet) => Tool(
+Tool<Json> testTool(DartToolSet toolSet) => Tool(
   name: toolSet.buildToolName('test'),
   description: toolSet.buildDescription('Runs unit tests'),
   inputSchema: DirectoryOrFileArgs.schema,
@@ -53,23 +54,6 @@ Future<ToolSuccess<Json>> _test(
   result['stdout'] = _summarize(result['stdout'] as String?).trim();
 
   return ToolSuccess(result);
-}
-
-extension type DirectoryOrFileArgs(Json _json) {
-  String get path {
-    final p = _json.getString('path', defaultValue: '').trim();
-    return p.startsWith('/') ? p.substring(1) : p;
-  }
-
-  static final schema = Z.object(
-    properties: {
-      'path': Z.string(
-        description: 'Path to the directory or file.'.optional(
-          'root directory',
-        ),
-      ),
-    },
-  );
 }
 
 String _summarize(String? testReport) {

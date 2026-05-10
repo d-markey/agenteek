@@ -5,20 +5,18 @@ import 'package:agenteek_containers/agenteek_containers.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../dart_toolset.dart';
+import '_json_arguments.dart';
 
 // run
-Tool runTool(DartToolSet toolSet) => Tool(
+Tool<Json> runTool(DartToolSet toolSet) => Tool(
   name: toolSet.buildToolName('run'),
   description: toolSet.buildDescription('Runs a Dart script'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _run(toolSet, args),
+  inputSchema: RunArgs.schema,
+  onCall: (args) => _run(toolSet, RunArgs(args)),
 );
 
-Future<ToolSuccess<Json>> _run(DartToolSet toolSet, Json args) async {
-  var path = args.getString('path');
-  if (path.startsWith('/')) path = path.substring(1);
-
-  final script = await File(path).check(toolSet.root);
+Future<ToolSuccess<Json>> _run(DartToolSet toolSet, RunArgs args) async {
+  final script = await File(args.scriptPath).check(toolSet.root);
   if (!await script.exists()) {
     throw 'Not found: ${script.getLocalPath(toolSet.root)}';
   }
@@ -46,8 +44,3 @@ Future<ToolSuccess<Json>> _run(DartToolSet toolSet, Json args) async {
 
   return ToolSuccess(result);
 }
-
-final _inputSchema = Z.object(
-  properties: {'path': Z.string(description: 'The path to the Dart script.')},
-  required: ['path'],
-);

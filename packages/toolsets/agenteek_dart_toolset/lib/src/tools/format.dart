@@ -4,24 +4,25 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../dart_toolset.dart';
+import '_json_arguments.dart';
 
 // format
-Tool formatTool(DartToolSet toolSet) => Tool(
+Tool<Json> formatTool(DartToolSet toolSet) => Tool(
   name: toolSet.buildToolName('format'),
   description: toolSet.buildDescription('Formats a Dart file or a directory'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _format(toolSet, args),
+  inputSchema: DirectoryOrFileArgs.schema,
+  onCall: (args) => _format(toolSet, DirectoryOrFileArgs(args)),
 );
 
-Future<ToolSuccess<Json>> _format(DartToolSet toolSet, Json args) async {
-  var path = args.getString('path', defaultValue: '').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-
+Future<ToolSuccess<Json>> _format(
+  DartToolSet toolSet,
+  DirectoryOrFileArgs args,
+) async {
   FileSystemEntity fileOrDir;
-  if (path.isEmpty) {
+  if (args.path.isEmpty) {
     fileOrDir = Directory(toolSet.root);
   } else {
-    fileOrDir = await Link(path).check(toolSet.root);
+    fileOrDir = await Link(args.path).check(toolSet.root);
     if (!await fileOrDir.exists()) {
       throw 'Not found: ${fileOrDir.getLocalPath(toolSet.root)}';
     }
@@ -29,14 +30,3 @@ Future<ToolSuccess<Json>> _format(DartToolSet toolSet, Json args) async {
 
   return ToolSuccess(await toolSet.exec('format', [fileOrDir.path]));
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(
-      description: 'The path of the file or directory to format'.optional(
-        'root directory',
-      ),
-    ),
-  },
-  required: ['path'],
-);
