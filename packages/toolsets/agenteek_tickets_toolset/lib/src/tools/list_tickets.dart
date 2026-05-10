@@ -1,19 +1,18 @@
 import 'dart:convert';
+
 import 'package:agenteek/agenteek.dart';
+
 import '../ticket.dart';
 import '../tickets_toolset.dart';
 
 /// A tool that lists all tickets.
-Tool listTicketsTool(TicketToolSet toolset) => Tool(
+Tool<List<Json>> listTicketsTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.list',
   description: toolset.scoped('List all tickets'),
-  onCall: (args) => _listTickets(toolset, args),
+  onCall: (_) => _listTickets(toolset),
 );
 
-Future<ToolSuccess<List<Json>>> _listTickets(
-  TicketToolSet toolset,
-  Json args,
-) async {
+Future<ToolSuccess<List<Json>>> _listTickets(TicketToolSet toolset) async {
   if (toolset.fileSystem != null) {
     final fs = toolset.fileSystem!;
     await for (var f in toolset.listTicketFiles(fs)) {

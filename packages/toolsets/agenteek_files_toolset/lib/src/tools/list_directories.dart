@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Lists all directories within a specified path.
 ///
@@ -18,30 +19,29 @@ Tool<String> listDirectoriesTool(FileToolSet toolSet) => Tool(
   description: toolSet.buildDescription(
     'Use this tool to list directories in a given directory, or to locate a directory; this tools lists **directories only**, not files',
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _listDirectories(toolSet, args),
+  inputSchema: ListDirectoriesArgs.schema,
+  onCall: (args) => _listDirectories(toolSet, ListDirectoriesArgs(args)),
 );
 
 Future<ToolSuccess<String>> _listDirectories(
   FileToolSet toolSet,
-  Json args,
+  ListDirectoriesArgs args,
 ) async {
-  // load args
-  var path = args.getString('path', defaultValue: '.').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final recursive = args.getBool('recursive', defaultValue: false);
-  final includeHidden =
-      args.getBool('includeHidden', defaultValue: false) &&
-      toolSet.showHiddenFiles;
-
   // check
-  final dir = await Directory(path).check<Directory>(toolSet.root);
+  Directory dir;
+  if (args.path.isEmpty) {
+    dir = Directory(toolSet.root);
+  } else {
+    dir = await Directory(args.path).check<Directory>(toolSet.root);
+  }
   if (!toolSet.showHiddenFiles && dir.isHidden) throw 'Access denied';
   if (!await dir.exists()) {
     throw 'Directory not found: ${dir.getLocalPath(toolSet.root)}';
   }
 
   // proceed
+  final recursive = args.recursive;
+  final includeHidden = args.includeHidden && toolSet.showHiddenFiles;
   final pending = <Directory>[], results = StringBuffer();
   if (includeHidden || !dir.isHidden) pending.add(dir);
   var idx = 0;
@@ -61,16 +61,16 @@ Future<ToolSuccess<String>> _listDirectories(
   return ToolSuccess(results.toString());
 }
 
-final _inputSchema = Z.object(
+final _inputSchema = S.object(
   properties: {
-    'path': Z.string(
+    'path': S.string(
       description: 'Directory to list from'.optional('root directory'),
     ),
-    'recursive': Z.boolean(
+    'recursive': S.boolean(
       description: 'Whether listing should recurse through sub-directories'
           .optional('false'),
     ),
-    'includeHidden': Z.boolean(
+    'includeHidden': S.boolean(
       description: 'Whether to include hidden directories (starting with a dot)'
           .optional('false'),
     ),

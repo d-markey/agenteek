@@ -1,26 +1,26 @@
 import 'dart:convert';
+
 import 'package:agenteek/agenteek.dart';
+
 import '../memory_toolset.dart';
+import '_json_arguments.dart';
 
 /// A tool that forgets information about a topic.
 Tool forgetTopicTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('forget_topic'),
   description: 'Forget information about a topic',
-  inputSchema: _inputSchema,
-  onCall: (args) => _forgetTopic(toolset, args),
+  inputSchema: ForgetTopicArgs.schema,
+  onCall: (args) => _forgetTopic(toolset, ForgetTopicArgs(args)),
 );
 
 Future<ToolSuccess<String>> _forgetTopic(
   MemoryToolSet toolset,
-  Json args,
+  ForgetTopicArgs args,
 ) async {
-  final topic = args.getString('topic').trim().toLowerCase();
-  if (topic.isEmpty) throw 'Missing topic.';
-
   await toolset.sync();
 
-  if (toolset.topics.containsKey(topic)) {
-    toolset.topics.remove(topic);
+  if (toolset.topics.containsKey(args.topic)) {
+    toolset.topics.remove(args.topic);
     await toolset.fileSystem.write(
       toolset.fileName,
       jsonEncode(toolset.topics),
@@ -29,8 +29,3 @@ Future<ToolSuccess<String>> _forgetTopic(
 
   return ToolSuccess.ok;
 }
-
-final _inputSchema = Z.object(
-  properties: {'topic': Z.string(description: 'Topic to forget')},
-  required: ['topic'],
-);

@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Gets the number of lines in a file.
 ///
@@ -14,17 +15,16 @@ import '../file_toolset.dart';
 Tool<int> getLineCountTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('line_count'),
   description: toolSet.buildDescription('Gets the number of lines in a file'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _getLineCount(toolSet, args),
+  inputSchema: GetLineCountArgs.schema,
+  onCall: (args) => _getLineCount(toolSet, GetLineCountArgs(args)),
 );
 
-Future<ToolSuccess<int>> _getLineCount(FileToolSet toolSet, Json args) async {
-  // load args
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-
+Future<ToolSuccess<int>> _getLineCount(
+  FileToolSet toolSet,
+  GetLineCountArgs args,
+) async {
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
   if (!await file.exists()) {
     throw 'File not found: ${file.getLocalPath(toolSet.root)}.';
@@ -34,8 +34,3 @@ Future<ToolSuccess<int>> _getLineCount(FileToolSet toolSet, Json args) async {
   final lines = await FileReader.readLines(file);
   return ToolSuccess(lines.length);
 }
-
-final _inputSchema = Z.object(
-  properties: {'path': Z.string(description: 'File path')},
-  required: ['path'],
-);

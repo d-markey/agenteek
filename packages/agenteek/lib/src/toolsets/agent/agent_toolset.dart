@@ -40,9 +40,9 @@ class AgentToolSet extends ToolSet with Prefix {
     description:
         'Send a message (prompt) to AI Agent ${_agent.displayName} (role: ${_agent.role}); '
         'returns the response from the Agent.',
-    inputSchema: Z.object(
+    inputSchema: S.object(
       properties: {
-        'prompt': Z.string(description: 'Instructions for the Agent.'),
+        'prompt': S.string(description: 'Instructions for the Agent.'),
       },
       required: ['prompt'],
     ),

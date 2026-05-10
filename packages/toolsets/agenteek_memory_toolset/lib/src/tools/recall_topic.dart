@@ -1,29 +1,21 @@
 import 'package:agenteek/agenteek.dart';
+
 import '../memory_toolset.dart';
+import '_json_arguments.dart';
 
 /// A tool that recalls a topic from memory.
 Tool recallTopicTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('recall_topic'),
   description: 'Loads information related to a topic from memory',
-  inputSchema: _inputSchema,
-  onCall: (args) => _recallTopic(toolset, args),
+  inputSchema: RecallTopicArgs.schema,
+  onCall: (args) => _recallTopic(toolset, RecallTopicArgs(args)),
 );
 
 Future<ToolSuccess<String>> _recallTopic(
   MemoryToolSet toolset,
-  Json args,
+  RecallTopicArgs args,
 ) async {
-  final topic = args.getString('topic').trim().toLowerCase();
-  if (topic.isEmpty) throw Exception('The topic argument cannot be empty.');
-
   final topics = await toolset.sync();
-  final info = topics[topic];
-
-  if (info != null) return ToolSuccess(info);
-  return ToolSuccess('Unknown topic.');
+  final info = topics[args.topic]?.trim() ?? '';
+  return ToolSuccess(info.isEmpty ? 'Unknown topic.' : info);
 }
-
-final _inputSchema = Z.object(
-  properties: {'topic': Z.string(description: 'Topic to recall')},
-  required: ['topic'],
-);

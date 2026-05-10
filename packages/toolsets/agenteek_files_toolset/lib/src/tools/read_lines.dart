@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Reads a portion of a file, given a start and end line.
 ///
@@ -18,27 +19,22 @@ Tool<String> readLinesTool(FileToolSet toolSet) => Tool(
   description: toolSet.buildDescription(
     'Reads a chunk from a file, given start and end line numbers',
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _readLines(toolSet, args),
+  inputSchema: ReadLinesArgs.schema,
+  onCall: (args) => _readLines(toolSet, ReadLinesArgs(args)),
 );
 
-Future<ToolSuccess<String>> _readLines(FileToolSet toolSet, Json args) async {
-  // load args
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final mode = args.getString('mode', defaultValue: 'raw').toLowerCase();
-  final startLine = args.getInt('startLine');
-  var endLine = args.getInt('endLine', defaultValue: 0);
-
+Future<ToolSuccess<String>> _readLines(
+  FileToolSet toolSet,
+  ReadLinesArgs args,
+) async {
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: $path.';
+  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final startLine = args.startLine;
+  var endLine = args.endLine;
   if (startLine < 1 || endLine < 0 || (endLine > 0 && endLine < startLine)) {
     throw 'Invalid line numbers. startLine must be >= 1, and if endLine is provided: endLine >= 1 && startLine <= endLine.';
-  }
-  if (mode != 'raw' && mode != 'numbered') {
-    throw 'Invalid mode. Mode must be `raw` or `numbered`.';
   }
 
   // proceed
@@ -52,7 +48,7 @@ Future<ToolSuccess<String>> _readLines(FileToolSet toolSet, Json args) async {
     if (endLine > lines.length) endLine = lines.length;
     final selectedLines = lines.sublist(startLine - 1, endLine);
     return ToolSuccess(
-      ((mode == 'raw')
+      ((args.mode == 'raw')
               ? selectedLines
               : selectedLines.indexed.map(
                   (e) =>
@@ -62,21 +58,3 @@ Future<ToolSuccess<String>> _readLines(FileToolSet toolSet, Json args) async {
     );
   }
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(description: 'File path'),
-    'startLine': Z.integer(description: 'Starting line number (1-based)'),
-    'endLine': Z.integer(
-      description:
-          'Ending line number (inclusive, 1-based); if provided, must be >= startLine'
-              .optional('last line in file'),
-    ),
-    'mode': Z.string(
-      description:
-          'One of `raw` (lines are dumped as is) or `numbered` (line numbers are shown before each line).'
-              .optional('raw'),
-    ),
-  },
-  required: ['path', 'startLine'],
-);

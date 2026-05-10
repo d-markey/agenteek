@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Inserts text into a file.
 ///
@@ -20,44 +21,30 @@ Tool<String> insertTextTool(FileToolSet toolSet) => Tool(
     'Insert text in a file. USE WITH CAUTION: WRONG LINE NUMBERS WILL LEAD TO TEXT/CODE CORRUPTION. ALWAYS CALL `read_lines` WITH mode=`numbered` FIRST'
         .sideEffect('line numbers will change'),
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _insertText(toolSet, args),
+  inputSchema: InsertTextArgs.schema,
+  onCall: (args) => _insertText(toolSet, InsertTextArgs(args)),
 );
 
-Future<ToolSuccess<String>> _insertText(FileToolSet toolSet, Json args) async {
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final line = args.getInt('line');
-  final newText = args.getString('newText');
-
+Future<ToolSuccess<String>> _insertText(
+  FileToolSet toolSet,
+  InsertTextArgs args,
+) async {
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: $path.';
-  if (line < 1) {
+  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  if (args.line < 1) {
     throw 'Invalid line number. line must be >= 1.';
   }
 
   // proceed
   final lines = await FileReader.readLines(file);
-  if (line >= lines.length) {
-    lines.add(newText);
+  if (args.line >= lines.length) {
+    lines.add(args.newText);
   } else {
-    lines.insert(line - 1, newText);
+    lines.insert(args.line - 1, args.newText);
   }
 
   await file.writeAsString(lines.join('\n'));
   return ToolSuccess.ok;
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(description: 'File path'),
-    'line': Z.integer(
-      description:
-          'Line number where insertion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
-    ),
-    'newText': Z.string(description: 'Text to insert.'),
-  },
-  required: ['path', 'line', 'newText'],
-);
