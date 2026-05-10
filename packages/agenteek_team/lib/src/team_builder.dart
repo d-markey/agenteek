@@ -1,6 +1,7 @@
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
-import 'package:agenteek_cli/agenteek_cli.dart';
+
+import 'agent_conf.dart';
 
 // builds the team based on the provided configuration
 Map<String, Agent> buildTeam(

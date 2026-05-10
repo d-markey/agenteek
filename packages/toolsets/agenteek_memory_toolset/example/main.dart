@@ -2,8 +2,7 @@ import 'dart:io' as io;
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-
-import '../lib/agenteek_memory_toolset.dart';
+import 'package:agenteek_memory_toolset/agenteek_memory_toolset.dart';
 
 void main(List<String> args) {
   var owner = '', root = '', logger = null as ErrorSink?;
