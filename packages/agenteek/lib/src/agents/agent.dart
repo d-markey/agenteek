@@ -172,7 +172,7 @@ class Agent {
       final thinking = r.thinking ?? '';
       if (thinking.isNotEmpty) {
         _streamingThinking?.add(thinking);
-        if (thinkingAccumulator.accumulate(output)) {
+        if (thinkingAccumulator.accumulate(thinking)) {
           isRepeating |= (thinkingAccumulator.checkRepetitions() > 2);
         }
       }

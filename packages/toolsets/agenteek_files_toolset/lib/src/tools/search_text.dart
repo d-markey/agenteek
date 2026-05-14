@@ -137,5 +137,23 @@ Future<ToolSuccess<Json>> _searchText(
 
   await Future.wait(tasks);
 
-  return ToolSuccess(allMatches);
+  final caseSensitivity = args.caseSensitive
+      ? 'case-sensitive'
+      : 'case-insensitive';
+
+  final matchCount = allMatches.isEmpty
+      ? 0
+      : allMatches.values.map((l) => l.length).reduce((a, b) => a + b);
+
+  return ToolSuccess({
+    'mode': (pattern is RegExp)
+        ? '**RegExp** search, $caseSensitivity.'
+        : '**String** search, $caseSensitivity.',
+    'summary': allMatches.isEmpty
+        ? 'The search found no result, try other options or adjust parameters if needed:\n'
+              '* Avoid searching for `class SomeClassName`; types could also be mixins, enums, extension types, etc.\n'
+              '* RegExp pattern must be wrapped in slashes, e.g. `/pattern/`.'
+        : 'Found $matchCount matches in ${allMatches.length} files.',
+    'matches': allMatches,
+  });
 }
