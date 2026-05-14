@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Deletes selected lines from a file.
 ///
@@ -17,25 +18,20 @@ Tool<String> deleteFileTool(FileToolSet toolSet) => Tool(
   description: toolSet.buildDescription(
     'Delete a file'.sideEffect('the file will be deleted'),
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _deleteLines(toolSet, args),
+  inputSchema: DeleteFileArgs.schema,
+  onCall: (args) => _deleteLines(toolSet, DeleteFileArgs(args)),
 );
 
-Future<ToolSuccess<String>> _deleteLines(FileToolSet toolSet, Json args) async {
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-
+Future<ToolSuccess<String>> _deleteLines(
+  FileToolSet toolSet,
+  DeleteFileArgs args,
+) async {
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: $path.';
+  if (!await file.exists()) throw 'File not found: ${args.path}.';
 
   // proceed
   await file.delete();
   return ToolSuccess.ok;
 }
-
-final _inputSchema = Z.object(
-  properties: {'path': Z.string(description: 'File path')},
-  required: ['path'],
-);

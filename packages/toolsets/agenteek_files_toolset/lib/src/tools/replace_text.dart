@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Replaces selected lines of a file with new content.
 ///
@@ -20,35 +21,34 @@ Tool<String> replaceTextTool(FileToolSet toolSet) => Tool(
       'line numbers might change',
     ),
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _replaceMultiText(toolSet, args),
+  inputSchema: ReplaceTextArgs.schema,
+  onCall: (args) => _replaceMultiText(toolSet, ReplaceTextArgs(args)),
 );
 
 Future<ToolSuccess<String>> _replaceMultiText(
   FileToolSet toolSet,
-  Json args,
+  ReplaceTextArgs args,
 ) async {
-  var path = args.getString('path').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final originalText = args.getString('originalText').normalizeEol();
-  final newText = args.getString('newText').normalizeEol();
-  final targetLines = args.getList<int>('targetLines', defaultValue: const []);
-
   // check
-  final file = await File(path).check<File>(toolSet.root);
+  final file = await File(args.path).check<File>(toolSet.root);
   if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied.';
-  if (!await file.exists()) throw 'File not found: $path.';
-  if (targetLines.length != targetLines.toSet().length) {
+  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  if (args.targetLines.length != args.targetLines.toSet().length) {
     throw 'Found duplicate target line numbers.';
+  }
+  final originalText = args.originalText, newText = args.newText;
+  if (newText == originalText) {
+    throw 'New text and original text are the same: no changes.';
   }
 
   // proceed
-  var text = (await FileReader.readString(file)).normalizeEol();
+  var text = (await FileReader.readString(file));
   var index = text.indexOf(originalText);
   if (index < 0) {
     throw 'Original text was not found in the file; new text was not applied.';
   }
 
+  final targetLines = args.targetLines;
   if (targetLines.isEmpty) {
     // single replacement
     if (text.indexOf(originalText, index + 1) >= 0) {
@@ -71,7 +71,7 @@ Future<ToolSuccess<String>> _replaceMultiText(
       occurrences.add(index);
     }
 
-    if (targetLines.length > occurrences.length) {
+    if (args.targetLines.length > occurrences.length) {
       throw 'Found ${occurrences.length} occurrences of original text, which is less than the number of required replacements (${targetLines.length}); new text was not applied.';
     }
 
@@ -99,18 +99,3 @@ Future<ToolSuccess<String>> _replaceMultiText(
   await file.writeAsString(text);
   return ToolSuccess.ok;
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(description: 'File path'),
-    'originalText': Z.string(description: 'Original text'),
-    'newText': Z.string(description: 'New text'),
-    'targetLines': Z.list(
-      items: Z.integer(),
-      description:
-          'Line numbers where replacement is expected; when missing or empty, the original text will be replaced if and only if there is exactly one occurence'
-              .optional(),
-    ),
-  },
-  required: ['path', 'originalText', 'newText'],
-);

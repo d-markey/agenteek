@@ -10,30 +10,6 @@ import 'package:logging/logging.dart' as l;
 import 'console_sink.dart';
 import 'args.dart';
 
-final sw = Stopwatch()..start();
-var lastTimestamp = 0;
-
-void _log(l.LogRecord r) {
-  final msg = r.message.toLowerCase();
-  if (r.error != null) {
-    lastTimestamp = sw.elapsedMilliseconds;
-    print(
-      '${r.level} ${r.time} ${r.loggerName} ${r.message} ${r.error} ${r.stackTrace}',
-    );
-  } else if (msg.contains('initializing') || msg.contains('finalizing')) {
-    lastTimestamp = sw.elapsedMilliseconds;
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
-  } else if (msg.contains('tool')) {
-    lastTimestamp = sw.elapsedMilliseconds;
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
-  } else {
-    final dt = sw.elapsedMilliseconds - lastTimestamp;
-    if (dt < const Duration(seconds: 15).inMilliseconds) return;
-    lastTimestamp = sw.elapsedMilliseconds;
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
-  }
-}
-
 void main(List<String> arguments) async {
   Log.enable();
 
@@ -42,7 +18,7 @@ void main(List<String> arguments) async {
     ..level = l.Level.ALL
     ..onRecord.listen(_log);
   l.Logger('dartantic.chat_agent')
-    ..level = l.Level.ALL
+    ..level = l.Level.OFF
     ..onRecord.listen(_log);
 
   final args = Args.parse(arguments);
@@ -146,5 +122,26 @@ String readMessage(String header) {
 void echoMessage(String header, String message) {
   for (var line in message.split('\n')) {
     stdout.writeln('$header: $line');
+  }
+}
+
+final sw = Stopwatch()..start();
+
+void _log(l.LogRecord r) {
+  final msg = r.message.toLowerCase();
+  if (r.error != null) {
+    sw.reset();
+    print(
+      '${r.level} ${r.time} ${r.loggerName} ${r.message} ${r.error} ${r.stackTrace}',
+    );
+  } else if (msg.contains('initializing') || msg.contains('finalizing')) {
+    sw.reset();
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+  } else if (msg.contains('tool')) {
+    sw.reset();
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+  } else if (sw.elapsedMilliseconds >= 10000) {
+    sw.reset();
+    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
   }
 }

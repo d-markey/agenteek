@@ -7,18 +7,16 @@ import '../tickets_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that updates an existing ticket.
-Tool<String> updateTicketTool(TicketToolSet toolset) => Tool(
-  name: '${toolset.prefix}.update',
-  description: toolset.scoped(
-    'Update an existing ticket; the original ticket is replaced with the provided information.',
-  ),
-  inputSchema: UpdateTicketArgs.schema,
-  onCall: (args) => _updateTicket(toolset, UpdateTicketArgs(args)),
+Tool<String> closeTicketTool(TicketToolSet toolset) => Tool(
+  name: '${toolset.prefix}.close',
+  description: toolset.scoped('Close an existing ticket.'),
+  inputSchema: CloseTicketArgs.schema,
+  onCall: (args) => _closeTicket(toolset, CloseTicketArgs(args)),
 );
 
-Future<ToolSuccess<String>> _updateTicket(
+Future<ToolSuccess<String>> _closeTicket(
   TicketToolSet toolset,
-  UpdateTicketArgs args,
+  CloseTicketArgs args,
 ) async {
   var ticket = toolset.tickets[args.ticketId];
   final fs = toolset.fileSystem;
@@ -28,12 +26,13 @@ Future<ToolSuccess<String>> _updateTicket(
   }
   if (ticket == null) {
     throw 'Ticket "${args.ticketId}" not found.';
+  } else if (ticket.status == 'closed') {
+    throw 'Ticket "${args.ticketId}" is already closed. No changes have been applied.';
   } else {
-    ticket.update(
-      modifiedBy: toolset.owner,
-      title: args.title,
-      description: args.description,
-    );
+    if (args.comment.isNotEmpty) {
+      ticket.addComment(author: toolset.owner, message: args.comment);
+    }
+    ticket.update(modifiedBy: toolset.owner, status: 'closed');
     toolset.logger.append('===\n$ticket');
     if (fs != null) {
       await fs.write(fname, jsonEncode(ticket));

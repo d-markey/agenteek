@@ -5,6 +5,7 @@ import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:path/path.dart' as p;
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Locate a file by its base name.
 ///
@@ -15,15 +16,16 @@ import '../file_toolset.dart';
 Tool<String> locateFileTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('locate_file'),
   description: toolSet.buildDescription('Use this tool to locate a file'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _locateFile(toolSet, args),
+  inputSchema: LocateFileArgs.schema,
+  onCall: (args) => _locateFile(toolSet, LocateFileArgs(args)),
 );
 
-Future<ToolSuccess<String>> _locateFile(FileToolSet toolSet, Json args) async {
-  // load args
-  final baseName = args.getString('baseName', defaultValue: '').trim();
-
-  // check
+Future<ToolSuccess<String>> _locateFile(
+  FileToolSet toolSet,
+  LocateFileArgs args,
+) async {
+  //check
+  final baseName = args.baseName.toLowerCase();
   if (baseName.isEmpty) throw 'Missing base name';
 
   // proceed
@@ -35,7 +37,7 @@ Future<ToolSuccess<String>> _locateFile(FileToolSet toolSet, Json args) async {
       if (e is Directory) {
         pending.add(e);
       } else if (e is File) {
-        final path = p.basename(e.path);
+        final path = p.basename(e.path).toLowerCase();
         if (path.contains(baseName)) {
           results.writeln(e.getLocalPath(toolSet.root));
         }
@@ -45,10 +47,3 @@ Future<ToolSuccess<String>> _locateFile(FileToolSet toolSet, Json args) async {
 
   return ToolSuccess(results.toString());
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'baseName': Z.string(description: 'The file\'s base file name '),
-  },
-  required: ['baseName'],
-);

@@ -4,38 +4,28 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../dart_toolset.dart';
+import '_json_arguments.dart';
 
 // analyze
-Tool analyzeTool(DartToolSet toolSet) => Tool(
+Tool<Json> analyzeTool(DartToolSet toolSet) => Tool(
   name: toolSet.buildToolName('analyze'),
   description: toolSet.buildDescription('Analyzes a Dart file or directory'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _analyze(toolSet, args),
+  inputSchema: DirectoryOrFileArgs.schema,
+  onCall: (args) => _analyze(toolSet, DirectoryOrFileArgs(args)),
 );
 
-Future<ToolSuccess<Json>> _analyze(DartToolSet toolSet, Json args) async {
-  var path = args.getString('path', defaultValue: '').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-
+Future<ToolSuccess<Json>> _analyze(
+  DartToolSet toolSet,
+  DirectoryOrFileArgs args,
+) async {
   FileSystemEntity fileOrDir;
-  if (path.isEmpty) {
+  if (args.path.isEmpty) {
     fileOrDir = Directory(toolSet.root);
   } else {
-    fileOrDir = await Link(path).check(toolSet.root);
+    fileOrDir = await Link(args.path).check(toolSet.root);
     if (!await fileOrDir.exists()) {
       throw 'Not found: ${fileOrDir.getLocalPath(toolSet.root)}';
     }
   }
   return ToolSuccess(await toolSet.exec('analyze', [fileOrDir.path]));
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(
-      description: 'The path of the file or directory to analyze'.optional(
-        'root directory',
-      ),
-    ),
-  },
-  required: ['path'],
-);

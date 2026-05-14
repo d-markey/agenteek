@@ -5,39 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "calc",
-            "request": "launch",
-            "program": "packages/agenteek_cli/bin/calc/agentic_calculator_cli.dart",
-            "type": "dart",
-            "console": "terminal"
-        },
-        {
             "name": "devteam",
             "request": "launch",
-            "program": "packages/agenteek_cli/bin/devteam/agentic_team_interactive.dart",
-            "type": "dart",
-            "console": "terminal"
-        },
-        {
-            "name": "architect",
-            "request": "launch",
-            "program": "packages/agenteek_cli/bin/devteam/agentic_team_interactive.dart",
+            "program": "packages/agenteek_team/bin/devteam/agentic_team_interactive.dart",
             "args": [
-                "--team-conf:personas_architect.yaml"
+                "--team-conf:lgmodel_bis/team.yaml",
             ],
             "type": "dart",
-            "console": "terminal"
+            "console": "terminal",
         },
-        {
-            "name": "architect (batch)",
-            "request": "launch",
-            "program": "packages/agenteek_cli/bin/devteam/agentic_team_batch.dart",
-            "args": [
-                "--team-conf:personas_architect.yaml",
-                "--prompt:prompt.md"
-            ],
-            "type": "dart",
-            "console": "terminal"
-        }
     ]
 }

@@ -1,14 +1,17 @@
 import 'package:agenteek/agenteek.dart';
+
 import '../memory_toolset.dart';
 
 /// A tool that lists all topics held in memory.
-Tool listTopicsTool(MemoryToolSet toolset) => Tool(
+Tool<String> listTopicsTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('list_topics'),
   description: 'List all topics held in memory',
-  onCall: (args) => _listTopics(toolset, args),
+  onCall: (_) => _listTopics(toolset),
 );
 
-Future<ToolSuccess<Json>> _listTopics(MemoryToolSet toolset, Json args) async {
+Future<ToolSuccess<String>> _listTopics(MemoryToolSet toolset) async {
   final topics = await toolset.sync();
-  return ToolSuccess<Json>({'topics': topics.keys.toList()});
+  return ToolSuccess<String>(
+    MarkdownTable.fromList(topics.keys.map((e) => [e]), headers: ['Topics']),
+  );
 }

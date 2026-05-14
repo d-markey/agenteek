@@ -1,24 +1,30 @@
 import 'dart:convert';
+
 import 'package:agenteek/agenteek.dart';
+
 import '../ticket.dart';
 import '../tickets_toolset.dart';
+import '_json_arguments.dart';
 
 /// A tool that creates and opens a new ticket.
-Tool openTicketTool(TicketToolSet toolset) => Tool(
+Tool<String> openTicketTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.open',
   description: toolset.scoped('Create and open a new ticket'),
-  inputSchema: _inputSchema,
-  onCall: (args) => _openTicket(toolset, args),
+  inputSchema: OpenTicketArgs.schema,
+  onCall: (args) => _openTicket(toolset, OpenTicketArgs(args)),
 );
 
 Future<ToolSuccess<String>> _openTicket(
   TicketToolSet toolset,
-  Json args,
+  OpenTicketArgs args,
 ) async {
-  final title = args.getString('title');
-  final description = args.getString('description');
   final id = await toolset.getNextTicketId();
-  final ticket = Ticket(id, toolset.owner, title, description);
+  final ticket = Ticket(
+    id: id,
+    createdBy: toolset.owner,
+    title: args.title,
+    description: args.description,
+  );
   toolset.tickets[id] = ticket;
   toolset.logger.append('===\n$ticket');
   final fs = toolset.fileSystem;
@@ -28,11 +34,3 @@ Future<ToolSuccess<String>> _openTicket(
   }
   return ToolSuccess('Ticket created successfully with id "$id".');
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'title': Z.string(description: 'Ticket title'),
-    'description': Z.string(description: 'Ticket details'),
-  },
-  required: ['title', 'description'],
-);

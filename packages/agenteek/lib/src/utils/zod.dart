@@ -1,7 +1,7 @@
 import 'package:dart_mcp/client.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic show Schema;
 
-typedef Z = dartantic.Schema;
+typedef S = dartantic.Schema;
 
 extension SchemaExt on Tool {
   dartantic.Schema getSchema() =>

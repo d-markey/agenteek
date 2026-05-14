@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:cancelation_token/cancelation_token.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
@@ -11,6 +12,7 @@ import '../toolsets/toolset.dart';
 import '../toolsets/toolset_combined.dart';
 import '../utils/types.dart';
 import 'agent_logger.dart';
+import 'agent_throttling_logger.dart';
 
 class Agent {
   Agent(
@@ -50,7 +52,10 @@ class Agent {
   final StreamingOutputSink? _streamingOutput;
   final StreamingOutputSink? _streamingThinking;
 
-  late final AgentLogger _agentLogger = AgentLogger(this);
+  late final AgentLogger _agentLogger = AgentThrottlingLogger(
+    this,
+    const Duration(milliseconds: 500),
+  );
 
   ToolSet _toolSet;
   Iterable<String> get toolNames => _toolSet.tools.map((t) => t.name);
@@ -122,6 +127,191 @@ class Agent {
     await conversationManager.setConversation([.model(response.output)]);
   }
 
+  Stream<String> invoke(String prompt, {CancelationToken? token}) async* {
+    late StreamSubscription<dartantic.ChatResult<String>> sub;
+    final streamController = StreamController<String>();
+
+    await Future.wait([
+      ?_streamingThinking?.start(),
+      ?_streamingOutput?.start(),
+    ]);
+
+    Future<void> $bailOut(String message) async {
+      if (!streamController.isClosed) {
+        final msg = dartantic.ChatMessage.model(message);
+        _agentLogger.log(msg);
+        await conversationManager.register(
+          dartantic.ChatResult(output: message, messages: [msg]),
+          toolSet: _toolSet,
+        );
+        streamController.add(message);
+        streamController.close();
+      }
+      sub.cancel();
+    }
+
+    final thinkingAccumulator = Accumulator('thinking');
+    final outputAccumulator = Accumulator('output');
+
+    Future<void> $register(dartantic.ChatResult<String> r) async {
+      if (streamController.isClosed) {
+        sub.cancel();
+        return;
+      }
+
+      var isRepeating = false;
+
+      final output = r.output;
+      if (output.isNotEmpty) {
+        _streamingOutput?.add(output);
+        if (outputAccumulator.accumulate(output)) {
+          isRepeating |= (outputAccumulator.checkRepetitions() > 2);
+        }
+      }
+
+      final thinking = r.thinking ?? '';
+      if (thinking.isNotEmpty) {
+        _streamingThinking?.add(thinking);
+        if (thinkingAccumulator.accumulate(output)) {
+          isRepeating |= (thinkingAccumulator.checkRepetitions() > 2);
+        }
+      }
+
+      if (isRepeating) {
+        return $bailOut(
+          'It seems I am running in circles, and I am repeating myself. '
+          'Please start over. '
+          'If this happens again, try clearing my history before retrying.',
+        );
+      }
+
+      // stop here if only thinking
+      if (r.messages.every(
+        (m) => m.parts.every((p) => p is dartantic.ThinkingPart),
+      )) {
+        return;
+      }
+
+      r.messages.forEach(_agentLogger.log);
+      _agentLogger.logUsage(r);
+
+      await conversationManager.register(r, toolSet: _toolSet);
+
+      if (streamController.isClosed) {
+        sub.cancel();
+        return;
+      }
+
+      for (final msg in r.messages.where((m) => m.role == .model)) {
+        for (final part in msg.parts.whereType<dartantic.TextPart>()) {
+          streamController.add(part.text);
+        }
+      }
+
+      if (token != null && token.isCanceled) {
+        return $bailOut(
+          token.exception?.message ?? '[Work interrupted by user]',
+        );
+      }
+    }
+
+    var pending = Future<void>.value();
+    int depth = 0, remaining = 0;
+
+    sub = _agent
+        .sendStream(prompt, history: conversationManager.history)
+        .listen(
+          (r) {
+            pending = pending.then((_) {
+              remaining--;
+              return $register(r);
+            });
+            remaining++;
+            depth++;
+          },
+          onError: (ex, st) async {
+            dbg.error('[E] ($depth/$remaining) Error $ex\n$st');
+            if (!streamController.isClosed) {
+              streamController.addError(ex, st);
+            }
+            await pending;
+            dbg.error('[E] ($depth/$remaining) closing now');
+            streamController.close();
+          },
+          onDone: () {
+            dbg.error('[D] ($depth/$remaining) Done');
+            pending.then((_) async {
+              dbg.error('[D] ($depth/$remaining) closing now');
+              streamController.close();
+              await Future.wait([
+                ?_streamingThinking?.finish(),
+                ?_streamingOutput?.finish(),
+              ]);
+            });
+          },
+          cancelOnError: true,
+        );
+
+    yield* streamController.stream;
+  }
+
+  Future<int> startNewConversation() async {
+    final systemPrompt = _systemPrompt;
+    final chatId = await conversationManager.startConversation(systemPrompt);
+    onNewConversation?.call();
+    if (systemPrompt != null) _agentLogger.log(systemPrompt);
+    return chatId;
+  }
+
+  Future<void> dispose() => Future.value();
+}
+
+extension on String {
+  dartantic.ChatMessage? toSystemPrompt() {
+    final prompt = trim();
+    return prompt.isEmpty ? null : .system(prompt);
+  }
+}
+
+class Accumulator {
+  Accumulator(this.mode);
+
+  final String mode;
+
+  final _lines = <String, int>{};
+  String _partial = '';
+
+  bool accumulate(String chunk) {
+    var res = false;
+    _partial += chunk;
+    final lines = _partial.split('\n');
+    _partial = lines.removeLast();
+    for (var line in lines.where(_shouldKeepLine)) {
+      line = line.trim().toLowerCase();
+      final count = (_lines[line] ?? 0) + 1;
+      _lines[line] = count;
+      res |= (count > 4);
+    }
+    return res;
+  }
+
+  int checkRepetitions() {
+    final entries = _lines.entries.where((e) => e.value > 4).toList()
+      ..sort((a, b) {
+        final countDelta = b.value.compareTo(a.value);
+        return (countDelta == 0)
+            ? a.key.length.compareTo(b.key.length)
+            : countDelta;
+      });
+    if (entries.any((e) => e.value > 20)) {
+      dbg.error(
+        'TOP 5 ${mode.toUpperCase()}:\n'
+        '${entries.take(5).map((e) => ' - (${e.value}) ${e.key}').join('\n')}',
+      );
+    }
+    return entries.where((e) => e.value > 20).length;
+  }
+
   static final _wordBoundary = RegExp(r'\b');
   static final _digit = RegExp(r'[0-9]');
   static final _hexNumber = RegExp(r'^(0x)?[a-fA-F0-9_]+$');
@@ -140,164 +330,5 @@ class Agent {
       }
     }
     return parts.length > 2;
-  }
-
-  /// Returns the number of repeating messages (more than 20 repetitions).
-  static int _checkRepetitions(String text, String mode) {
-    final counts = <String, int>{};
-    text.split('\n').map((l) => l.trim()).where(_shouldKeepLine).forEach((l) {
-          counts.update(l, (n) => n + 1, ifAbsent: () => 1);
-        });
-    final entries = counts.entries.toList();
-    entries.removeWhere((e) => e.value == 1);
-    entries.sort((a, b) {
-      final countDelta = b.value.compareTo(a.value);
-      return (countDelta == 0)
-          ? a.key.length.compareTo(b.key.length)
-          : countDelta;
-    });
-    final mostRepeated = entries.where((e) => e.value > 20);
-    if (mostRepeated.isNotEmpty) {
-      print(
-        'TOP 5 ${mode.toUpperCase()}:\n'
-        '${mostRepeated.take(5).map((e) => ' - (${e.value}) ${e.key}').join('\n')}',
-      );
-    }
-    return mostRepeated.length;
-  }
-
-  Stream<String> invoke(String prompt, {CancelationToken? token}) async* {
-    late StreamSubscription<dartantic.ChatResult<String>> sub;
-    final stream = StreamController<String>();
-
-    await Future.wait([
-      ?_streamingThinking?.start(),
-      ?_streamingOutput?.start(),
-    ]);
-
-    var fullThoughts = '', fullOutput = '';
-
-    Future<void> $register(dartantic.ChatResult<String> r) async {
-      if (stream.isClosed) return;
-
-      var isRepeating = false;
-
-      final output = r.output;
-      if (output.isNotEmpty) {
-        _streamingOutput?.add(output);
-        fullOutput += output;
-        if (_checkRepetitions(fullOutput, 'output') > 2) {
-          isRepeating = true;
-        }
-      }
-
-      final thinking = r.thinking ?? '';
-      if (thinking.isNotEmpty) {
-        _streamingThinking?.add(thinking);
-        fullThoughts += thinking;
-        if (_checkRepetitions(fullThoughts, 'thinking') > 2) {
-          isRepeating = true;
-        }
-      }
-
-      if (isRepeating) {
-        if (!stream.isClosed) {
-          final msg =
-              'It seems I am running in circles, and I am repeating myself. '
-              'Please start over. '
-              'If this happens again, try clearing my history before retrying.';
-          final cancelled = dartantic.ChatMessage.model(msg);
-          _agentLogger.log(cancelled);
-          await conversationManager.register(
-            dartantic.ChatResult(output: msg, messages: [cancelled]),
-            toolSet: _toolSet,
-          );
-          stream.add(msg);
-          stream.close();
-        }
-        sub.cancel();
-        return;
-      }
-
-      if (r.messages
-          .expand((m) => m.parts)
-          .every((p) => p is dartantic.ThinkingPart)) {
-        // thinking only
-        return;
-      }
-
-      for (var m in r.messages) {
-        _agentLogger.log(m);
-      }
-      _agentLogger.logUsage(r);
-
-      await conversationManager.register(r, toolSet: _toolSet);
-
-      for (var p
-          in r.messages
-              .where((m) => m.role == .model)
-              .expand((m) => m.parts.whereType<dartantic.TextPart>())) {
-        stream.add(p.text);
-      }
-
-      if (token != null && token.isCanceled) {
-        if (!stream.isClosed) {
-          final msg = token.exception?.message ?? '[Work interrupted by user]';
-          final cancelled = dartantic.ChatMessage.user(msg);
-          _agentLogger.log(cancelled);
-          await conversationManager.register(
-            dartantic.ChatResult(output: msg, messages: [cancelled]),
-            toolSet: _toolSet,
-          );
-          stream.add(msg);
-          stream.close();
-        }
-        sub.cancel();
-      }
-    }
-
-    var pending = Future<void>.value();
-
-    sub = _agent
-        .sendStream(prompt, history: conversationManager.history)
-        .listen(
-          (r) => pending = pending.then((_) => $register(r)),
-          onError: (ex, st) async {
-            if (!stream.isClosed) {
-              stream.addError(ex, st);
-            }
-            await pending;
-            stream.close();
-          },
-          onDone: () {
-            pending.then((_) async {
-              stream.close();
-              await Future.wait([
-                ?_streamingThinking?.finish(),
-                ?_streamingOutput?.finish(),
-              ]);
-            });
-          },
-          cancelOnError: true,
-        );
-
-    yield* stream.stream;
-  }
-
-  Future<int> startNewConversation() async {
-    final systemPrompt = _systemPrompt;
-    final chatId = await conversationManager.startConversation(systemPrompt);
-    onNewConversation?.call();
-    if (systemPrompt != null) _agentLogger.log(systemPrompt);
-    return chatId;
-  }
-
-  Future<void> dispose() => Future.value();
-}
-
-extension on String {
-  dartantic.ChatMessage? toSystemPrompt() {
-    final prompt = trim();
-    return prompt.isEmpty ? null : .system(prompt);
   }
 }

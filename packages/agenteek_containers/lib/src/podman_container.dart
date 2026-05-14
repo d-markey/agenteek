@@ -143,7 +143,30 @@ class PodmanContainer implements Container {
   }
 
   @override
-  Future<Json> run(String command, {String? workingDir}) async {
+  Future<Json> run(
+    String command, {
+    String? workingDir,
+    Duration? timeOut,
+  }) async {
+    final sw = Stopwatch()..start();
+    final timer = Timer.periodic(const Duration(seconds: 30), (t) {
+      dbg.error(
+        '[${sw.elapsed}] Command "$command" still pending in container $id...',
+      );
+    });
+
+    try {
+      return await _run(command, workingDir: workingDir, timeOut: timeOut);
+    } finally {
+      timer.cancel();
+    }
+  }
+
+  Future<Json> _run(
+    String command, {
+    String? workingDir,
+    Duration? timeOut,
+  }) async {
     if (workingDir != null) {
       workingDir = _getSafePath(workingDir);
     }
@@ -154,12 +177,13 @@ class PodmanContainer implements Container {
       'sh',
       '-c',
       command,
-    ]);
+    ], timeOut);
   }
 
   static Future<Json> _exec(
     String command, [
     List<String> args = const [],
+    Duration? timeOut,
   ]) async {
     final id = Object().hashCode.toRadixString(16).padLeft(8, '0');
 
@@ -180,15 +204,43 @@ class PodmanContainer implements Container {
       stdOut.add(e);
     }, onDone: stdOutDone.complete);
 
-    process.exitCode.then((exitCode) async {
-      await Future.wait([stdErrDone.future, stdOutDone.future]);
-      completer.complete({
-        'commandLine': {'command': command, 'args': args},
-        'stderr': utf8.decode(stdErr.toBytes()),
-        'stdout': utf8.decode(stdOut.toBytes()),
-        'exitCode': exitCode,
+    Timer? timeoutTimer;
+    if (timeOut != null) {
+      timeoutTimer = Timer(timeOut, () {
+        if (!completer.isCompleted) {
+          completer.complete({
+            'commandLine': {'command': command, 'args': args},
+            'stderr': utf8.decode(stdErr.toBytes()),
+            'stdout': utf8.decode(stdOut.toBytes()),
+            'exitCode': null,
+            'status':
+                'The command timed-out after ${timeOut.inMilliseconds} ms.'
+                '`stderr` and `stdout` content are provided but likely incomplete.',
+          });
+        }
+        process.kill();
       });
-    }, onError: completer.completeError);
+    }
+
+    process.exitCode.then(
+      (exitCode) async {
+        timeoutTimer?.cancel();
+        await Future.wait([stdErrDone.future, stdOutDone.future]);
+        if (!completer.isCompleted) {
+          completer.complete({
+            'commandLine': {'command': command, 'args': args},
+            'stderr': utf8.decode(stdErr.toBytes()),
+            'stdout': utf8.decode(stdOut.toBytes()),
+            'exitCode': exitCode,
+          });
+        }
+      },
+      onError: (ex, st) {
+        if (!completer.isCompleted) {
+          completer.completeError(ex, st);
+        }
+      },
+    );
 
     return completer.future;
   }

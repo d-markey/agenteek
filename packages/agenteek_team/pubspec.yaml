@@ -12,6 +12,7 @@ dependencies:
   better_future: ^2.0.3
   dartantic_ai:
   dart_mcp:
+  meta:
   path:
   yaml:
   glob:

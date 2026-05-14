@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Searches files for a specific regular expression pattern.
 ///
@@ -34,21 +35,17 @@ Tool<Json> searchTextTool(FileToolSet toolSet) => Tool(
     'a Glob pattern can be provided as the `path` argument to restrict the search to specific files, e.g. "*.java";'
     'if no `path` is provided, the search will be executed against all files.',
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _searchText(toolSet, args),
+  inputSchema: SearchTextArgs.schema,
+  onCall: (args) => _searchText(toolSet, SearchTextArgs(args)),
 );
 
-Future<ToolSuccess<Json>> _searchText(FileToolSet toolSet, Json args) async {
-  // load args
-  var str = args.getString('pattern');
-  final caseSensitive = args.getBool('caseSensitive', defaultValue: false);
-  var path = args.getString('path', defaultValue: '');
-  if (path == '.') path = '';
-  final includeHidden =
-      args.getBool('includeHidden', defaultValue: false) &&
-      toolSet.showHiddenFiles;
-
+Future<ToolSuccess<Json>> _searchText(
+  FileToolSet toolSet,
+  SearchTextArgs args,
+) async {
   // check
+  final caseSensitive = args.caseSensitive;
+  var str = args.pattern;
   Pattern pattern;
   if (str.startsWith('/') && str.endsWith('/')) {
     str = str.substring(1, str.length - 1);
@@ -60,6 +57,7 @@ Future<ToolSuccess<Json>> _searchText(FileToolSet toolSet, Json args) async {
     throw 'Do not use this tool with an empty pattern or a "match all" pattern; '
         'if full content is required, use the `read_lines` tool instead.';
   }
+  final path = args.path;
   if (path.startsWith('..')) {
     throw 'Access denied: cannot search outside of the root directory.';
   }
@@ -72,6 +70,8 @@ Future<ToolSuccess<Json>> _searchText(FileToolSet toolSet, Json args) async {
   } else {
     $include = (e) => (e is File);
   }
+
+  final includeHidden = args.includeHidden && toolSet.showHiddenFiles;
 
   final allMatches = <String, List<Json>>{};
   final tasks = <Future<void>>[];
@@ -139,25 +139,3 @@ Future<ToolSuccess<Json>> _searchText(FileToolSet toolSet, Json args) async {
 
   return ToolSuccess(allMatches);
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'pattern': Z.string(
-      description:
-          'Search pattern: raw string OR regular expression. To active a "RegExp" search, the pattern **MUST** be provided between slashes (`/`, eg: `/\\.java\$/`) otherwise it will be interpreted as a raw string. Case-sensitivity can be controlled via the `caseSensitive` argument.',
-    ),
-    'path': Z.string(
-      description:
-          'Path to specific files or folders (must be a valid glob pattern, e.g. `dir/*.txt` to search for text files directly under `dir`, or `dir/**.txt` to search for all text files under `dir`)'
-              .optional('root directory'),
-    ),
-    'caseSensitive': Z.boolean(
-      description: 'Whether the search is case-sensitive'.optional('false'),
-    ),
-    'includeHidden': Z.boolean(
-      description: 'Whether to include hidden files (starting with a dot)'
-          .optional('false'),
-    ),
-  },
-  required: ['pattern'],
-);

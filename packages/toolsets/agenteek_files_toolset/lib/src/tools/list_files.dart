@@ -4,6 +4,7 @@ import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../file_toolset.dart';
+import '_json_arguments.dart';
 
 /// Lists all files and directories within a specified path.
 ///
@@ -18,27 +19,29 @@ Tool<String> listFilesTool(FileToolSet toolSet) => Tool(
   description: toolSet.buildDescription(
     'Use this tool to list files in a given directory, or to locate a file; this tools lists **files only**, not directories',
   ),
-  inputSchema: _inputSchema,
-  onCall: (args) => _listFiles(toolSet, args),
+  inputSchema: ListFilesArgs.schema,
+  onCall: (args) => _listFiles(toolSet, ListFilesArgs(args)),
 );
 
-Future<ToolSuccess<String>> _listFiles(FileToolSet toolSet, Json args) async {
-  // load args
-  var path = args.getString('path', defaultValue: '.').trim();
-  if (path.startsWith('/')) path = path.substring(1);
-  final recursive = args.getBool('recursive', defaultValue: false);
-  final includeHidden =
-      args.getBool('includeHidden', defaultValue: false) &&
-      toolSet.showHiddenFiles;
-
+Future<ToolSuccess<String>> _listFiles(
+  FileToolSet toolSet,
+  ListFilesArgs args,
+) async {
   // check
-  final dir = await Directory(path).check<Directory>(toolSet.root);
+  Directory dir;
+  if (args.path.isEmpty) {
+    dir = Directory(toolSet.root);
+  } else {
+    dir = await Directory(args.path).check<Directory>(toolSet.root);
+  }
   if (!toolSet.showHiddenFiles && dir.isHidden) throw 'Access denied';
   if (!await dir.exists()) {
     throw 'Directory not found: ${dir.getLocalPath(toolSet.root)}';
   }
 
   // proceed
+  final recursive = args.recursive;
+  final includeHidden = args.includeHidden && toolSet.showHiddenFiles;
   final results = StringBuffer(), pending = <Directory>[];
   if (includeHidden || !dir.isHidden) pending.add(dir);
   var idx = 0;
@@ -57,20 +60,3 @@ Future<ToolSuccess<String>> _listFiles(FileToolSet toolSet, Json args) async {
   pending.removeAt(0); // do not include starting directory in results
   return ToolSuccess(results.toString());
 }
-
-final _inputSchema = Z.object(
-  properties: {
-    'path': Z.string(
-      description: 'Directory to list from'.optional('root directory'),
-    ),
-    'recursive': Z.boolean(
-      description: 'Whether listing should recurse through sub-directories'
-          .optional('false'),
-    ),
-    'includeHidden': Z.boolean(
-      description:
-          'Whether to include hidden files and directories (starting with a dot)'
-              .optional('false'),
-    ),
-  },
-);

@@ -7,3 +7,9 @@ environment:
 workspace:
   - packages/*
   - packages/toolsets/*
+
+dependency_overrides:
+  dartantic_ai:
+    path: C:\_Projects\oss\dartantic\packages\dartantic_ai
+  dartantic_interface:
+    path: C:\_Projects\oss\dartantic\packages\dartantic_interface
