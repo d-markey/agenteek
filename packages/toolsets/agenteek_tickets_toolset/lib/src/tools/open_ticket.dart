@@ -7,7 +7,7 @@ import '../tickets_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that creates and opens a new ticket.
-Tool openTicketTool(TicketToolSet toolset) => Tool(
+Tool<String> openTicketTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.open',
   description: toolset.scoped('Create and open a new ticket'),
   inputSchema: OpenTicketArgs.schema,
@@ -19,7 +19,12 @@ Future<ToolSuccess<String>> _openTicket(
   OpenTicketArgs args,
 ) async {
   final id = await toolset.getNextTicketId();
-  final ticket = Ticket(id, toolset.owner, args.title, args.description);
+  final ticket = Ticket(
+    id: id,
+    createdBy: toolset.owner,
+    title: args.title,
+    description: args.description,
+  );
   toolset.tickets[id] = ticket;
   toolset.logger.append('===\n$ticket');
   final fs = toolset.fileSystem;

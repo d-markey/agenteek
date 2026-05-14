@@ -10,7 +10,7 @@ import '../../utils/zod.dart';
 import '../tool.dart';
 import '../tool_outcome.dart';
 import '../toolset.dart';
-import '_json_to_markdown.dart';
+import 'markdown_table.dart';
 
 const _experimental = true;
 
@@ -83,19 +83,21 @@ class McpToolSet extends ToolSet {
         final structured = _decodeIfNeeded(res.structuredContent);
         if (structured != null) {
           String? table;
-          if (structured case List data) {
-            table = JsonToMarkdownConverter.convert(data);
-          } else if (structured case {'content': Object? data}) {
-            data = _decodeIfNeeded(data);
-            if (data is List) {
-              table = JsonToMarkdownConverter.convert(data);
-              if (table != null) {
+          try {
+            if (structured case List data) {
+              table = MarkdownTable.fromJsonList(data.cast<Json>());
+            } else if (structured case {'content': Object? data}) {
+              data = _decodeIfNeeded(data);
+              if (data is List) {
+                table = MarkdownTable.fromJsonList(data.cast<Json>());
                 structured.remove('content');
                 if (structured.isNotEmpty) {
                   table = '${jsonEncode(structured)}\n\n$table';
                 }
               }
             }
+          } catch (e) {
+            dbg.error('Error converting structured content: $e');
           }
           return ToolSuccess(table ?? res);
         }

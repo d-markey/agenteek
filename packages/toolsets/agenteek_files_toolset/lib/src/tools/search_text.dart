@@ -139,25 +139,3 @@ Future<ToolSuccess<Json>> _searchText(
 
   return ToolSuccess(allMatches);
 }
-
-final _inputSchema = S.object(
-  properties: {
-    'pattern': S.string(
-      description:
-          'Search pattern: raw string OR regular expression. To active a "RegExp" search, the pattern **MUST** be provided between slashes (`/`, eg: `/\\.java\$/`) otherwise it will be interpreted as a raw string. Case-sensitivity can be controlled via the `caseSensitive` argument.',
-    ),
-    'path': S.string(
-      description:
-          'Path to specific files or folders (must be a valid glob pattern, e.g. `dir/*.txt` to search for text files directly under `dir`, or `dir/**.txt` to search for all text files under `dir`)'
-              .optional('root directory'),
-    ),
-    'caseSensitive': S.boolean(
-      description: 'Whether the search is case-sensitive'.optional('false'),
-    ),
-    'includeHidden': S.boolean(
-      description: 'Whether to include hidden files (starting with a dot)'
-          .optional('false'),
-    ),
-  },
-  required: ['pattern'],
-);

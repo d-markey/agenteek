@@ -1,0 +1,42 @@
+technical_lead:
+  llm: google/gemma-4-26b-a4b-it
+  api-key: gemma-api-key
+  name: Tecwyn
+  instructions: technical_lead.md
+  roots:
+    agenteek:
+      description: agenteek workspace
+      path: C:\_Projects\ai\agenteek
+      read-only: false
+  tools:
+    dart:
+      description: agenteek workspace
+      path: C:\_Projects\ai\agenteek
+
+software_engineer:
+  llm: google/gemma-4-26b-a4b-it
+  api-key: gemma-api-key
+  name: Angie
+  instructor: Tecwyn
+  instructions: software_engineer.md
+  roots:
+    agenteek:
+      description: agenteek workspace
+      path: C:\_Projects\ai\agenteek
+      read-only: false
+  tools:
+    dart:
+      description: agenteek workspace
+      path: C:\_Projects\ai\agenteek
+
+technical_writer:
+  llm: google/gemma-4-26b-a4b-it
+  api-key: gemma-api-key
+  name: Wright
+  instructor: Tecwyn
+  instructions: technical_writer.md
+  roots:
+    agenteek:
+      description: agenteek workspace
+      path: C:\_Projects\ai\agenteek
+      read-only: false

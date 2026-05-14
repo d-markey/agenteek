@@ -25,7 +25,7 @@ export 'src/output_sinks/output_sink.dart';
 export 'src/output_sinks/streaming_output_sink.dart';
 export 'src/secrets/in_memory_secrets.dart';
 export 'src/secrets/secrets.dart';
-export 'src/toolsets/agent/agent_toolset.dart';
+export 'src/toolsets/mcp/markdown_table.dart';
 export 'src/toolsets/mcp/mcp_tool_support.dart';
 export 'src/toolsets/mcp/mcp_toolset.dart';
 export 'src/toolsets/prefix_mixin.dart';

@@ -2,6 +2,8 @@ import 'package:agenteek/agenteek.dart';
 
 import 'ticket.dart';
 
+import 'tools/close_ticket.dart';
+import 'tools/comment_on_ticket.dart';
 import 'tools/list_tickets.dart';
 import 'tools/open_ticket.dart';
 import 'tools/update_ticket.dart';
@@ -21,6 +23,8 @@ class TicketToolSet extends ToolSet with Prefix, Scope {
     register(openTicketTool(this));
     register(updateTicketTool(this));
     register(readTicketTool(this));
+    register(commentOnTicketTool(this));
+    register(closeTicketTool(this));
   }
 
   /// The prefix used as a namespace for ticket-related tools.

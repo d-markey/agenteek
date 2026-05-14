@@ -36,3 +36,31 @@ extension type UpdateTicketArgs(Json _json) {
     required: ['ticket_id', 'title', 'description'],
   );
 }
+
+extension type CloseTicketArgs(Json _json) {
+  int get ticketId => _json.getInt('ticket_id');
+
+  String get comment => _json.getString('comment', defaultValue: '');
+
+  static final schema = S.object(
+    properties: {
+      'ticket_id': S.integer(description: 'Ticket ID'),
+      'comment': S.string(description: 'Comment text'.optional('')),
+    },
+    required: ['ticket_id'],
+  );
+}
+
+extension type CommentOnTicketArgs(Json _json) {
+  int get ticketId => _json.getInt('ticket_id');
+
+  String get comment => _json.getString('comment');
+
+  static final schema = S.object(
+    properties: {
+      'ticket_id': S.integer(description: 'Ticket ID'),
+      'comment': S.string(description: 'Comment text'),
+    },
+    required: ['ticket_id', 'comment'],
+  );
+}

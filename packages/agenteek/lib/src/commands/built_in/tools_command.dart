@@ -26,14 +26,14 @@ class ToolsCommand extends Command {
       }
 
       final toolsets = agent.toolNames
-          .map((t) => t.split('_').first)
+          .map((t) => t.split('.').first)
           .toSet()
           .toList();
       toolsets.sort();
 
       for (var toolset in toolsets) {
         final tools = agent.toolNames
-            .where((t) => t.startsWith('${toolset}_') || t == toolset)
+            .where((t) => t.startsWith('$toolset.') || t == toolset)
             .toList();
         tools.sort();
         writeln(

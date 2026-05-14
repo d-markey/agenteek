@@ -1,7 +1,7 @@
 import 'package:agenteek/agenteek.dart';
 
 extension type MemorizeTopicArgs(Json _json) {
-  String get topic => _json.getString('topic').trim().toLowerCase();
+  String get topic => _json.getString('topic').toLowerCase();
 
   String get information => _json.getString('information');
 
@@ -29,7 +29,7 @@ extension type MemorizeTopicArgs(Json _json) {
 }
 
 extension type RecallTopicArgs(Json _json) {
-  String get topic => _json.getString('topic').trim().toLowerCase();
+  String get topic => _json.getString('topic').toLowerCase();
 
   static final schema = S.object(
     properties: {'topic': S.string(description: 'Topic to recall')},
@@ -38,7 +38,7 @@ extension type RecallTopicArgs(Json _json) {
 }
 
 extension type ForgetTopicArgs(Json _json) {
-  String get topic => _json.getString('topic').trim().toLowerCase();
+  String get topic => _json.getString('topic').toLowerCase();
 
   static final schema = S.object(
     properties: {'topic': S.string(description: 'Topic to forget')},

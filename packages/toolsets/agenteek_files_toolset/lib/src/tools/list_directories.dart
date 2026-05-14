@@ -60,19 +60,3 @@ Future<ToolSuccess<String>> _listDirectories(
 
   return ToolSuccess(results.toString());
 }
-
-final _inputSchema = S.object(
-  properties: {
-    'path': S.string(
-      description: 'Directory to list from'.optional('root directory'),
-    ),
-    'recursive': S.boolean(
-      description: 'Whether listing should recurse through sub-directories'
-          .optional('false'),
-    ),
-    'includeHidden': S.boolean(
-      description: 'Whether to include hidden directories (starting with a dot)'
-          .optional('false'),
-    ),
-  },
-);

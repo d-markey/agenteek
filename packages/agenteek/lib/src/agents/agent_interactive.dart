@@ -75,36 +75,31 @@ class InteractiveAgent extends Agent {
       );
     }
 
-    var throttling = Future<void>.value();
-
     Future<void> $handleUserInput() async {
+      String prompt;
       while (!completer.isCompleted) {
+        dbg.trace('Waiting for user input...');
+
+        // handle prompt & commands
         try {
-          dbg.trace('Waiting for user input...');
+          prompt = await _prompt();
 
-          // handle prompt & commands
-          String prompt;
-          try {
-            prompt = await _prompt();
-
-            // handle command
-            final (command, args) = $parseCommand(prompt);
-            if (command != null) {
-              prompt = await command.handle(this, args) ?? '';
-            }
-          } catch (ex, st) {
-            await onError?.call(ex, st);
-            continue;
+          // handle command
+          final (command, args) = $parseCommand(prompt);
+          if (command != null) {
+            prompt = await command.handle(this, args) ?? '';
           }
+        } catch (ex, st) {
+          await onError?.call(ex, st);
+          continue;
+        }
 
-          // handle prompt
-          if (prompt.isEmpty) continue;
+        // handle prompt
+        if (prompt.isEmpty) continue;
 
+        try {
           // In case of problem, invokeStream() will call onError() and return a recovery string if available.
           // If it rethrows, it means the error was not "handled" (returned null).
-
-          await throttling;
-
           await for (var response in invoke(
             prompt,
             token: tokenFactory?.call(),
@@ -113,12 +108,10 @@ class InteractiveAgent extends Agent {
               modelOutput.add(response);
             }
           }
-        } catch (ex, st) {
+        } catch (ex) {
           // This should be an unexpected error that escaped the inner blocks.
-          // If invokeStream() threw, onError was already called once.
-          dbg.error('!!! UNHANDLED ERROR: $ex\n$st');
-        } finally {
-          throttling = Future.delayed(const Duration(milliseconds: 500));
+          // If invoke() threw, onError was already called once.
+          dbg.error('!!! UNHANDLED ERROR: $ex');
         }
       }
     }

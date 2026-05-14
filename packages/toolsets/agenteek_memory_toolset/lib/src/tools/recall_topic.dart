@@ -4,7 +4,7 @@ import '../memory_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that recalls a topic from memory.
-Tool recallTopicTool(MemoryToolSet toolset) => Tool(
+Tool<String> recallTopicTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('recall_topic'),
   description: 'Loads information related to a topic from memory',
   inputSchema: RecallTopicArgs.schema,

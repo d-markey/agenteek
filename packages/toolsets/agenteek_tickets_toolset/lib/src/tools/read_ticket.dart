@@ -7,7 +7,7 @@ import '../tickets_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that reads an existing ticket.
-Tool readTicketTool(TicketToolSet toolset) => Tool(
+Tool<Ticket> readTicketTool(TicketToolSet toolset) => Tool(
   name: '${toolset.prefix}.read',
   description: toolset.scoped('Read an existing ticket.'),
   inputSchema: ReadTicketArgs.schema,

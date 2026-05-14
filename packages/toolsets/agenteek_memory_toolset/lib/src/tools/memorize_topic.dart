@@ -6,7 +6,7 @@ import '../memory_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that remembers information about a topic.
-Tool memorizeTopicTool(MemoryToolSet toolset) => Tool<String>(
+Tool<String> memorizeTopicTool(MemoryToolSet toolset) => Tool<String>(
   name: toolset.buildToolName('memorize_topic'),
   description:
       'Associate information to a topic in memory; if the topic is already present in memory, the provided information is concatenated with the existing information',

@@ -7,18 +7,16 @@ import '../tickets_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that updates an existing ticket.
-Tool<String> updateTicketTool(TicketToolSet toolset) => Tool(
-  name: '${toolset.prefix}.update',
-  description: toolset.scoped(
-    'Update an existing ticket; the original ticket is replaced with the provided information.',
-  ),
-  inputSchema: UpdateTicketArgs.schema,
-  onCall: (args) => _updateTicket(toolset, UpdateTicketArgs(args)),
+Tool<String> commentOnTicketTool(TicketToolSet toolset) => Tool(
+  name: '${toolset.prefix}.add_comment',
+  description: toolset.scoped('Comment on an existing ticket.'),
+  inputSchema: CommentOnTicketArgs.schema,
+  onCall: (args) => _commentOnTicket(toolset, CommentOnTicketArgs(args)),
 );
 
-Future<ToolSuccess<String>> _updateTicket(
+Future<ToolSuccess<String>> _commentOnTicket(
   TicketToolSet toolset,
-  UpdateTicketArgs args,
+  CommentOnTicketArgs args,
 ) async {
   var ticket = toolset.tickets[args.ticketId];
   final fs = toolset.fileSystem;
@@ -29,11 +27,7 @@ Future<ToolSuccess<String>> _updateTicket(
   if (ticket == null) {
     throw 'Ticket "${args.ticketId}" not found.';
   } else {
-    ticket.update(
-      modifiedBy: toolset.owner,
-      title: args.title,
-      description: args.description,
-    );
+    ticket.addComment(author: toolset.owner, message: args.comment);
     toolset.logger.append('===\n$ticket');
     if (fs != null) {
       await fs.write(fname, jsonEncode(ticket));

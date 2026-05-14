@@ -6,7 +6,7 @@ import '../memory_toolset.dart';
 import '_json_arguments.dart';
 
 /// A tool that forgets information about a topic.
-Tool forgetTopicTool(MemoryToolSet toolset) => Tool(
+Tool<String> forgetTopicTool(MemoryToolSet toolset) => Tool(
   name: toolset.buildToolName('forget_topic'),
   description: 'Forget information about a topic',
   inputSchema: ForgetTopicArgs.schema,

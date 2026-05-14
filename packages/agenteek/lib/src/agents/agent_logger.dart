@@ -58,11 +58,11 @@ class AgentLogger {
   static final _collapseWs = RegExp(r'\s+');
 
   void logUsage(dartantic.ChatResult result) {
-    final logger = currentLogger;
-    if (logger == null || result.usage == null) return;
-    logger.append(
+    final usage = result.usage;
+    if (usage == null) return;
+    currentLogger?.append(
       'FINISH REASON: ${result.finishReason}\n'
-      'USAGE: ${result.usage!.toString().trim().replaceAll(_collapseWs, ' ')}',
+      'USAGE: ${usage.toString().trim().replaceAll(_collapseWs, ' ')}',
     );
   }
 
@@ -84,10 +84,12 @@ extension on dartantic.Part {
     dartantic.ToolPart t => switch (t.kind) {
       .call =>
         '=== CALLING ${t.toolCallId} ==>\n'
-            '${t.arguments}',
+            '${t.arguments}\n'
+            '=== CALLING ${t.toolCallId} ==>',
       .result =>
         '<== CALLED  ${t.toolCallId} ===\n'
-            '${t.result}',
+            '${t.result}\n'
+            '<== CALLED  ${t.toolCallId} ===',
     },
     _ =>
       '**${_roleLabel(role)} $runtimeType**\n'

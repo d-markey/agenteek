@@ -1,6 +1,8 @@
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
+
 import '../agenteek_team.dart';
+import 'toolsets/team/team_toolset.dart';
 
 // builds the team based on the provided configuration
 Map<String, Agent> buildTeam(
@@ -54,6 +56,8 @@ Map<String, Agent> buildTeam(
     }
   }
 
+  final teamToolsets = <Agent, TeamToolSet>{};
+
   for (var conf in teamConf) {
     final agent = agents[conf.displayName]!;
 
@@ -62,11 +66,25 @@ Map<String, Agent> buildTeam(
 
     if (conf.instructor.isNotEmpty) {
       final instructor = agents[conf.instructor]!;
-      final modelInput = inputCallbackBuilder(
+      final agentSink = inputCallbackBuilder(
         instructor.displayName,
         conf.displayName,
       );
-      instructor.registerToolSet(AgentToolSet(agent, modelInput: modelInput));
+      final instructorSink = inputCallbackBuilder(
+        conf.displayName,
+        instructor.displayName,
+      );
+      teamToolsets
+          .putIfAbsent(instructor, () {
+            final teamToolSet = TeamToolSet();
+            instructor.registerToolSet(teamToolSet);
+            return teamToolSet;
+          })
+          .registerTeamMember(
+            agent,
+            agentSink: agentSink,
+            instructorSink: instructorSink,
+          );
     }
   }
 

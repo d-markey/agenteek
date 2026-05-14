@@ -266,20 +266,18 @@ packages:
     source: hosted
     version: "3.1.9"
   dartantic_ai:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: dartantic_ai
-      sha256: "2c6cf66ef2ee081a2b863c11b7d8343e0f760380ba1a367df567a537c520bd14"
-      url: "https://pub.dev"
-    source: hosted
+      path: "C:\\_Projects\\oss\\dartantic\\packages\\dartantic_ai"
+      relative: false
+    source: path
     version: "3.4.0"
   dartantic_interface:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: dartantic_interface
-      sha256: b21a1867da49335b1004cae5b97abeff75e3421ec7c3fee144bcc5e6f463dc63
-      url: "https://pub.dev"
-    source: hosted
+      path: "C:\\_Projects\\oss\\dartantic\\packages\\dartantic_interface"
+      relative: false
+    source: path
     version: "4.0.0"
   decimal:
     dependency: transitive
@@ -349,10 +347,10 @@ packages:
     dependency: transitive
     description:
       name: googleai_dart
-      sha256: b7283c2d0d0aefb8feb735b1a8bcaa5cd1eaeb18fef86d500e9644564586d762
+      sha256: fa1925592e52709adb99c57cb45f519b9de39800ba6b728e59e583fae82f40ee
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "6.3.0"
   graphs:
     dependency: transitive
     description:

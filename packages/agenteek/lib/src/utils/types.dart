@@ -37,8 +37,10 @@ extension JsonExtension on Json {
     }
   }
 
-  String getString(String key, {String? defaultValue}) {
-    final value = this[key]?.toString() ?? '';
+  String getString(String key, {String? defaultValue, bool trim = true}) {
+    var value = this[key]?.toString() ?? '';
+    if (trim) value = value.trim();
+
     if (value.isEmpty) {
       return (defaultValue != null)
           ? defaultValue
