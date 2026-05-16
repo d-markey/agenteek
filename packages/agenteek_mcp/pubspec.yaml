@@ -1,0 +1,21 @@
+name: agenteek_mcp
+description: Agenteek MCP support.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.11.5
+
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  agenteek: any
+  dart_mcp: any
+  logging: any
+  http: any
+  stream_channel: any
+
+dev_dependencies:
+  lints: any
+  test: any
