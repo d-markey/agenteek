@@ -10,19 +10,19 @@ resolution: workspace
 
 # Add regular dependencies here.
 dependencies:
-  web:
-  dart_mcp:
-  dartantic_ai:
-  agenteek:
-  markdown:
-  cancelation_token:
   better_future: ^2.0.3
-  pdf: ^3.11.0
-  http: ^1.6.0
+  web: any
+  dart_mcp: any
+  dartantic_interface: any
+  agenteek: any
+  agenteek_mcp_toolset: any
+  markdown: any
+  cancelation_token: any
+  pdf: any
 
 dev_dependencies:
-  cors_enabler: ^0.9.0
-  build_runner:
-  build_web_compilers:
-  preload:
-  lints:
+  cors_enabler: any
+  build_runner: any
+  build_web_compilers: any
+  preload: any
+  lints: any

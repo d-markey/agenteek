@@ -1,14 +1,15 @@
+import 'package:agenteek/agenteek.dart';
 import 'package:http/http.dart';
+import 'package:logging/logging.dart';
 
-import '../utils/debug.dart' as dbg;
-import '../utils/types.dart';
-import '../utils/unique_id.dart';
 import '_client_stub.dart'
     if (dart.library.io) '_client_io.dart'
     if (dart.library.js_interop) '_client_web.dart'
     as impl_;
 
 export 'package:http/http.dart';
+
+typedef CustomErrorHandler = Future<Duration?> Function(Response, int);
 
 class DbgClient with BaseClient implements Client {
   DbgClient({
@@ -23,10 +24,12 @@ class DbgClient with BaseClient implements Client {
   final bool traceResponses;
   final CustomErrorHandler? customErrorHandler;
 
+  static Logger get logger => Logger('agenteek.dbg_client');
+
   Client? _client;
 
   static void _traceRequest(String id, BaseRequest req) {
-    dbg.trace(
+    logger.fine(
       '****\n'
       '[$id] >>>> request = ${req.method} ${req.url}\n'
       '[$id] Headers:\n'
@@ -43,7 +46,7 @@ class DbgClient with BaseClient implements Client {
     // load response and rebuild the streamed response
     final res = await Response.fromStream(resp);
     resp = resp.rebuild(res.bodyBytes);
-    dbg.trace(
+    logger.fine(
       '[$id] <<<< response = ${resp.statusCode} ${resp.reasonPhrase ?? ''} ${resp.request?.method ?? ''} ${resp.request?.url ?? ''}\n'
       '[$id] Headers:\n'
       '${resp.headers.dump((e) => '[$id]   < ${e.key}: ${e.value}')}\n'
@@ -117,7 +120,7 @@ class DbgClient with BaseClient implements Client {
   @override
   void close() {
     if (_client != null) {
-      dbg.trace('[DbgClient.close] closing');
+      logger.fine('[DbgClient.close] closing');
       _client?.close();
       _client = null;
       super.close();

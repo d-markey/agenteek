@@ -1,21 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:agenteek/agenteek.dart';
 import 'package:dart_mcp/client.dart' as mcp;
+import 'package:logging/logging.dart';
 
-import '../../utils/access_control_list.dart';
-import '../../utils/debug.dart' as dbg;
-import '../../utils/types.dart';
-import '../../utils/zod.dart';
-import '../tool.dart';
-import '../tool_outcome.dart';
-import '../toolset.dart';
-import 'markdown_table.dart';
+import 'mcp_extension.dart';
 
 const _experimental = true;
 
 class McpToolSet extends ToolSet {
   McpToolSet(this.prefix, this.scope, this._client, this._connection);
+
+  @override
+  Logger get logger => Logger('${super.logger.name}.${name.toLowerCase()}');
 
   final String prefix;
   final String scope;
@@ -72,22 +70,22 @@ class McpToolSet extends ToolSet {
     final name = tool.name;
 
     return (Json args) async {
-      dbg.trace('Calling tool $name...');
+      logger.info('Calling tool $name...');
       final res = await _connection.callTool(
         mcp.CallToolRequest(name: name, arguments: args),
       );
-      dbg.trace('Tool $name results: $res');
+      logger.info('Tool $name results: $res');
       if (res.isError == true) return ToolError(res as Json);
 
       if (_experimental && res.structuredContent != null) {
-        final structured = _decodeIfNeeded(res.structuredContent);
+        final structured = _tryDecode(res.structuredContent);
         if (structured != null) {
           String? table;
           try {
             if (structured case List data) {
               table = MarkdownTable.fromJsonList(data.cast<Json>());
             } else if (structured case {'content': Object? data}) {
-              data = _decodeIfNeeded(data);
+              data = _tryDecode(data);
               if (data is List) {
                 table = MarkdownTable.fromJsonList(data.cast<Json>());
                 structured.remove('content');
@@ -97,7 +95,7 @@ class McpToolSet extends ToolSet {
               }
             }
           } catch (e) {
-            dbg.error('Error converting structured content: $e');
+            logger.warning('Error converting structured content: $e');
           }
           return ToolSuccess(table ?? res);
         }
@@ -107,7 +105,7 @@ class McpToolSet extends ToolSet {
     };
   }
 
-  static Object? _decodeIfNeeded(Object? data) {
+  static Object? _tryDecode(Object? data) {
     if (data is String) {
       try {
         data = data.trim().isEmpty ? null : jsonDecode(data);

@@ -23,7 +23,11 @@ extension type TestArgs(Json _json) {
     return p.startsWith('/') ? p.substring(1) : p;
   }
 
+  String get nameFilter => _json.getString('nameFilter', defaultValue: '');
+
   int get concurrency => _json.getInt('concurrency', defaultValue: 2);
+
+  int get timeout => _json.getInt('timeout', defaultValue: 300);
 
   static final schema = S.object(
     properties: {
@@ -32,8 +36,22 @@ extension type TestArgs(Json _json) {
           'root directory',
         ),
       ),
+      'nameFilter': S.string(
+        description:
+            'Plain name filter to run only matching tests (the "--plain-name" argument). '
+                    'When empty, all tests are run.'
+                .optional(''),
+      ),
       'concurrency': S.integer(
-        description: 'The number of concurrent test suites.'.optional('2'),
+        description:
+            'The number of concurrent test suites (the "--concurrency" argument). '
+                    'When provided, must be positive and non-zero.'
+                .optional('4'),
+      ),
+      'timeout': S.integer(
+        description:
+            'An optional timeout in seconds for the full test process (not per test case).'
+                .optional('300'),
       ),
     },
   );
@@ -45,9 +63,14 @@ extension type RunArgs(Json _json) {
     return p.startsWith('/') ? p.substring(1) : p;
   }
 
+  int get timeout => _json.getInt('timeout', defaultValue: 180);
+
   static final schema = S.object(
     properties: {
       'scriptPath': S.string(description: 'The path to the Dart script.'),
+      'timeout': S.integer(
+        description: 'An optional timeout in seconds.'.optional('180'),
+      ),
     },
     required: ['scriptPath'],
   );

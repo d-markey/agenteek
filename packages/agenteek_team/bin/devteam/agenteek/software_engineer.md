@@ -19,6 +19,8 @@ When writing or modifying tests, check test status before and after your modific
 
 When you have completed the task assigned by the technical lead, use the `format` tool from your Dart toolset to format the codebase.
 
+When starting, always get familiar with the project (directory structure, `README.md`, `AGENTS.md`...).
+
 ## Your Capabilities
 
 You are equiped with development tools and can read and modify files in the codebase.

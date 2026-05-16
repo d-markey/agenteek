@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '_logger.stub.dart' as base_;
-import 'debug.dart' as dbg;
 
 Directory? _logDir;
 
@@ -28,7 +27,7 @@ Future<RandomAccessFile> _openWriter(String name) {
     path = path.substring(0, idx + 'agenteek_logs'.length);
     logDir = Directory(p.join(path, timestamp))..createSync(recursive: true);
     _logDir = logDir;
-    dbg.trace('Logging to $logDir');
+    print('Logging to $logDir');
   }
   return File(
     p.join(logDir.path, 'agenteek_$name.log'),

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:agenteek/agenteek.dart';
+
 abstract class Container {
   String get image;
   String get name;
@@ -16,5 +18,5 @@ abstract class Container {
   Future<void> cpdir(Directory source, String dest);
   Future<void> rmdir(String dest);
 
-  Future<Map<String, Object?>> run(String command, {String? workingDir});
+  Future<Json> run(String command, {String? workingDir, Duration? timeout});
 }

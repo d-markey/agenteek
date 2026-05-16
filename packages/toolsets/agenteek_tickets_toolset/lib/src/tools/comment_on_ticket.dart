@@ -28,7 +28,7 @@ Future<ToolSuccess<String>> _commentOnTicket(
     throw 'Ticket "${args.ticketId}" not found.';
   } else {
     ticket.addComment(author: toolset.owner, message: args.comment);
-    toolset.logger.append('===\n$ticket');
+    toolset.logger.fine('Added comment: $ticket');
     if (fs != null) {
       await fs.write(fname, jsonEncode(ticket));
     }

@@ -1,36 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dart_mcp/client.dart' as mcp;
 import 'package:dart_mcp/server.dart' as mcp;
 
-import '../../channels/http_channel.dart';
-import '../../utils/access_control_list.dart';
-import '../tool.dart';
-import '../toolset.dart';
-import 'mcp_toolset.dart';
-
-extension McpToolSetExt on mcp.Implementation {
-  Future<McpToolSet?> setup({
-    required String prefix,
-    required String scope,
-    required Uri url,
-    Map<String, String>? headers,
-    AccessControlList toolsAcl = AccessControlList.allowAll,
-  }) async {
-    try {
-      final client = mcp.MCPClient(this);
-      final channel = HttpChannel(url: url, headers: headers);
-      final connection = client.connectServer(channel);
-      final mcpToolset = McpToolSet(prefix, scope, client, connection);
-      await mcpToolset.initialize(toolsAcl: toolsAcl);
-      return mcpToolset;
-    } catch (ex) {
-      print('Failed to initialize MCP server: $ex');
-      return null;
-    }
-  }
-}
+import 'package:agenteek/agenteek.dart';
 
 extension ToolSupportExt on mcp.ToolsSupport {
   void registerToolSet(ToolSet toolSet) {

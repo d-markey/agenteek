@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:http/http.dart';
-
 import '../commands/command.dart';
 import '../toolsets/toolset_exception.dart';
 
@@ -16,8 +14,6 @@ typedef PromptCallback = FutureOr<String> Function();
 typedef NewConversationCallback = FutureOr<void> Function();
 
 typedef UserCommandHandler = Command? Function(String label, List<String> args);
-
-typedef CustomErrorHandler = Future<Duration?> Function(Response, int);
 
 typedef ErrorCallback =
     FutureOr<String?> Function(Object error, [StackTrace? stackTrace]);

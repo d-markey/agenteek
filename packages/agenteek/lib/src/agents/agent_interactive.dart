@@ -13,7 +13,6 @@ import '../commands/built_in/quit_command.dart';
 import '../commands/built_in/summarize_command.dart';
 import '../commands/built_in/system_messages_command.dart';
 import '../commands/built_in/tools_command.dart';
-import '../utils/debug.dart' as dbg;
 import '../utils/types.dart';
 import 'agent.dart';
 
@@ -78,7 +77,7 @@ class InteractiveAgent extends Agent {
     Future<void> $handleUserInput() async {
       String prompt;
       while (!completer.isCompleted) {
-        dbg.trace('Waiting for user input...');
+        logger.fine('Waiting for user input...');
 
         // handle prompt & commands
         try {
@@ -108,10 +107,10 @@ class InteractiveAgent extends Agent {
               modelOutput.add(response);
             }
           }
-        } catch (ex) {
+        } catch (ex, st) {
           // This should be an unexpected error that escaped the inner blocks.
           // If invoke() threw, onError was already called once.
-          dbg.error('!!! UNHANDLED ERROR: $ex');
+          logger.severe('!!! UNHANDLED ERROR: $ex', ex, st);
         }
       }
     }

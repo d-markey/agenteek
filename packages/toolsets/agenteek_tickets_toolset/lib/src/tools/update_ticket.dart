@@ -34,7 +34,7 @@ Future<ToolSuccess<String>> _updateTicket(
       title: args.title,
       description: args.description,
     );
-    toolset.logger.append('===\n$ticket');
+    toolset.logger.fine('Updated: $ticket');
     if (fs != null) {
       await fs.write(fname, jsonEncode(ticket));
     }

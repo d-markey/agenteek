@@ -10,20 +10,20 @@ resolution: workspace
 
 dependencies:
   better_future: ^2.0.3
-  dartantic_ai:
-  dart_mcp:
-  meta:
-  path:
-  yaml:
-  glob:
-  logging:
-  agenteek:
-  agenteek_files:
-  agenteek_memory_toolset:
-  agenteek_files_toolset:
-  agenteek_dart_toolset:
-  agenteek_tickets_toolset:
+  dart_mcp: any
+  meta: any
+  yaml: any
+  glob: any
+  path: any
+  logging: any
+  agenteek: any
+  agenteek_files: any
+  agenteek_mcp_toolset: any
+  agenteek_memory_toolset: any
+  agenteek_files_toolset: any
+  agenteek_dart_toolset: any
+  agenteek_tickets_toolset: any
 
 dev_dependencies:
-  lints:
-  test:
+  lints: any
+  test: any

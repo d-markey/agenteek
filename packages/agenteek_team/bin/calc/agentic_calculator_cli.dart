@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
+import 'package:agenteek_mcp_toolset/mcp_toolset.dart';
 import 'package:better_future/better_future.dart';
 
 import 'mcp_arithmetic_client.dart';
@@ -51,7 +52,7 @@ void main() async {
         'When possible, reuse previous calculations and tool results and indicate which results were reused. '
         'Note that "a - b" (subtracting b from a) is equivalent to "a + -b". ',
     prompt: () {
-      stdout.write('\x1B[94mYou\x1B[0m: ');
+      stdout.write('\x1B[94m You \x1B[0m: ');
       return stdin.readLineSync()?.trim() ?? '';
     },
     modelOutput: AgentSink(agentConf.displayName),

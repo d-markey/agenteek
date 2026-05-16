@@ -4,12 +4,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
+import 'package:logging/logging.dart';
 
 import 'container.dart';
 
 class PodmanContainer implements Container {
   PodmanContainer({required this.image, String name = ''}) : name = name.trim();
+
+  static Logger get _logger => Logger('agenteek.containers.podman');
 
   @override
   final String image; // dart:stable
@@ -146,17 +148,17 @@ class PodmanContainer implements Container {
   Future<Json> run(
     String command, {
     String? workingDir,
-    Duration? timeOut,
+    Duration? timeout,
   }) async {
     final sw = Stopwatch()..start();
     final timer = Timer.periodic(const Duration(seconds: 30), (t) {
-      dbg.error(
+      _logger.fine(
         '[${sw.elapsed}] Command "$command" still pending in container $id...',
       );
     });
 
     try {
-      return await _run(command, workingDir: workingDir, timeOut: timeOut);
+      return await _run(command, workingDir: workingDir, timeOut: timeout);
     } finally {
       timer.cancel();
     }
@@ -189,59 +191,69 @@ class PodmanContainer implements Container {
 
     final completer = Completer<Json>();
 
-    dbg.trace('[$id] podman $command $args');
+    final sw = Stopwatch()..start();
+
+    _logger.fine('[$id] podman $command $args');
     final process = await Process.start('podman', [command, ...args]);
 
     final stdErr = BytesBuilder(), stdErrDone = Completer();
     process.stderr.listen((e) {
-      dbg.trace('[$id] [ERR] ${utf8.decode(e)}');
+      _logger.warning('[$id] [ERR] ${utf8.decode(e)}');
       stdErr.add(e);
-    }, onDone: stdErrDone.complete);
+    }, onDone: stdErrDone.safeComplete);
 
     final stdOut = BytesBuilder(), stdOutDone = Completer();
     process.stdout.listen((e) {
-      dbg.trace(() => '[$id] [OUT] ${utf8.decode(e)}');
+      _logger.fine(() => '[$id] [OUT] ${utf8.decode(e)}');
       stdOut.add(e);
-    }, onDone: stdOutDone.complete);
+    }, onDone: stdOutDone.safeComplete);
 
     Timer? timeoutTimer;
     if (timeOut != null) {
       timeoutTimer = Timer(timeOut, () {
-        if (!completer.isCompleted) {
-          completer.complete({
-            'commandLine': {'command': command, 'args': args},
-            'stderr': utf8.decode(stdErr.toBytes()),
-            'stdout': utf8.decode(stdOut.toBytes()),
-            'exitCode': null,
-            'status':
-                'The command timed-out after ${timeOut.inMilliseconds} ms.'
-                '`stderr` and `stdout` content are provided but likely incomplete.',
-          });
-        }
+        final elapsed = sw.elapsed;
+        completer.safeComplete({
+          'commandLine': {'command': command, 'args': args},
+          'stderr': utf8.decode(stdErr.toBytes()),
+          'stdout': utf8.decode(stdOut.toBytes()),
+          'exitCode': null,
+          'elapsed': elapsed.inMilliseconds > 10000
+              ? '${elapsed.inSeconds} seconds'
+              : '${elapsed.inMilliseconds} milliseconds',
+          'status':
+              'The command timed-out after $timeOut.'
+              '`stderr` and `stdout` content are provided but likely incomplete.',
+        });
         process.kill();
+        unawaited(Future.wait([stdErrDone.future, stdOutDone.future]));
       });
     }
 
-    process.exitCode.then(
-      (exitCode) async {
-        timeoutTimer?.cancel();
-        await Future.wait([stdErrDone.future, stdOutDone.future]);
-        if (!completer.isCompleted) {
-          completer.complete({
-            'commandLine': {'command': command, 'args': args},
-            'stderr': utf8.decode(stdErr.toBytes()),
-            'stdout': utf8.decode(stdOut.toBytes()),
-            'exitCode': exitCode,
-          });
-        }
-      },
-      onError: (ex, st) {
-        if (!completer.isCompleted) {
-          completer.completeError(ex, st);
-        }
-      },
-    );
+    process.exitCode.then((exitCode) async {
+      timeoutTimer?.cancel();
+      final elapsed = sw.elapsed;
+      await Future.wait([stdErrDone.future, stdOutDone.future]);
+      completer.safeComplete({
+        'commandLine': {'command': command, 'args': args},
+        'stderr': utf8.decode(stdErr.toBytes()),
+        'stdout': utf8.decode(stdOut.toBytes()),
+        'elapsed': elapsed.inMilliseconds > 10000
+            ? '${elapsed.inSeconds} seconds'
+            : '${elapsed.inMilliseconds} milliseconds',
+        'exitCode': exitCode,
+      });
+    }, onError: completer.safeCompleteError);
 
     return completer.future;
+  }
+}
+
+extension<T> on Completer<T> {
+  void safeComplete([FutureOr<T>? value]) {
+    if (!isCompleted) complete(value);
+  }
+
+  void safeCompleteError(Object error, StackTrace st) {
+    if (!isCompleted) completeError(error, st);
   }
 }

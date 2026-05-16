@@ -1,4 +1,5 @@
 import 'package:agenteek/agenteek.dart';
+import 'package:logging/logging.dart';
 
 import 'ticket.dart';
 
@@ -16,8 +17,7 @@ class TicketToolSet extends ToolSet with Prefix, Scope {
     required this.owner,
     String? scope,
     this.fileSystem,
-  }) : scope = scope?.trim() ?? '',
-       logger = Log('tickets_$owner') {
+  }) : scope = scope?.trim() ?? '' {
     // register tools
     register(listTicketsTool(this));
     register(openTicketTool(this));
@@ -43,14 +43,15 @@ class TicketToolSet extends ToolSet with Prefix, Scope {
 
   final tickets = <int, Ticket>{};
 
-  final Log logger;
+  @override
+  Logger get logger => Logger('${super.logger.name}.$owner');
 
   final pattern = RegExp('ticket_(\\d+)\\.json');
 
   String getTicketFileName(int id) => 'ticket_$id.json';
 
   Stream<String> listTicketFiles(FileSystem fs) =>
-      fs.list().where((f) => pattern.hasMatch(f));
+      fs.list().where(pattern.hasMatch);
 
   Future<int> getNextTicketId() async {
     var maxId = tickets.length - 1;

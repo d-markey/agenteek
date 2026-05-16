@@ -4,30 +4,11 @@ import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
 import '../toolsets/tool_outcome.dart';
 import '../toolsets/toolset.dart';
-import '_logger.stub.dart'
-    if (dart.library.io) '_logger.io.dart'
-    if (dart.library.js_interop) '_logger.web.dart'
-    as impl_
-    show trace;
 import 'types.dart';
 
 extension ObjectDbgExt on Object? {
   String getHexHashCode(int width) =>
       hashCode.toRadixString(16).padLeft(width, '0');
-}
-
-bool enableTrace = false;
-
-void trace(Object message) {
-  if (enableTrace) {
-    if (message is Function) message = message();
-    impl_.trace(message);
-  }
-}
-
-void error(Object message) {
-  if (message is Function) message = message();
-  impl_.trace(message);
 }
 
 String dump(dynamic args, {int maxLen = 40}) {

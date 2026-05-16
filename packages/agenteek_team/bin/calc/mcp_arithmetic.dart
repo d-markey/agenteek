@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:dart_mcp/server.dart' as mcp;
+import 'package:dart_mcp/stdio.dart';
 
 void main() async {
   MathMCP(stdioChannel(input: stdin, output: stdout));
@@ -134,9 +133,9 @@ base class MathMCP extends mcp.MCPServer with mcp.ToolsSupport {
           args.entries.where((e) => e.key != 'name' && e.key != 'arguments'),
         ).toString();
         if (info.isNotEmpty) info = ' / $info';
-        dbg.trace('$name: ${args['name']}(${args['arguments']})$info');
+        print('$name: ${args['name']}(${args['arguments']})$info');
       } else {
-        dbg.trace('$name: $args');
+        print('$name: $args');
       }
       return impl(args);
     }

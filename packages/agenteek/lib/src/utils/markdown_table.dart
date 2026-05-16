@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../../utils/types.dart';
+import 'types.dart';
 
 class MarkdownTable {
   /// Recursively flattens a Map by joining nested keys with a dot ('.').

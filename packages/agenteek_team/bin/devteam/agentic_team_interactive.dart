@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:agenteek_team/agenteek_team.dart';
-import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart' as l;
+import 'package:path/path.dart' as p;
 
 import 'console_sink.dart';
 import 'args.dart';
@@ -14,12 +14,12 @@ void main(List<String> arguments) async {
   Log.enable();
 
   l.hierarchicalLoggingEnabled = true;
-  l.Logger('dartantic.orchestrator')
-    ..level = l.Level.ALL
-    ..onRecord.listen(_log);
-  l.Logger('dartantic.chat_agent')
-    ..level = l.Level.OFF
-    ..onRecord.listen(_log);
+  l.Logger.root.level = l.Level.SEVERE;
+  l.Logger('dartantic.orchestrator').level = l.Level.ALL;
+  l.Logger('dartantic.executor.tool').level = l.Level.INFO;
+  l.Logger('dartantic.chat_agent').level = l.Level.OFF;
+  l.Logger('GoogleAI.HTTP').level = l.Level.SEVERE;
+  l.Logger.root.onRecord.listen(_log);
 
   final args = Args.parse(arguments);
   if (args.teamConfPath.isEmpty) {
@@ -72,10 +72,11 @@ void main(List<String> arguments) async {
   final agents = buildTeam(
     agentsConf,
     secrets: secrets,
-    getUserInput: () => readMessage('\x1B[44mYou\x1B[0m'),
-    outputCallbackBuilder: (name) => ConsoleSink('\x1B[94m$name\x1B[0m'),
-    inputCallbackBuilder: (instructorName, name) =>
-        ConsoleSink('\x1B[44m$instructorName => $name\x1B[0m'),
+    getUserInput: () => readMessage('\x1B[42m You \x1B[0m'),
+    outputCallbackBuilder: (name) => ConsoleSink('\x1B[43m$name\x1B[0m'),
+    a2aSinkBuilder:
+        ({required String from, required String to, required String color}) =>
+            ConsoleSink('\x1B[${color}m$from => $to\x1B[0m'),
   );
 
   // the root agent is the only interactive agent
@@ -89,17 +90,17 @@ void main(List<String> arguments) async {
   //   ),
   // );
 
-  dbg.trace(
+  print(
     'rootAgent = $rootAgent / ${rootAgent.displayName} / tools: ${rootAgent.toolNames.join(', ')}',
   );
 
   // process user instructions
   await rootAgent.interactWithUser(/*handleUserCommand: userCommandHandler*/);
 
-  dbg.trace('Shutting down...');
+  print('Shutting down...');
   await Future.wait(agents.values.map((a) => a.dispose()));
   Log.disable();
-  dbg.trace('Done.');
+  print('Done.');
 }
 
 Never usage() {
@@ -128,20 +129,37 @@ void echoMessage(String header, String message) {
 final sw = Stopwatch()..start();
 
 void _log(l.LogRecord r) {
+  if (r.loggerName == 'GoogleAI.HTTP' && r.level < l.Level.SEVERE) return;
+
   final msg = r.message.toLowerCase();
   if (r.error != null) {
-    sw.reset();
-    print(
-      '${r.level} ${r.time} ${r.loggerName} ${r.message} ${r.error} ${r.stackTrace}',
-    );
-  } else if (msg.contains('initializing') || msg.contains('finalizing')) {
-    sw.reset();
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
-  } else if (msg.contains('tool')) {
-    sw.reset();
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
-  } else if (sw.elapsedMilliseconds >= 10000) {
-    sw.reset();
-    print('${r.level} ${r.time} ${r.loggerName} ${r.message}');
+    _logLines(r);
+  } else if (r.loggerName.startsWith('dartantic.orchestrator')) {
+    if (msg.contains('initializing') ||
+        msg.contains('finalizing') ||
+        (msg.contains('streaming chunk') && sw.elapsedMilliseconds >= 10000)) {
+      _logLines(r);
+    }
+  } else {
+    _logLines(r);
   }
+}
+
+void _logLines(l.LogRecord r) {
+  final maxLen = l.Level.LEVELS.map((l) => l.name.length).reduce(max);
+  final prefix = '[${r.time}] ${r.level.name.padRight(maxLen)} ${r.loggerName}';
+  List<String> lines;
+  if (r.error == null) {
+    lines = r.message.split('\n');
+  } else {
+    final st = r.stackTrace?.toString();
+    lines = 'ERROR: ${r.error}'.split('\n');
+    if (st != null) {
+      lines.addAll(['CALL STACK:', ...st.split('\n').map((l) => '  $l')]);
+    }
+  }
+  for (var l in lines) {
+    print('$prefix> $l');
+  }
+  sw.reset();
 }

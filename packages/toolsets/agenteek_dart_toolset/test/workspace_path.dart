@@ -4,9 +4,14 @@ import 'dart:isolate';
 import 'package:path/path.dart' as p;
 
 Future<String> getWorkspacePath(String path) async {
-  final uri = Uri.parse('package:agenteek_dart/agenteek_dart.dart');
-  final res = File(
-    (await Isolate.resolvePackageUri(uri))!.toFilePath(),
-  ).parent.parent.absolute;
-  return Link(p.join(res.path, '..', '..', '..', path)).absolute.path;
+  final uri = await Isolate.resolvePackageUri(
+    Uri.parse('package:agenteek/agenteek.dart'),
+  );
+  final workspace = File(uri!.toFilePath())
+      .parent /*agenteek.dart*/
+      .parent /*lib*/
+      .parent /*agenteek*/
+      .parent /*packages*/
+      .absolute;
+  return Link(p.join(workspace.path, path)).absolute.path;
 }

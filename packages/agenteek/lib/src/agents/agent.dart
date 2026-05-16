@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:cancelation_token/cancelation_token.dart';
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
+import 'package:logging/logging.dart';
 
 import '../conversations/check_point.dart';
 import '../conversations/conversation_manager.dart';
@@ -11,6 +11,7 @@ import '../output_sinks/streaming_output_sink.dart';
 import '../toolsets/toolset.dart';
 import '../toolsets/toolset_combined.dart';
 import '../utils/types.dart';
+import 'accumulator.dart';
 import 'agent_logger.dart';
 import 'agent_throttling_logger.dart';
 
@@ -33,6 +34,8 @@ class Agent {
        _displayName = displayName,
        _systemPrompt = systemInstructions?.toSystemPrompt(),
        _toolSet = toolSet.isEmpty ? ToolSet.empty : CombinedToolSet({toolSet});
+
+  Logger get logger => Logger('agenteek.agent.${displayName.toLowerCase()}');
 
   final ConversationManager conversationManager;
 
@@ -165,7 +168,8 @@ class Agent {
       if (output.isNotEmpty) {
         _streamingOutput?.add(output);
         if (outputAccumulator.accumulate(output)) {
-          isRepeating |= (outputAccumulator.checkRepetitions() > 2);
+          final repetitions = outputAccumulator.checkRepetitions();
+          isRepeating |= (repetitions.$1 > 2 || repetitions.$2 > 0);
         }
       }
 
@@ -173,7 +177,8 @@ class Agent {
       if (thinking.isNotEmpty) {
         _streamingThinking?.add(thinking);
         if (thinkingAccumulator.accumulate(thinking)) {
-          isRepeating |= (thinkingAccumulator.checkRepetitions() > 2);
+          final repetitions = thinkingAccumulator.checkRepetitions();
+          isRepeating |= (repetitions.$1 > 2 || repetitions.$2 > 0);
         }
       }
 
@@ -230,18 +235,18 @@ class Agent {
             depth++;
           },
           onError: (ex, st) async {
-            dbg.error('[E] ($depth/$remaining) Error $ex\n$st');
+            logger.fine('[E] ($depth/$remaining) Error $ex\n$st');
             if (!streamController.isClosed) {
               streamController.addError(ex, st);
             }
             await pending;
-            dbg.error('[E] ($depth/$remaining) closing now');
+            logger.fine('[E] ($depth/$remaining) closing now');
             streamController.close();
           },
           onDone: () {
-            dbg.error('[D] ($depth/$remaining) Done');
+            logger.fine('[D] ($depth/$remaining) Done');
             pending.then((_) async {
-              dbg.error('[D] ($depth/$remaining) closing now');
+              logger.fine('[D] ($depth/$remaining) closing now');
               streamController.close();
               await Future.wait([
                 ?_streamingThinking?.finish(),
@@ -270,65 +275,5 @@ extension on String {
   dartantic.ChatMessage? toSystemPrompt() {
     final prompt = trim();
     return prompt.isEmpty ? null : .system(prompt);
-  }
-}
-
-class Accumulator {
-  Accumulator(this.mode);
-
-  final String mode;
-
-  final _lines = <String, int>{};
-  String _partial = '';
-
-  bool accumulate(String chunk) {
-    var res = false;
-    _partial += chunk;
-    final lines = _partial.split('\n');
-    _partial = lines.removeLast();
-    for (var line in lines.where(_shouldKeepLine)) {
-      line = line.trim().toLowerCase();
-      final count = (_lines[line] ?? 0) + 1;
-      _lines[line] = count;
-      res |= (count > 4);
-    }
-    return res;
-  }
-
-  int checkRepetitions() {
-    final entries = _lines.entries.where((e) => e.value > 4).toList()
-      ..sort((a, b) {
-        final countDelta = b.value.compareTo(a.value);
-        return (countDelta == 0)
-            ? a.key.length.compareTo(b.key.length)
-            : countDelta;
-      });
-    if (entries.any((e) => e.value > 20)) {
-      dbg.error(
-        'TOP 5 ${mode.toUpperCase()}:\n'
-        '${entries.take(5).map((e) => ' - (${e.value}) ${e.key}').join('\n')}',
-      );
-    }
-    return entries.where((e) => e.value > 20).length;
-  }
-
-  static final _wordBoundary = RegExp(r'\b');
-  static final _digit = RegExp(r'[0-9]');
-  static final _hexNumber = RegExp(r'^(0x)?[a-fA-F0-9_]+$');
-  static final _word = RegExp(r'^[0-9\w]+$');
-
-  static bool _shouldKeepLine(String line) {
-    final parts = line.trim().split(_wordBoundary);
-    for (var i = parts.length - 1; i >= 0; i--) {
-      final p = parts[i].trim();
-      if (p.isEmpty) {
-        parts.removeAt(i);
-      } else if (_digit.hasMatch(p) && _hexNumber.hasMatch(p)) {
-        parts.removeAt(i);
-      } else if (!_word.hasMatch(p)) {
-        parts.removeAt(i);
-      }
-    }
-    return parts.length > 2;
   }
 }

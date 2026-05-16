@@ -1,5 +1,4 @@
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 
 import '../agenteek_team.dart';
 import 'toolsets/team/team_toolset.dart';
@@ -10,7 +9,12 @@ Map<String, Agent> buildTeam(
   required Secrets secrets,
   PromptCallback? getUserInput,
   required OutputSink Function(String) outputCallbackBuilder,
-  required OutputSink Function(String, String) inputCallbackBuilder,
+  required OutputSink Function({
+    required String from,
+    required String to,
+    required String color,
+  })
+  a2aSinkBuilder,
 }) {
   final agents = <String, Agent>{};
 
@@ -46,8 +50,6 @@ Map<String, Agent> buildTeam(
 
     agents[conf.displayName] = agent;
 
-    dbg.trace('$agentName is running with model ${conf.modelInfo}.');
-
     if (conf.instructor.isNotEmpty) {
       final instructorConf = teamConf
           .where(($) => $.displayName == conf.instructor)
@@ -66,13 +68,15 @@ Map<String, Agent> buildTeam(
 
     if (conf.instructor.isNotEmpty) {
       final instructor = agents[conf.instructor]!;
-      final agentSink = inputCallbackBuilder(
-        instructor.displayName,
-        conf.displayName,
+      final agentSink = a2aSinkBuilder(
+        from: instructor.displayName,
+        to: conf.displayName,
+        color: '44', // blue background
       );
-      final instructorSink = inputCallbackBuilder(
-        conf.displayName,
-        instructor.displayName,
+      final instructorSink = a2aSinkBuilder(
+        from: conf.displayName,
+        to: instructor.displayName,
+        color: '45', // magenta background
       );
       teamToolsets
           .putIfAbsent(instructor, () {

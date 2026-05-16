@@ -33,7 +33,7 @@ Future<ToolSuccess<String>> _closeTicket(
       ticket.addComment(author: toolset.owner, message: args.comment);
     }
     ticket.update(modifiedBy: toolset.owner, status: 'closed');
-    toolset.logger.append('===\n$ticket');
+    toolset.logger.fine('Closed: $ticket');
     if (fs != null) {
       await fs.write(fname, jsonEncode(ticket));
     }

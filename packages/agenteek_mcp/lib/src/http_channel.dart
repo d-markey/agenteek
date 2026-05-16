@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import '../utils/debug.dart' as dbg;
+import 'package:logging/logging.dart';
+
 import 'package:stream_channel/stream_channel.dart';
 
 import '_helpers.dart';
@@ -15,6 +16,8 @@ class HttpChannel
     final sub = _input.stream.listen(_process);
     _output.onCancel = sub.cancel;
   }
+
+  Logger get logger => Logger('agenteek.http_channel');
 
   Uri _url;
   final Map<String, String>? _headers;
@@ -41,7 +44,7 @@ class HttpChannel
   void _process(String data) async {
     // avoid concurrent messages in HTTP channel
     while (!_pendingOperation.isCompleted) {
-      dbg.trace('AWAITING PENDING OPERATION...');
+      logger.info('AWAITING PENDING OPERATION...');
       await _pendingOperation.future;
     }
     _pendingOperation = Completer();

@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
 import 'package:glob/glob.dart';
-import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
+import 'package:path/path.dart' as p;
 
 class AgentConf extends AgentConfiguration {
   AgentConf({
@@ -55,7 +55,7 @@ class AgentConf extends AgentConfiguration {
             ? instructionsTemplate
             : p.join(yamlFile.absolute.parent.path, instructionsTemplate),
       );
-      if (instrFile.existsSync()) {
+      if (await instrFile.exists()) {
         instructionsTemplate = await FileReader.readString(instrFile);
       }
     }

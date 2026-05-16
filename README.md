@@ -7,22 +7,33 @@ Welcome to the **Agenteek** monorepo! This workspace contains a collection of Da
 This workspace is organized into several modular packages:
 
 ### Core & Framework
-- **[agenteek](packages/agenteek)**: The core library containing the base `Agent` abstractions, conversation management, and toolset orchestration.
 
-- **[agenteek_team](packages/agenteek_team)**: Configurable multi-agent harness for managing a team of Agenteek agents.
+- **[agenteek](packages/agenteek)**: The core package containing the base `Agent` abstractions, conversation management, and toolset orchestration.
+
+- **[agenteek_containers](packages/agenteek_containers)**: Utility classes for running workloads in containers. Provides a `podman` implementation (cf. `PodmanContainer`).
 
 - **[agenteek_files](packages/agenteek_files)**: Utility classes for reading text files.
 
-- **[agenteek_containers](packages/agenteek_containers)**: Utility classes for running workloads in containers, including a `podman` implementation via `PodmanContainer`.
+- **[agenteek_mcp](packages/agenteek_mcp)**: Utility classes for MCP protocol.
+
+- **[agenteek_team](packages/agenteek_team)**: Configurable multi-agent harness for managing a team of Agenteek agents. Provides a toolset for team communication.
 
 ### Toolsets
+
 Specialized capabilities that can be plugged into any agent:
-- **`agenteek_dart_toolset`**: Tools for Dart code analysis and execution.
-- **`agenteek_files_toolset`**: Tools for file system interaction.
-- **`agenteek_memory_toolset`**: Short/long-term memory management for agents.
-- **`agenteek_tickets_toolset`**: Tools for managing tasks and tickets.
+
+- **[agenteek_dart_toolset](packages/toolsets/agenteek_dart_toolset)**: Tools for Dart code analysis and execution.
+
+- **[agenteek_files_toolset](packages/toolsets/agenteek_files_toolset)**: Tools for file system interaction.
+
+- **[agenteek_mcp_toolset](packages/toolsets/agenteek_mcp_toolset)**: Tools for exposing MCP tools to Agenteek agents.
+
+- **[agenteek_memory_toolset](packages/toolsets/agenteek_memory_toolset)**: Tools for managing short/long-term memory for Agenteek agents.
+
+- **[agenteek_tickets_toolset](packages/toolsets/agenteek_tickets_toolset)**: Tools for managing tasks and tickets.
 
 ### Examples
+
 - **[agenteek_web](packages/agenteek_web)**: A bare-bones web application for [chatting with agents in the browser](https://d-markey.github.io/agenteek/agenteek_web/).
 
 ## 🚀 Getting Started

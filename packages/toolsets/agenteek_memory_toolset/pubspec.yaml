@@ -10,10 +10,10 @@ resolution: workspace
 
 # Add regular dependencies here.
 dependencies:
-  dartantic_interface:
-  agenteek:
-  dart_mcp:
+  agenteek: any
+  agenteek_mcp: any
+  dart_mcp: any
 
 dev_dependencies:
-  lints:
-  test:
+  lints: any
+  test: any

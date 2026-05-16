@@ -1,4 +1,5 @@
 import 'package:agenteek/agenteek.dart';
+import 'package:agenteek_mcp_toolset/mcp_toolset.dart';
 import 'package:better_future/better_future.dart';
 import 'package:dart_mcp/client.dart' as mcp;
 

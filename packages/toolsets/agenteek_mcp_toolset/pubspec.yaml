@@ -1,0 +1,21 @@
+name: agenteek_mcp_toolset
+description: Agenteek MCP toolset.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.11.5
+
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  dartantic_interface: any
+  agenteek: any
+  agenteek_mcp: any
+  dart_mcp: any
+  logging: any
+
+dev_dependencies:
+  lints: any
+  test: any

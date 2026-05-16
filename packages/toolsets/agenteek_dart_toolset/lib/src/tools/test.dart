@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_files/agenteek_files_io.dart';
 
 import '../dart_toolset.dart';
@@ -27,12 +26,23 @@ Future<ToolSuccess<Json>> _test(DartToolSet toolSet, TestArgs args) async {
     }
   }
 
+  final testFileOrDir = fileOrDir
+      .getLocalPath(toolSet.root)
+      .replaceAll('\\', '/');
+  final concurrency = '--concurrency=${args.concurrency}';
+  final plainName = args.nameFilter.isNotEmpty
+      ? '--plain-name="${args.nameFilter}"'
+      : '';
+
+  toolSet.logger.info('Runing tests: $args');
+
   final result = await toolSet.execInPodman(
-    'dart test --concurrency=${args.concurrency} --reporter=json ${fileOrDir.getLocalPath(toolSet.root).replaceAll('\\', '/')}',
+    'dart test --reporter=json $concurrency $plainName "$testFileOrDir"',
+    timeout: Duration(seconds: args.timeout),
   );
   final testResult = _summarize(result['stdout'] as String?).trim();
   result['stdout'] = testResult;
-  dbg.error('TEST RESULTS: $testResult');
+  toolSet.logger.info(result);
   return ToolSuccess(result);
 }
 
@@ -165,10 +175,6 @@ String _summarize(String? testReport) {
         'FAILED TEST "${t.name}" FROM "${t.suite?.path ?? '<unknown test file>'}" ON PLATFORM "${t.suite?.platform ?? '<unknown platform>'}"',
       );
       var blankline = '';
-      if (t.name != t.fullName) {
-        sb.writeln('Full test name: ${t.fullName}');
-        blankline = '\n';
-      }
       if (t.messages.isNotEmpty) {
         sb.writeln('Test messages:');
         sb.writeln(t.messages.map((l) => '- $l').join('\n'));
@@ -201,6 +207,13 @@ String _summarize(String? testReport) {
       sb.writeln(
         'STILL PENDING TEST "${t.name}" FROM "${t.suite?.path ?? '<unknown test file>'}" ON PLATFORM "${t.suite?.platform ?? '<unknown platform>'}"',
       );
+      var blankline = '';
+      if (t.messages.isNotEmpty) {
+        sb.writeln('Test messages:');
+        sb.writeln(t.messages.map((l) => '- $l').join('\n'));
+        blankline = '\n';
+      }
+      sb.write(blankline);
     }
   }
 
@@ -243,8 +256,6 @@ class _Group {
   final int id;
   final String name;
 
-  String get fullName => (parent == null) ? name : '${parent!.fullName} $name';
-
   _Group? parent;
   _Suite? suite;
 
@@ -261,8 +272,6 @@ class _Test {
 
   final int id;
   final String name;
-
-  String get fullName => (group == null) ? name : '${group!.fullName} $name';
 
   final messages = <String>[];
 

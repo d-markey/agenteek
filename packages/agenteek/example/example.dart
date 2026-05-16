@@ -1,10 +1,7 @@
 import 'dart:io';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek/agenteek.dart';
 
 void main() async {
-  dbg.enableTrace = false;
-
   // 1. Setup secrets (manual for web or loaded for CLI)
   // In a real app, you'd load this from an environment variable or secret store.
   final secrets = InMemorySecrets({

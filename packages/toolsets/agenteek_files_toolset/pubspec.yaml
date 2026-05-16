@@ -9,14 +9,15 @@ environment:
 resolution: workspace
 
 dependencies:
-  collection:
-  dartantic_interface:
-  agenteek:
-  agenteek_files:
-  dart_mcp:
-  glob:
-  path:
+  collection: any
+  dartantic_interface: any
+  agenteek: any
+  agenteek_files: any
+  agenteek_mcp: any
+  dart_mcp: any
+  glob: any
+  path: any
 
 dev_dependencies:
-  lints:
-  test:
+  lints: any
+  test: any

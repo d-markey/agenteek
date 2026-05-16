@@ -19,6 +19,8 @@ If you need to update specifications, for instance because of newly discovered e
 
 Additional instructions specific to the project may be found in files named `agents.md`: if such files exist, read them immediately and follow the instructions when working in the corresponding workspace or package.
 
+When starting, always get familiar with the project (directory structure, specifications, `README.md`, `AGENTS.md`...).
+
 ## Your Responsabilities
 
 You are accountable for the quality of the results. Always check your team's work to ensure best practices are properly followed.

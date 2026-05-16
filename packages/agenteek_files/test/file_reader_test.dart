@@ -17,7 +17,7 @@ void main() {
       );
       final contents = await file.readAsString(encoding: utf16be);
       final text = await FileReader.readString(file);
-      expect(text, contents);
+      expect(text.normalizeEol(), contents.normalizeEol());
     });
 
     test('utf16-le with BOM', () async {
@@ -28,7 +28,7 @@ void main() {
       );
       final contents = await file.readAsString(encoding: utf16le);
       final text = await FileReader.readString(file);
-      expect(text, contents);
+      expect(text.normalizeEol(), contents.normalizeEol());
     });
 
     test('utf8 with BOM', () async {
@@ -39,7 +39,7 @@ void main() {
       );
       final contents = await file.readAsString(encoding: utf8);
       final text = await FileReader.readString(file);
-      expect(text, contents);
+      expect(text.normalizeEol(), contents.normalizeEol());
     });
 
     test('utf8 without BOM', () async {
@@ -48,7 +48,7 @@ void main() {
       );
       final contents = await file.readAsString(encoding: utf8);
       final text = await FileReader.readString(file);
-      expect(text, contents);
+      expect(text.normalizeEol(), contents.normalizeEol());
     });
 
     test('Windows1252', () async {
@@ -59,7 +59,7 @@ void main() {
       );
       final contents = await file.readAsString(encoding: latin1);
       final text = await FileReader.readString(file);
-      expect(text, contents);
+      expect(text.normalizeEol(), contents.normalizeEol());
     });
   });
 }

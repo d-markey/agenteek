@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
+import 'package:dartantic_interface/dartantic_interface.dart' as dartantic;
 import 'package:markdown/markdown.dart' as md;
 import 'package:pdf/pdf.dart' as pdf;
 import 'package:pdf/widgets.dart' as pdf;

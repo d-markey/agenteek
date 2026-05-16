@@ -145,15 +145,21 @@ Future<ToolSuccess<Json>> _searchText(
       ? 0
       : allMatches.values.map((l) => l.length).reduce((a, b) => a + b);
 
+  final matches = matchCount == 1 ? '1 match' : '$matchCount matches';
+
+  final matchesFiles = allMatches.length == 1
+      ? '1 file'
+      : '${allMatches.length} files';
+
   return ToolSuccess({
     'mode': (pattern is RegExp)
         ? '**RegExp** search, $caseSensitivity.'
         : '**String** search, $caseSensitivity.',
     'summary': allMatches.isEmpty
-        ? 'The search found no result, try other options or adjust parameters if needed:\n'
-              '* Avoid searching for `class SomeClassName`; types could also be mixins, enums, extension types, etc.\n'
-              '* RegExp pattern must be wrapped in slashes, e.g. `/pattern/`.'
-        : 'Found $matchCount matches in ${allMatches.length} files.',
+        ? 'The search found no result; if this was unexpected, try other options or adjust parameters:\n'
+              '* Avoid searching for `class SomeClassName`; types could also be mixins, enums, extension types...\n'
+              '* RegExp patterns must be wrapped in slashes, e.g. `/pattern/`.'
+        : 'Found $matches in $matchesFiles.',
     'matches': allMatches,
   });
 }

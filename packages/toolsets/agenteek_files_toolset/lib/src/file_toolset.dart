@@ -101,7 +101,7 @@ class FileToolSet extends ToolSet with Prefix, Scope {
           if (path.isEmpty) continue;
           try {
             final file = await File(path).check<File>(root);
-            sideEffects ??= StringBuffer('**Side-effects**\n');
+            sideEffects ??= StringBuffer();
             sideEffects.writeln(
               '* ${file.getLocalPath(root)} possibly modified by tool call #${call.callId} `${call.toolName}`',
             );
@@ -127,7 +127,7 @@ class FileToolSet extends ToolSet with Prefix, Scope {
         <String, List<({bool fullRead, dartantic.ToolPart tool})>>{};
     for (var call in readLinesCalls) {
       final path = call.arguments?['path'] as String?;
-      final startLine = call.arguments?['startLine'] as int?;
+      final startLine = call.arguments?['startLine'] as int? ?? 1;
       final endLine = call.arguments?['endLine'] as int?;
       if (path != null) {
         try {

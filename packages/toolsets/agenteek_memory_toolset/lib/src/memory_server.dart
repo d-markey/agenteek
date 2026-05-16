@@ -1,5 +1,6 @@
 import 'package:agenteek/agenteek.dart';
 import 'package:dart_mcp/server.dart' as mcp;
+import 'package:agenteek_mcp/agenteek_mcp.dart';
 
 import 'memory_toolset.dart';
 

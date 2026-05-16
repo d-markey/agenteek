@@ -98,7 +98,7 @@ extension type ReadLinesArgs(Json _json) {
                 .optional('raw'),
       ),
     },
-    required: ['path', 'startLine'],
+    required: ['path'],
   );
 }
 

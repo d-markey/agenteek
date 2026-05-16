@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import '../utils/debug.dart' as dbg;
+import 'package:logging/logging.dart';
+
 import '../utils/types.dart';
 import 'tool.dart';
 import 'tool_outcome.dart';
@@ -10,6 +11,9 @@ import 'toolset_exception.dart';
 
 class ToolSet extends ToolSetBase {
   ToolSet();
+
+  Logger get logger =>
+      Logger('agenteek.toolsets.${runtimeType.toString().toLowerCase()}');
 
   static const ToolSet empty = _EmptyToolSet._();
 
@@ -67,13 +71,16 @@ class ToolSet extends ToolSetBase {
 
   @override
   Future<void> dispose() async {
-    dbg.trace('Disposing $runtimeType #$hashCode ($_disposed)');
+    logger.info('Disposing $runtimeType #$hashCode ($_disposed)');
     _disposed = true;
   }
 }
 
 class _EmptyToolSet extends ToolSetBase implements ToolSet {
   const _EmptyToolSet._();
+
+  @override
+  Logger get logger => Logger('agenteek.toolsets.empty');
 
   @override
   Future<void> dispose() => Future.value();

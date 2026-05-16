@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
 
-import '../../agenteek_dbg.dart' as dbg;
+import '../../agenteek_dbg.dart' as _;
 import '../utils/log.dart';
 import 'agent.dart';
 import 'agent_interactive.dart';
@@ -88,7 +90,7 @@ extension on dartantic.Part {
             '=== CALLING ${t.toolCallId} ==>',
       .result =>
         '<== CALLED  ${t.toolCallId} ===\n'
-            '${t.result}\n'
+            '${tryDecodeJson(t.result)}\n'
             '<== CALLED  ${t.toolCallId} ===',
     },
     _ =>
@@ -101,6 +103,17 @@ extension on dartantic.Part {
     .model => 'MODEL',
     .system => 'SYSTEM',
   };
+
+  static Object? tryDecodeJson(Object? result) {
+    if (result is String) {
+      try {
+        return jsonDecode(result);
+      } catch (_) {
+        // ignored
+      }
+    }
+    return result;
+  }
 }
 
 extension on dartantic.TextPart {

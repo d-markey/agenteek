@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_dart_toolset/dart_toolset.dart';
 import 'package:agenteek_files_toolset/files_toolset.dart';
+import 'package:agenteek_mcp_toolset/mcp_toolset.dart';
 import 'package:agenteek_memory_toolset/memory_toolset.dart';
 import 'package:agenteek_tickets_toolset/tickets_toolset.dart';
 import 'package:better_future/better_future.dart';

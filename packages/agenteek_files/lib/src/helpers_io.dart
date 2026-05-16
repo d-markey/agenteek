@@ -34,7 +34,9 @@ extension FileSystemEntityEx on FileSystemEntity {
       resolvedPath = p.canonicalize(await local.resolveSymbolicLinks());
     }
     if (isDirectory) resolvedPath = appendPathSeparator(resolvedPath);
-    if (!resolvedPath.startsWith(root)) throw 'Access denied';
+    if (!resolvedPath.startsWith(root)) {
+      throw 'Access denied: $resolvedPath vs. $root';
+    }
     return (isDirectory ? Directory(resolvedPath) : File(resolvedPath)) as T;
   }
 

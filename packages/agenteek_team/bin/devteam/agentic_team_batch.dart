@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek_files/agenteek_files_io.dart';
-import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_team/agenteek_team.dart';
 import 'package:path/path.dart' as p;
 
@@ -77,8 +76,9 @@ void main(List<String> argumentss) async {
     agentsConf,
     secrets: secrets,
     outputCallbackBuilder: (name) => ConsoleSink('\x1B[94m$name\x1B[0m'),
-    inputCallbackBuilder: (instructorName, name) =>
-        ConsoleSink('\x1B[44m$instructorName => $name\x1B[0m'),
+    a2aSinkBuilder:
+        ({required String from, required String to, required String color}) =>
+            ConsoleSink('\x1B[${color}m$from => $to\x1B[0m'),
   );
 
   // the root agent is **LAST** in list
@@ -93,7 +93,7 @@ void main(List<String> argumentss) async {
   // );
 
   for (var agent in agents.values) {
-    dbg.trace(
+    print(
       '${agent == rootAgent ? 'rootAgent' : 'agent'} = ${agent.displayName} / tools: ${agent.toolNames.join(', ')}',
     );
   }
@@ -120,10 +120,10 @@ void main(List<String> argumentss) async {
     }
   }
 
-  dbg.trace('Shutting down...');
+  print('Shutting down...');
   await Future.wait(agents.values.map((a) => a.dispose()));
   Log.disable();
-  dbg.trace('Done.');
+  print('Done.');
 }
 
 Never usage() {

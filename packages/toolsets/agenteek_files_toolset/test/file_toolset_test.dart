@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:agenteek/agenteek.dart';
 import 'package:agenteek/agenteek_dbg.dart' as dbg;
 import 'package:agenteek_files_toolset/files_toolset.dart';
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+import 'package:path/path.dart' as p;
 
 import 'workspace_path.dart';
 
@@ -95,8 +95,9 @@ void main() {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         final args = {'pattern': '\'dart:io\''};
         var result = await allFiles.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.dart': [
               {'beginLine': '2', 'endLine': '2', 'text': 'import \'dart:io\';'},
@@ -112,8 +113,9 @@ void main() {
           root: p.join(tempDir.path, 'subdir'),
         );
         result = await subdirFiles.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.dart': [
               {'beginLine': '2', 'endLine': '2', 'text': 'import \'dart:io\';'},
@@ -126,8 +128,9 @@ void main() {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         final args = {'pattern': '\'dart:io\'', 'path': '**.dart'};
         final result = await allFiles.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.dart': [
               {'beginLine': '2', 'endLine': '2', 'text': 'import \'dart:io\';'},
@@ -143,8 +146,9 @@ void main() {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         var args = {'pattern': '\'dart:io\'', 'path': 'subdir/**'};
         var result = await allFiles.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'subdir\\test.dart': [
               {'beginLine': '2', 'endLine': '2', 'text': 'import \'dart:io\';'},
@@ -158,8 +162,9 @@ void main() {
         );
         args = {'pattern': '\'dart:io\''};
         result = await subdirFiles.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.dart': [
               {'beginLine': '2', 'endLine': '2', 'text': 'import \'dart:io\';'},
@@ -179,8 +184,9 @@ void main() {
 
         var args = <String, Object?>{'pattern': 'äöüß'};
         var result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.txt': [
               {
@@ -194,7 +200,16 @@ void main() {
 
         args = {'pattern': 'ÄÖÜ', 'caseSensitive': true};
         result = await fileToolSet.call<Json>('search_text', args);
-        expect(result.result, isEmpty);
+        expect(result.result['mode'], contains('**String**'));
+        expect(
+          result.result['summary'],
+          allOf(
+            contains('try other options or adjust parameters'),
+            contains('Avoid searching for `class SomeClassName`'),
+            contains('RegExp patterns must be wrapped in slashes'),
+          ),
+        );
+        expect(result.result['matches'], isEmpty);
       });
 
       test('case-insensitive search', () async {
@@ -205,8 +220,9 @@ void main() {
 
         final args = {'pattern': 'test file'};
         final result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.txt': [
               {'beginLine': '1', 'endLine': '1', 'text': 'THIS IS A TEST FILE'},
@@ -215,7 +231,7 @@ void main() {
         );
       });
 
-      test('empty pattern', () async {
+      test('Error: empty pattern', () async {
         final fileToolSet = FileToolSet(prefix: pfx, root: tempDir.path);
         final filePath = p.join(tempDir.path, 'test.txt');
         final file = File(filePath);
@@ -224,7 +240,13 @@ void main() {
         final args = {'pattern': ''};
         final result = await fileToolSet.call<Json>('search_text', args);
         result as ToolError<Json>;
-        expect(result.error.toString().toLowerCase(), contains('match all'));
+        expect(
+          result.error.toString(),
+          allOf(
+            contains(MissingArgumentException('').runtimeType.toString()),
+            contains('"pattern"'),
+          ),
+        );
       });
 
       test('multiline match', () async {
@@ -237,8 +259,9 @@ void main() {
 
         final args = {'pattern': '/class\\s+[a-z0-9_]+/'};
         final result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**RegExp**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'test.txt': [
               {'beginLine': '2', 'endLine': '3', 'text': 'class\n   Test'},
@@ -248,10 +271,12 @@ void main() {
         );
       });
 
-      test('code search - match all', () async {
+      test('Error: code search - match all', () async {
         final fileToolSet = FileToolSet(
           prefix: pfx,
-          root: await getWorkspacePath('packages/toolsets/agenteek_files'),
+          root: await getWorkspacePath(
+            'packages/toolsets/agenteek_files_toolset',
+          ),
         );
         final args = {'pattern': '/.+/', 'path': '**/*.java'};
         final result = await fileToolSet.call<Json>('search_text', args);
@@ -262,12 +287,15 @@ void main() {
       test('code search - single lines', () async {
         final fileToolSet = FileToolSet(
           prefix: pfx,
-          root: await getWorkspacePath('packages/toolsets/agenteek_files/test'),
+          root: await getWorkspacePath(
+            'packages/toolsets/agenteek_files_toolset/test',
+          ),
         );
         final args = {'pattern': 'public', 'path': '**/*.java'};
         final result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'assets\\test_code.java': [
               {
@@ -298,12 +326,15 @@ void main() {
       test('code search - multiline', () async {
         final fileToolSet = FileToolSet(
           prefix: pfx,
-          root: await getWorkspacePath('packages/toolsets/agenteek_files/test'),
+          root: await getWorkspacePath(
+            'packages/toolsets/agenteek_files_toolset/test',
+          ),
         );
         final args = {'pattern': '/;\\s*\\}/', 'path': '**/*.java'};
         final result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**RegExp**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'assets\\test_code.java': [
               {'beginLine': '8', 'endLine': '9', 'text': 'super();\n\t}'},
@@ -321,12 +352,15 @@ void main() {
       test('code search - single file', () async {
         final fileToolSet = FileToolSet(
           prefix: pfx,
-          root: await getWorkspacePath('packages/toolsets/agenteek_files/test'),
+          root: await getWorkspacePath(
+            'packages/toolsets/agenteek_files_toolset/test',
+          ),
         );
         final args = {'pattern': 'code', 'path': 'assets/test_code.java'};
         final result = await fileToolSet.call<Json>('search_text', args);
+        expect(result.result['mode'], contains('**String**'));
         expect(
-          result.result,
+          result.result['matches'],
           equals({
             'assets\\test_code.java': [
               {
@@ -350,69 +384,6 @@ void main() {
             ],
           }),
         );
-      });
-    });
-
-    group('create directory', () {
-      test('successful directory creation', () async {
-        final fileToolSet = FileToolSet(
-          prefix: pfx,
-          root: tempDir.path,
-          allowCreate: true,
-        );
-        final args = {'path': 'new_dir'};
-        final result = await fileToolSet.call<String>('create_dir', args);
-        expect(result.result.toLowerCase(), contains('ok'));
-        expect(Directory(p.join(tempDir.path, 'new_dir')).existsSync(), isTrue);
-      });
-
-      test('directory already exists', () async {
-        final fileToolSet = FileToolSet(
-          prefix: pfx,
-          root: tempDir.path,
-          allowCreate: true,
-        );
-        final newDirPath = p.join(tempDir.path, 'existing_dir');
-        await Directory(newDirPath).create();
-        final args = {'path': 'existing_dir'};
-        final result = await fileToolSet.call<String>('create_dir', args);
-        expect(result.result.toLowerCase(), contains('ok'));
-      });
-
-      test('absolute path creation within root', () async {
-        final fileToolSet = FileToolSet(
-          prefix: pfx,
-          root: tempDir.path,
-          allowCreate: true,
-        );
-        final args = {'path': p.join(tempDir.path, 'new_dir')};
-        final result = await fileToolSet.call<String>('create_dir', args);
-        expect(result.result.toLowerCase(), contains('ok'));
-        expect(Directory(p.join(tempDir.path, 'new_dir')).existsSync(), isTrue);
-      });
-
-      test('absolute path creation outside root', () async {
-        final fileToolSet = FileToolSet(
-          prefix: pfx,
-          root: tempDir.path,
-          allowCreate: true,
-        );
-        final args = {'path': p.join(Directory.current.path, 'new_dir')};
-        final result = await fileToolSet.call<String>('create_dir', args);
-        result as ToolError<String>;
-        expect(result.error.toString().toLowerCase(), contains('denied'));
-      });
-
-      test('path outside root', () async {
-        final fileToolSet = FileToolSet(
-          prefix: pfx,
-          root: tempDir.path,
-          allowCreate: true,
-        );
-        final args = {'path': '../new_dir'};
-        final result = await fileToolSet.call<String>('create_dir', args);
-        result as ToolError<String>;
-        expect(result.error.toString().toLowerCase(), contains('denied'));
       });
     });
 

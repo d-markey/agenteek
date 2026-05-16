@@ -26,7 +26,7 @@ Future<ToolSuccess<String>> _openTicket(
     description: args.description,
   );
   toolset.tickets[id] = ticket;
-  toolset.logger.append('===\n$ticket');
+  toolset.logger.fine('Opened: $ticket');
   final fs = toolset.fileSystem;
   if (fs != null) {
     final fname = toolset.getTicketFileName(id);

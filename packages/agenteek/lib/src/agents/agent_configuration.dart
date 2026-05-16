@@ -1,4 +1,5 @@
 import 'package:dartantic_ai/dartantic_ai.dart' as dartantic;
+import 'package:logging/logging.dart';
 
 import '../secrets/secrets.dart';
 import '../toolsets/toolset.dart';
@@ -31,7 +32,9 @@ class AgentConfiguration {
         apiKey.then(
           _setupCustomProvider,
           onError: (ex) {
-            print('!!! Failed to setup custom provider for $_modelInfo');
+            logger.severe(
+              '!!! Failed to setup custom provider for $_modelInfo',
+            );
           },
         );
       }
@@ -39,6 +42,9 @@ class AgentConfiguration {
       _customModelInfo = null;
     }
   }
+
+  Logger get logger =>
+      Logger('agenteek.agent.configuration.${displayName.toLowerCase()}');
 
   final dartantic.ModelStringParser _modelInfo;
   late final dartantic.ModelStringParser? _customModelInfo;
@@ -109,7 +115,7 @@ class AgentConfiguration {
     dartantic.Agent.providerFactories[customModelInfo.providerName] =
         customProvider;
 
-    print('Registered provider for ${customModelInfo.toString()}');
+    logger.info('Registered provider for ${customModelInfo.toString()}');
   }
 
   String _instructions = '';
