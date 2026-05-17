@@ -56,12 +56,17 @@ extension type InsertTextArgs(Json _json) {
 
   static final schema = S.object(
     properties: {
-      'path': S.string(description: 'File path'),
+      'path': S.string(
+        description:
+            'Path to the target file which will receive the `newText`.',
+      ),
       'line': S.integer(
         description:
             'Line number where insertion starts (1-based, as provided by `read_lines` with mode=`numbered`). Never guess this parameter, call `read_lines` first.',
       ),
-      'newText': S.string(description: 'Text to insert.'),
+      'newText': S.string(
+        description: 'Text to insert at the specified line number.',
+      ),
     },
     required: ['path', 'line', 'newText'],
   );
@@ -177,7 +182,7 @@ extension type UpdateFileArgs(Json _json) {
   );
 }
 
-extension type ListDirectoriesArgs(Json _json) {
+extension type ListArgs(Json _json) {
   String get path => _normalizePath(_json.getString('path', defaultValue: ''));
 
   bool get recursive => _json.getBool('recursive', defaultValue: true);
@@ -196,31 +201,6 @@ extension type ListDirectoriesArgs(Json _json) {
       'includeHidden': S.boolean(
         description:
             'Whether to include hidden directories (starting with a dot)'
-                .optional('false'),
-      ),
-    },
-  );
-}
-
-extension type ListFilesArgs(Json _json) {
-  String get path => _normalizePath(_json.getString('path', defaultValue: ''));
-
-  bool get recursive => _json.getBool('recursive', defaultValue: false);
-
-  bool get includeHidden => _json.getBool('includeHidden', defaultValue: false);
-
-  static final schema = S.object(
-    properties: {
-      'path': S.string(
-        description: 'Directory to list from'.optional('root directory'),
-      ),
-      'recursive': S.boolean(
-        description: 'Whether listing should recurse through sub-directories'
-            .optional('false'),
-      ),
-      'includeHidden': S.boolean(
-        description:
-            'Whether to include hidden files and directories (starting with a dot)'
                 .optional('false'),
       ),
     },

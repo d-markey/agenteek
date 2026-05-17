@@ -2,7 +2,7 @@ technical_lead:
   llm: google/gemma-4-26b-a4b-it
   api-key: gemma-api-key
   name: Tecwyn
-  instructions: technical_lead.md
+  instructions: ../instructions/technical_lead.md
   roots:
     agenteek:
       description: agenteek workspace
@@ -18,7 +18,7 @@ software_engineer:
   api-key: gemma-api-key
   name: Angie
   instructor: Tecwyn
-  instructions: software_engineer.md
+  instructions: ../instructions/software_engineer.md
   roots:
     agenteek:
       description: agenteek workspace
@@ -34,7 +34,7 @@ technical_writer:
   api-key: gemma-api-key
   name: Wright
   instructor: Tecwyn
-  instructions: technical_writer.md
+  instructions: ../instructions/technical_writer.md
   roots:
     agenteek:
       description: agenteek workspace

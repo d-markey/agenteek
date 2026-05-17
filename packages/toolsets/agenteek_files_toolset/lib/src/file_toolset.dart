@@ -9,8 +9,7 @@ import 'tools/delete_file.dart';
 import 'tools/delete_lines.dart';
 import 'tools/get_line_count.dart';
 import 'tools/insert_text.dart';
-import 'tools/list_directories.dart';
-import 'tools/list_files.dart';
+import 'tools/list.dart';
 import 'tools/locate_file.dart';
 import 'tools/read_lines.dart';
 import 'tools/replace_text.dart';
@@ -43,9 +42,10 @@ class FileToolSet extends ToolSet with Prefix, Scope {
        scope = scope?.trim() ?? '',
        root = canonicalize(root) {
     // register tools
-    register(listFilesTool(this));
+    // register(listFilesTool(this));
+    register(listTool(this));
     register(locateFileTool(this));
-    register(listDirectoriesTool(this));
+    // register(listDirectoriesTool(this));
     register(searchTextTool(this));
     register(readLinesTool(this));
     register(getLineCountTool(this));
