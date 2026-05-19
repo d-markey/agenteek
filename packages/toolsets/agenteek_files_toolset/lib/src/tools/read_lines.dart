@@ -28,20 +28,23 @@ Future<ToolSuccess<String>> _readLines(
   ReadLinesArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!await file.exists()) {
+    throw 'File not found: "${toolSet.getLocalPath(file)}"';
+  }
   final startLine = args.startLine;
   var endLine = args.endLine;
   if (startLine < 1 || endLine < 0 || (endLine > 0 && endLine < startLine)) {
-    throw 'Invalid line numbers. startLine must be >= 1, and if endLine is provided: endLine >= 1 && startLine <= endLine.';
+    throw 'Invalid line range: $startLine-$endLine. `startLine` must be >= 1, and if `endLine` is provided: 1 <= `endLine` <= `startLine`.';
   }
 
   // proceed
   final lines = await FileReader.readLines(file);
   if (lines.isEmpty || startLine > lines.length) {
     return ToolSuccess(
-      '**INFO**: file "${file.getLocalPath(toolSet.root)}" is empty after line $startLine.',
+      '**INFO**: file "${toolSet.getLocalPath(file)}" is empty after line $startLine.',
     );
   } else {
     if (endLine == 0) endLine = lines.length;

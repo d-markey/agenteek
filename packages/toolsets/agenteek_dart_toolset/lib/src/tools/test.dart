@@ -20,9 +20,9 @@ Future<ToolSuccess<Json>> _test(DartToolSet toolSet, TestArgs args) async {
   if (args.path.isEmpty) {
     fileOrDir = Directory(toolSet.root);
   } else {
-    fileOrDir = await Link(args.path).check(toolSet.root);
+    fileOrDir = await Link(args.path).check(toolSet.root, includeHidden: false);
     if (!await fileOrDir.exists()) {
-      throw 'Not found: ${fileOrDir.getLocalPath(toolSet.root)}';
+      throw 'File or directory not found: "${fileOrDir.getLocalPath(toolSet.root)}"';
     }
   }
 

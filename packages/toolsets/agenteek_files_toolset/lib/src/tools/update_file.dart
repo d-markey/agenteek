@@ -16,7 +16,7 @@ import '_json_arguments.dart';
 Tool<String> updateFileTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('update_file'),
   description: toolSet.buildDescription(
-    'Update an existing file'.sideEffect('the line numbers might change'),
+    'Update an existing file'.sideEffect('the file will be rewritten entirely'),
   ),
   inputSchema: UpdateFileArgs.schema,
   onCall: (args) => _updateFile(toolSet, UpdateFileArgs(args)),
@@ -27,25 +27,14 @@ Future<ToolSuccess<String>> _updateFile(
   UpdateFileArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!(await file.exists())) {
+    throw 'File does not exist: "${toolSet.getLocalPath(file)}"';
+  }
 
   // proceed
-  if (!(await file.exists())) {
-    throw 'File does not exists: ${file.getLocalPath(toolSet.root)}';
-  }
-  if (!toolSet.showHiddenFiles) {
-    if (file.isHidden) {
-      throw 'File update denied: ${file.getLocalPath(toolSet.root)}';
-    }
-    var d = Directory(file.getLocalPath(toolSet.root));
-    while (d.path != '.') {
-      if (d.isHidden) {
-        throw 'File update denied: ${file.getLocalPath(toolSet.root)}';
-      }
-      d = d.parent;
-    }
-  }
   await file.writeAsString(args.newText);
-  return ToolSuccess.ok;
+  return ToolSuccess('File updated: "${toolSet.getLocalPath(file)}"');
 }

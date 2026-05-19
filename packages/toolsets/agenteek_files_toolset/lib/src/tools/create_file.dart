@@ -14,7 +14,9 @@ import '_json_arguments.dart';
 /// Returns a `Future<ToolSuccess>` which contains 'OK'.
 Tool<String> createFileTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('create_file'),
-  description: toolSet.buildDescription('Create a new file'),
+  description: toolSet.buildDescription(
+    'Create a new **file** at `path`. Directories will be created as needed.',
+  ),
   inputSchema: CreateFileArgs.schema,
   onCall: (args) => _createFile(toolSet, CreateFileArgs(args)),
 );
@@ -24,26 +26,15 @@ Future<ToolSuccess<String>> _createFile(
   CreateFileArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (await file.exists()) {
+    throw 'File already exists: "${toolSet.getLocalPath(file)}"';
+  }
 
   // proceed
-  if (await file.exists()) {
-    throw 'File already exists: ${file.getLocalPath(toolSet.root)}';
-  }
-  if (!toolSet.showHiddenFiles) {
-    if (file.isHidden) {
-      throw 'File creation denied: ${file.getLocalPath(toolSet.root)}';
-    }
-    var d = Directory(file.getLocalPath(toolSet.root));
-    while (d.path != '.') {
-      if (d.isHidden) {
-        throw 'File creation denied: ${file.getLocalPath(toolSet.root)}';
-      }
-      d = d.parent;
-    }
-  }
   await file.parent.create(recursive: true);
   await file.writeAsString(args.text);
-  return ToolSuccess.ok;
+  return ToolSuccess('File created: "${toolSet.getLocalPath(file)}"');
 }

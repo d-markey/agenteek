@@ -29,11 +29,12 @@ Future<ToolSuccess<String>> _list(FileToolSet toolSet, ListArgs args) async {
   if (args.path.isEmpty) {
     dir = Directory(toolSet.root);
   } else {
-    dir = await Directory(args.path).check<Directory>(toolSet.root);
+    dir = await Directory(
+      args.path,
+    ).check<Directory>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
   }
-  if (!toolSet.showHiddenFiles && dir.isHidden) throw 'Access denied';
   if (!await dir.exists()) {
-    throw 'Directory not found: ${dir.getLocalPath(toolSet.root)}';
+    throw 'Directory not found: "${toolSet.getLocalPath(dir)}"';
   }
 
   // proceed
@@ -45,13 +46,13 @@ Future<ToolSuccess<String>> _list(FileToolSet toolSet, ListArgs args) async {
   while (idx < pending.length) {
     final dir = pending[idx++];
     count = 0;
-    results.writeln('Directory: ${dir.getLocalPath(toolSet.root)}');
+    results.writeln('Directory: ${toolSet.getLocalPath(dir)}');
     for (var e in dir.listSync(recursive: false, followLinks: false)) {
       if (!includeHidden && e.isHidden) continue;
       if (e is Directory) {
         if (recursive) pending.add(e);
       } else if (e is File) {
-        results.writeln('  * ${e.getLocalPath(toolSet.root)}');
+        results.writeln('  * ${toolSet.getLocalPath(e)}');
         count++;
       }
     }

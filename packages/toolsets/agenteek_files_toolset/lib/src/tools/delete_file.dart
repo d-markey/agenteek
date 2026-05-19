@@ -16,7 +16,7 @@ import '_json_arguments.dart';
 Tool<String> deleteFileTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('delete_file'),
   description: toolSet.buildDescription(
-    'Delete a file'.sideEffect('the file will be deleted'),
+    'Delete file at `path`'.sideEffect('the file will be deleted'),
   ),
   inputSchema: DeleteFileArgs.schema,
   onCall: (args) => _deleteLines(toolSet, DeleteFileArgs(args)),
@@ -27,11 +27,14 @@ Future<ToolSuccess<String>> _deleteLines(
   DeleteFileArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!await file.exists()) {
+    throw 'File not found: "${toolSet.getLocalPath(file)}".';
+  }
 
   // proceed
   await file.delete();
-  return ToolSuccess.ok;
+  return ToolSuccess('File deleted: "${toolSet.getLocalPath(file)}"');
 }

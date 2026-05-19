@@ -19,9 +19,11 @@ Future<ToolSuccess<Json>> _pubGet(DartToolSet toolSet, PubGetArgs args) async {
   if (args.path.isEmpty) {
     dir = Directory(toolSet.root);
   } else {
-    dir = await Link(args.path).check<Directory>(toolSet.root);
+    dir = await Link(
+      args.path,
+    ).check<Directory>(toolSet.root, includeHidden: false);
     if (!await dir.exists()) {
-      throw 'Not found: ${dir.getLocalPath(toolSet.root)}';
+      throw 'Directory not found: "${dir.getLocalPath(toolSet.root)}"';
     }
   }
 

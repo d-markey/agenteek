@@ -51,7 +51,7 @@ extension RunCommandExt on DartToolSet {
     try {
       final version = await PodmanContainer.getVersion();
       if (version.isNotEmpty) {
-        await PodmanContainer.startMachine();
+        await PodmanContainer.ensureMachineIsRunning();
         return true;
       }
     } catch (_) {}

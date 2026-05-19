@@ -32,31 +32,58 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    group('list files', () {
-      test('from root directory', () async {
+    group('list files & directories', () {
+      test('from root directory (recursive by default)', () async {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
-        final res = await allFiles.call<String>('list_files');
-        expect(res.result.split('\n').where((f) => f.isNotEmpty), hasLength(1));
+        final res = await allFiles.call<String>('list');
+        expect(
+          res.result.split('\n').where((f) => f.startsWith('Directory: ')),
+          hasLength(2),
+        );
+        expect(
+          res.result
+              .split('\n')
+              .where((f) => f.isNotEmpty && !f.startsWith('Directory: ')),
+          hasLength(2),
+        );
       });
 
-      test('recursive from root directory', () async {
+      test('non-recursive from root directory', () async {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
-        final args = {'recursive': true};
-        final res = await allFiles.call<String>('list_files', args);
-        expect(res.result.split('\n').where((f) => f.isNotEmpty), hasLength(2));
+        final args = {'recursive': false};
+        final res = await allFiles.call<String>('list', args);
+        expect(
+          res.result.split('\n').where((f) => f.startsWith('Directory: ')),
+          hasLength(1),
+        );
+        expect(
+          res.result
+              .split('\n')
+              .where((f) => f.isNotEmpty && !f.startsWith('Directory: ')),
+          hasLength(1),
+        );
       });
 
       test('from sub directory', () async {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         final args = {'path': 'subdir'};
-        final res = await allFiles.call<String>('list_files', args);
-        expect(res.result.split('\n').where((f) => f.isNotEmpty), hasLength(1));
+        final res = await allFiles.call<String>('list', args);
+        expect(
+          res.result.split('\n').where((f) => f.startsWith('Directory: ')),
+          hasLength(1),
+        );
+        expect(
+          res.result
+              .split('\n')
+              .where((f) => f.isNotEmpty && !f.startsWith('Directory: ')),
+          hasLength(1),
+        );
       });
 
       test('from root directory parent', () async {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         final args = {'path': '..'};
-        final res = await allFiles.call<String>('list_files', args);
+        final res = await allFiles.call<String>('list', args);
         expect(res, isA<ToolError>());
         res as ToolError<String>;
         expect(res.error.toString().toLowerCase(), contains('denied'));
@@ -72,7 +99,7 @@ void main() {
           p.join(tempDir.path, '.hidden_dir', 'file_in_hidden_dir.txt'),
         ).writeAsString('visible file in hidden dir');
 
-        final res = await allFiles.call<String>('list_files');
+        final res = await allFiles.call<String>('list');
         final files = res.result.split('\n');
         expect(files.where((f) => f.contains('.hidden_file')), isEmpty);
         expect(files.where((f) => f.contains('.file_in_hidden_dir')), isEmpty);
@@ -81,7 +108,7 @@ void main() {
       test('recursive listing', () async {
         final allFiles = FileToolSet(prefix: pfx, root: tempDir.path);
         final args = {'recursive': true};
-        final res = await allFiles.call<String>('list_files', args);
+        final res = await allFiles.call<String>('list', args);
         final files = res.result.split('\n');
         expect(
           files.where((f) => f.contains('test.dart')),
@@ -487,7 +514,7 @@ void main() {
           'newText': 'new line2a\nnew line2b\n',
         };
         final result = await fileToolSet.call<String>('replace_text', args);
-        expect(result.result.toLowerCase(), contains('ok'));
+        expect(result.result.toLowerCase(), contains('1 replacement'));
         final newText = await file.readAsString();
         expect(newText, 'line1\nnew line2a\nnew line2b\nline3');
       });
@@ -507,7 +534,7 @@ void main() {
           'targetLines': [2, 4],
         };
         final result = await fileToolSet.call<String>('replace_text', args);
-        expect(result.result.toLowerCase(), contains('ok'));
+        expect(result.result.toLowerCase(), contains('2 replacements'));
         final newText = await file.readAsString();
         expect(newText, 'line1\nLINE-002-a\nline2b\nLINE-002-c\nline3');
       });

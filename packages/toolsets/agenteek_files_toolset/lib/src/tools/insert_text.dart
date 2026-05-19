@@ -18,8 +18,8 @@ import '_json_arguments.dart';
 Tool<String> insertTextTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('insert_text'),
   description: toolSet.buildDescription(
-    'Insert text in a file. USE WITH CAUTION: WRONG LINE NUMBERS WILL LEAD TO TEXT/CODE CORRUPTION. ALWAYS CALL `read_lines` WITH mode=`numbered` FIRST'
-        .sideEffect('line numbers will change'),
+    'Insert text in a file; use with caution: wrong line numbers will lead to text/code corruption. Always call `read_lines` with `mode=numbered` first'
+        .sideEffect('line numbers and file contents will change'),
   ),
   inputSchema: InsertTextArgs.schema,
   onCall: (args) => _insertText(toolSet, InsertTextArgs(args)),
@@ -30,11 +30,14 @@ Future<ToolSuccess<String>> _insertText(
   InsertTextArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!await file.exists()) {
+    throw 'File not found: "${toolSet.getLocalPath(file)}"';
+  }
   if (args.line < 1) {
-    throw 'Invalid line number. line must be >= 1.';
+    throw 'Invalid line number: ${args.line}. `line` must be >= 1.';
   }
 
   // proceed
@@ -46,5 +49,7 @@ Future<ToolSuccess<String>> _insertText(
   }
 
   await file.writeAsString(lines.join('\n'));
-  return ToolSuccess.ok;
+  return ToolSuccess(
+    'New text inserted into file at line ${args.line}: "${file.getLocalPath(toolSet.root)}"',
+  );
 }

@@ -24,9 +24,6 @@ abstract class ToolSetBase {
 
   FutureOr<ToolOutcome<T>> invoke<T>(String name, [Json? args]);
 
-  Future<String> checkSideEffects(dartantic.ChatResult result) =>
-      Future.value('');
-
   Future<Map<dartantic.ToolPart, dartantic.ToolPart>> redactObsoleteToolResults(
     List<dartantic.ChatMessage> history,
   ) => Future.value(const {});

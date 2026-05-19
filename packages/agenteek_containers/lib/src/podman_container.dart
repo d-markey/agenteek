@@ -24,10 +24,13 @@ class PodmanContainer implements Container {
 
   String _id = '';
 
-  static Future<void> startMachine() async {
+  static Future<bool> ensureMachineIsRunning() async {
     try {
       await _exec('machine', ['start']);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<String> getVersion() async {
@@ -36,7 +39,8 @@ class PodmanContainer implements Container {
       final output = res['stdout']?.toString() ?? '';
       final version = RegExp('\\d+\\.\\d+\\.\\d+').firstMatch(output)?.group(0);
       return version ?? '';
-    } catch (_) {
+    } catch (ex, st) {
+      print('PODMAN ERROR $ex\n$st');
       return '';
     }
   }

@@ -9,5 +9,5 @@ extension DescriptionExt on String {
 
   String sideEffect(String sideEffect) => sideEffect.isEmpty
       ? '${toString()}; **WARNING: this tool has side effects**'
-      : '${toString()}; **WARNING: this tool has side effects** $sideEffect';
+      : '${toString()}; **WARNING: this tool has side effects**: $sideEffect';
 }

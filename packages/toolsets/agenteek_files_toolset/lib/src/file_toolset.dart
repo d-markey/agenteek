@@ -80,37 +80,7 @@ class FileToolSet extends ToolSet with Prefix, Scope {
   /// A flag indicating whether hidden files (starting with a dot) should be listed or shown.
   final bool showHiddenFiles;
 
-  late final _sideEffectingToolNames = {
-    buildToolName('create_file'),
-    buildToolName('update_file'),
-    buildToolName('replace_text'),
-    buildToolName('insert_text'),
-    buildToolName('delete_lines'),
-    buildToolName('delete_file'),
-  };
-
-  @override
-  Future<String> checkSideEffects(dartantic.ChatResult result) async {
-    StringBuffer? sideEffects;
-    for (var message in result.messages) {
-      if (message.hasToolCalls) {
-        for (var call in message.toolCalls.where(
-          (t) => _sideEffectingToolNames.contains(t.toolName),
-        )) {
-          final path = call.arguments?['path']?.toString() ?? '';
-          if (path.isEmpty) continue;
-          try {
-            final file = await File(path).check<File>(root);
-            sideEffects ??= StringBuffer();
-            sideEffects.writeln(
-              '* ${file.getLocalPath(root)} possibly modified by tool call #${call.callId} `${call.toolName}`',
-            );
-          } catch (_) {}
-        }
-      }
-    }
-    return (sideEffects == null) ? '' : sideEffects.toString();
-  }
+  String getLocalPath(FileSystemEntity e) => e.getLocalPath(root);
 
   @override
   Future<Map<dartantic.ToolPart, dartantic.ToolPart>> redactObsoleteToolResults(
@@ -131,7 +101,7 @@ class FileToolSet extends ToolSet with Prefix, Scope {
       final endLine = call.arguments?['endLine'] as int?;
       if (path != null) {
         try {
-          final file = await File(path).check<File>(root);
+          final file = await File(path).check<File>(root, includeHidden: true);
           fileReads.putIfAbsent(file.path, () => []).add((
             fullRead: startLine == 1 && endLine == null,
             tool: call,

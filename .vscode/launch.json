@@ -5,11 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "devteam",
+            "name": "devteam - lgmodel_bis",
             "request": "launch",
             "program": "packages/agenteek_team/bin/devteam/agentic_team_interactive.dart",
             "args": [
                 "--team-conf:lgmodel_bis/team.yaml",
+            ],
+            "type": "dart",
+            "console": "terminal",
+        },
+        {
+            "name": "devteam - agenteek",
+            "request": "launch",
+            "program": "packages/agenteek_team/bin/devteam/agentic_team_interactive.dart",
+            "args": [
+                "--team-conf:agenteek/team.yaml",
             ],
             "type": "dart",
             "console": "terminal",

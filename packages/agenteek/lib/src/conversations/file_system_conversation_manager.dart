@@ -113,12 +113,6 @@ class FileSystemConversationManager extends ConversationManager {
 
     copy.messages.forEach(_register);
 
-    final sideEffects = (await toolSet?.checkSideEffects(copy)) ?? '';
-    if (sideEffects.isNotEmpty) {
-      _register(.system('**Side Effects**:\n$sideEffects'));
-      print('Side Effects:\n$sideEffects');
-    }
-
     await _history.redactObsoleteToolResults(toolSet);
 
     await _save();

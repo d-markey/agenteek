@@ -18,9 +18,11 @@ Tool<Json> runTool(DartToolSet toolSet) => Tool(
 );
 
 Future<ToolSuccess<Json>> _run(DartToolSet toolSet, RunArgs args) async {
-  final script = await File(args.scriptPath).check(toolSet.root);
+  final script = await File(
+    args.scriptPath,
+  ).check<File>(toolSet.root, includeHidden: false);
   if (!await script.exists()) {
-    throw 'Not found: ${script.getLocalPath(toolSet.root)}';
+    throw 'Script not found: "${script.getLocalPath(toolSet.root)}"';
   }
 
   toolSet.logger.info('Runing script: $args');

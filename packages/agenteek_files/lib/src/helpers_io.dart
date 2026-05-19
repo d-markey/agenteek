@@ -18,7 +18,10 @@ String canonicalize(String root) {
 
 extension FileSystemEntityEx on FileSystemEntity {
   /// checks the entity belongs to the root directory
-  Future<T> check<T extends FileSystemEntity>(String root) async {
+  Future<T> check<T extends FileSystemEntity>(
+    String root, {
+    required bool includeHidden,
+  }) async {
     var resolvedPath = p.canonicalize(p.join(root, path));
 
     bool isDirectory;
@@ -34,9 +37,16 @@ extension FileSystemEntityEx on FileSystemEntity {
       resolvedPath = p.canonicalize(await local.resolveSymbolicLinks());
     }
     if (isDirectory) resolvedPath = appendPathSeparator(resolvedPath);
-    if (!resolvedPath.startsWith(root)) {
-      throw 'Access denied: $resolvedPath vs. $root';
+    if (!resolvedPath.startsWith(root)) throw 'Access denied';
+
+    if (!includeHidden) {
+      FileSystemEntity d = Link(local.getLocalPath(root));
+      while (d.path != '.') {
+        if (d.isHidden) throw 'Access denied (hidden)';
+        d = d.parent;
+      }
     }
+
     return (isDirectory ? Directory(resolvedPath) : File(resolvedPath)) as T;
   }
 
@@ -46,5 +56,8 @@ extension FileSystemEntityEx on FileSystemEntity {
     return (root.length < abs.length) ? abs.substring(root.length) : '';
   }
 
-  bool get isHidden => p.basename(path).startsWith('.');
+  bool get isHidden {
+    final basename = p.basename(path);
+    return basename != '.' && basename.startsWith('.');
+  }
 }

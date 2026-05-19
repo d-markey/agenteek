@@ -57,15 +57,11 @@ Future<ToolSuccess<Json>> _searchText(
     throw 'Do not use this tool with an empty pattern or a "match all" pattern; '
         'if full content is required, use the `read_lines` tool instead.';
   }
-  final path = args.path;
-  if (path.startsWith('..')) {
-    throw 'Access denied: cannot search outside of the root directory.';
-  }
 
   // proceed
   final bool Function(FileSystemEntity) $include;
-  if (path.isNotEmpty) {
-    final glob = Glob(path.replaceAll('\\', '/'));
+  if (args.path.isNotEmpty) {
+    final glob = Glob(args.path.replaceAll('\\', '/'));
     $include = (e) => (e is File) && glob.matches(e.getLocalPath(toolSet.root));
   } else {
     $include = (e) => (e is File);
@@ -78,6 +74,7 @@ Future<ToolSuccess<Json>> _searchText(
 
   Future<void> $search(File f) async {
     final matches = <Json>[];
+    f = await f.check<File>(toolSet.root, includeHidden: includeHidden);
     try {
       final text = (await FileReader.readString(f)).normalizeEol();
       final srch = caseSensitive ? text : text.toLowerCase();

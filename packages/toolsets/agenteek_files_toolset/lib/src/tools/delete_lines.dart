@@ -18,8 +18,9 @@ import '_json_arguments.dart';
 Tool<String> deleteLinesTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('delete_lines'),
   description: toolSet.buildDescription(
-    'Deletes lines from file. USE WITH CAUTION: WRONG LINE NUMBERS WILL LEAD TO TEXT/CODE CORRUPTION. ALWAYS CALL `read_lines` WITH mode=`numbered` FIRST'
-        .sideEffect('line numbers will change'),
+    'Deletes lines between `startLine` and `endLine` (inclusive, 1-based) from file at `path`; '
+            'use with caution: wrong line numbers will lead to text/code corruption. Always call `read_lines` with `mode=numbered` first'
+        .sideEffect('line numbers and file contents will change'),
   ),
   inputSchema: DeleteLinesArgs.schema,
   onCall: (args) => _deleteLines(toolSet, DeleteLinesArgs(args)),
@@ -30,21 +31,25 @@ Future<ToolSuccess<String>> _deleteLines(
   DeleteLinesArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
-  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!await file.exists()) {
+    throw 'File not found: "${toolSet.getLocalPath(file)}".';
+  }
   final startLine = args.startLine, endLine = args.endLine;
   if (startLine < 1 || endLine < 1) {
-    throw 'Invalid line number. line must be >= 1.';
+    throw 'Invalid line range: $startLine-$endLine. Lines must be >= 1.';
   }
   if (endLine < startLine) {
-    throw 'Invalid line range. endLine must be >= startLine.';
+    throw 'Invalid line range: $startLine-$endLine. `endLine` must be >= `startLine`.';
   }
 
   // proceed
   final lines = await FileReader.readLines(file);
   lines.removeRange(startLine - 1, endLine);
-
   await file.writeAsString(lines.join('\n'));
-  return ToolSuccess.ok;
+  return ToolSuccess(
+    'Lines $startLine-$endLine deleted from file: "${toolSet.getLocalPath(file)}"',
+  );
 }

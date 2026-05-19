@@ -28,19 +28,6 @@ class CombinedToolSet extends ToolSet {
       _toolsets.map((ts) => ts.getTool(name)).nonNulls.firstOrNull;
 
   @override
-  Future<String> checkSideEffects(dartantic.ChatResult result) async {
-    StringBuffer? sideEffects;
-    for (var toolset in _toolsets) {
-      final message = await toolset.checkSideEffects(result);
-      if (message.isNotEmpty) {
-        sideEffects ??= StringBuffer();
-        sideEffects.writeln(message);
-      }
-    }
-    return (sideEffects == null) ? '' : sideEffects.toString().trim();
-  }
-
-  @override
   Future<Map<dartantic.ToolPart, dartantic.ToolPart>> redactObsoleteToolResults(
     List<dartantic.ChatMessage> history,
   ) async {

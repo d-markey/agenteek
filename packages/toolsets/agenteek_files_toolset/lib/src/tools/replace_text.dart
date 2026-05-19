@@ -17,9 +17,9 @@ import '_json_arguments.dart';
 Tool<String> replaceTextTool(FileToolSet toolSet) => Tool(
   name: toolSet.buildToolName('replace_text'),
   description: toolSet.buildDescription(
-    'Replaces `originalText` with `newText` in a file'.sideEffect(
-      'line numbers might change',
-    ),
+    'Replaces `originalText` with `newText` in file at `path`; '
+            'multiple replacements are possible by providing the target starting lines with `targetLines` (1-based line numbers -- always call `read_file` with `mode=numbered` to get the correct line numbers)'
+        .sideEffect('line numbers and file contents will change'),
   ),
   inputSchema: ReplaceTextArgs.schema,
   onCall: (args) => _replaceMultiText(toolSet, ReplaceTextArgs(args)),
@@ -30,29 +30,32 @@ Future<ToolSuccess<String>> _replaceMultiText(
   ReplaceTextArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied.';
-  if (!await file.exists()) throw 'File not found: ${args.path}.';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
+  if (!await file.exists()) {
+    throw 'File not found: "${toolSet.getLocalPath(file)}"';
+  }
   if (args.targetLines.length != args.targetLines.toSet().length) {
-    throw 'Found duplicate target line numbers.';
+    throw 'Found duplicate target line numbers: ${args.targetLines}';
   }
   final originalText = args.originalText, newText = args.newText;
   if (newText == originalText) {
-    throw 'New text and original text are the same: no changes.';
+    throw 'New text and original text are the same: no changes made.';
   }
 
   // proceed
   var text = (await FileReader.readString(file));
   var index = text.indexOf(originalText);
   if (index < 0) {
-    throw 'Original text was not found in the file; new text was not applied.';
+    throw 'Original text was not found in the file; no changes made.';
   }
 
-  final targetLines = args.targetLines;
+  final targetLines = args.targetLines.toList();
   if (targetLines.isEmpty) {
     // single replacement
     if (text.indexOf(originalText, index + 1) >= 0) {
-      throw 'Found several occurrences of original text and no target lines were specified for replacements; new text was not applied.';
+      throw 'Found several occurrences of original text and no target lines were specified for replacements; no changes made.';
     }
     text = text.replaceFirst(originalText, newText, index);
   } else {
@@ -72,7 +75,7 @@ Future<ToolSuccess<String>> _replaceMultiText(
     }
 
     if (args.targetLines.length > occurrences.length) {
-      throw 'Found ${occurrences.length} occurrences of original text, which is less than the number of required replacements (${targetLines.length}); new text was not applied.';
+      throw 'Found ${occurrences.length} occurrences of original text, which is less than the number of required replacements (${targetLines.length}); no changes made.';
     }
 
     // replace from end
@@ -92,10 +95,12 @@ Future<ToolSuccess<String>> _replaceMultiText(
     }
 
     if (targetLines.isNotEmpty) {
-      throw 'Failed to replace at ${targetLines.length > 1 ? 'lines' : 'line'} ${targetLines.join(', ')}; new text was not applied.';
+      throw 'No match found for target ${targetLines.length > 1 ? 'lines' : 'line'} ${targetLines.join(', ')}; no changes made.';
     }
   }
 
   await file.writeAsString(text);
-  return ToolSuccess.ok;
+  return ToolSuccess(
+    'Text replaced with new text in file: "${file.getLocalPath(toolSet.root)}" (${(args.targetLines.isEmpty || args.targetLines.length == 1) ? '1 replacement' : '${args.targetLines.length} replacements'})',
+  );
 }

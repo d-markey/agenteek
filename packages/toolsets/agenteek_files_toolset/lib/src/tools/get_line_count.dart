@@ -24,10 +24,11 @@ Future<ToolSuccess<int>> _getLineCount(
   GetLineCountArgs args,
 ) async {
   // check
-  final file = await File(args.path).check<File>(toolSet.root);
-  if (!toolSet.showHiddenFiles && file.isHidden) throw 'Access denied';
+  final file = await File(
+    args.path,
+  ).check<File>(toolSet.root, includeHidden: toolSet.showHiddenFiles);
   if (!await file.exists()) {
-    throw 'File not found: ${file.getLocalPath(toolSet.root)}.';
+    throw 'File not found: "${toolSet.getLocalPath(file)}"';
   }
 
   // proceed

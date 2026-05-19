@@ -125,7 +125,8 @@ extension type ReplaceTextArgs(Json _json) {
       'targetLines': S.list(
         items: S.integer(),
         description:
-            'Line numbers where replacement is expected; when missing or empty, the original text will be replaced if and only if there is exactly one occurence'
+            'Start line numbers where replacement is expected (e.g. if 3 replacements are expected, provide 3 line numbers corresponding to the start line of each replacement); '
+                    'when missing or empty, the original text will be replaced if and only if there is exactly one occurence'
                 .optional('empty list'),
       ),
     },
@@ -207,12 +208,26 @@ extension type ListArgs(Json _json) {
   );
 }
 
+extension type CopyFileArgs(Json _json) {
+  String get sourcePath => _normalizePath(_json.getString('sourcePath'));
+
+  String get targetPath => _normalizePath(_json.getString('targetPath'));
+
+  static final schema = S.object(
+    properties: {
+      'sourcePath': S.string(description: 'Path to the source file'),
+      'targetPath': S.string(description: 'Path to the target (copied) file'),
+    },
+    required: ['sourcePath', 'targetPath'],
+  );
+}
+
 extension type LocateFileArgs(Json _json) {
   String get baseName => _json.getString('baseName');
 
   static final schema = S.object(
     properties: {
-      'baseName': S.string(description: 'The file\'s base file name '),
+      'baseName': S.string(description: 'The file\'s base name, or part of it'),
     },
     required: ['baseName'],
   );
